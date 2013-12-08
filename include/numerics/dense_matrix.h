@@ -27,7 +27,7 @@
 // C++ includes
 #include <vector>
 #include <algorithm>
-#include <cstring> // std::memset
+//#include <cstring> // std::memset
 
 namespace libMesh
 {
@@ -644,7 +644,8 @@ void DenseMatrix<T>::zero()
   // Just doing this ifdef to be completely safe
 #ifndef LIBMESH_USE_COMPLEX_NUMBERS
   if(_val.size())
-    std::memset(&_val[0], 0, sizeof(T) * _val.size());
+    //std::memset(&_val[0], 0, sizeof(T) * _val.size());
+    std::fill (_val.begin(), _val.end(), 0.);
 #else
   std::fill (_val.begin(), _val.end(), 0.);
 #endif
