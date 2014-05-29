@@ -88,7 +88,7 @@ void PetscDMNonlinearSolver<T>::init(const char* name)
 
   // Attaching a DM with the function and Jacobian callbacks to SNES.
   ierr = DMCreateLibMesh(this->comm().get(), this->system(), &dm); LIBMESH_CHKERRABORT(ierr);
-    if (name) 
+    if (name)
       {
         ierr = DMSetOptionsPrefix(dm,name);    LIBMESH_CHKERRABORT(ierr);
       }
@@ -159,9 +159,18 @@ PetscDMNonlinearSolver<T>::solve (SparseMatrix<T>& jac_in,  // System Jacobian M
   ierr = SNESGetLinearSolveIterations(this->_snes, &this->_n_linear_iterations);
   LIBMESH_CHKERRABORT(ierr);
 
+#if PETSC_RELEASE_LESS_THAN(3,5,0)
   ierr = SNESGetFunctionNorm(this->_snes,&final_residual_norm);
   LIBMESH_CHKERRABORT(ierr);
-
+#else
+   {
+     Vec r;
+     ierr = SNESGetFunction(this->_snes,&r,NULL,NULL);
+     LIBMESH_CHKERRABORT(ierr);
+     ierr = VecNorm(r,NORM_2,&final_residual_norm);
+     LIBMESH_CHKERRABORT(ierr);
+   }
+#endif
   // Get and store the reason for convergence
   SNESGetConvergedReason(this->_snes, &this->_reason);
 

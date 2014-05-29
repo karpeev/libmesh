@@ -558,8 +558,19 @@ PetscNonlinearSolver<T>::solve (SparseMatrix<T>&  jac_in,  // System Jacobian Ma
   ierr = SNESGetLinearSolveIterations(_snes, &_n_linear_iterations);
   LIBMESH_CHKERRABORT(ierr);
 
-  ierr = SNESGetFunctionNorm(_snes,&final_residual_norm);
+
+#if PETSC_RELEASE_LESS_THAN(3,5,0)
+  ierr = SNESGetFunctionNorm(this->_snes,&final_residual_norm);
   LIBMESH_CHKERRABORT(ierr);
+#else
+   {
+     Vec r;
+     ierr = SNESGetFunction(this->_snes,&r,NULL,NULL);
+     LIBMESH_CHKERRABORT(ierr);
+     ierr = VecNorm(r,NORM_2,&final_residual_norm);
+     LIBMESH_CHKERRABORT(ierr);
+   }
+#endif
 
 #endif
 
