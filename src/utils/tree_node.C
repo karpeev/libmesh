@@ -533,7 +533,26 @@ const Elem* TreeNode<N>::find_element(const Point& p) const
   return NULL;
 }
 
-
+template <unsigned int N>
+void TreeNode<N>::find_nodes(const std::pair<Point, Point>& box,
+                             std::vector<const Node*>& result) const
+{
+  if (!box_box_overlap(box, bounding_box)) return;
+  if (this->active()) {
+    for (std::vector<const Node*>::const_iterator pos=nodes.begin();
+         pos != nodes.end(); ++pos)
+    {
+      if((*pos)->active() && box_point_overlap(box, **pos)) {
+        result.push_back(*pos);
+      }
+    }
+  }
+  else {
+    for (unsigned int c = 0; c < children.size(); c++) {
+      children[c]->find_nodes(box, result);
+    }
+  }
+}
 
 
 template <unsigned int N>
@@ -604,6 +623,42 @@ const Elem* TreeNode<N>::find_element_in_children(const Point& p) const
   // _no_ elements in the tree claim to contain point p.
 
   return NULL;
+}
+
+template<unsigned int N>
+bool TreeNode<N>::box_box_overlap (const std::pair<Point, Point>& box_a,
+                                     const std::pair<Point, Point>& box_b)
+{
+  const Point& min_a = box_a.first;
+  const Point& max_a = box_a.second;
+  const Point& min_b = box_b.first;
+  const Point& max_b = box_b.second;
+
+  return min_a(0) <= max_b(0) && min_b(0) <= max_a(0)
+#if LIBMESH_DIM > 1
+      && min_a(1) <= max_b(1) && min_b(1) <= max_a(1)
+#endif
+#if LIBMESH_DIM > 2
+      && min_a(2) <= max_b(2) && min_b(2) <= max_a(2)
+#endif
+      ;
+}
+
+template <unsigned int N>
+bool TreeNode<N>::box_point_overlap (const std::pair<Point, Point>& box,
+                                     const Point& p)
+{
+  const Point& min = box.first;
+  const Point& max = box.second;
+
+  return min(0) <= p(0) && p(0) <= max(0)
+#if LIBMESH_DIM > 1
+      && min(1) <= p(1) && p(1) <= max(1)
+#endif
+#if LIBMESH_DIM > 2
+      && min(2) <= p(2) && p(2) <= max(2)
+#endif
+      ;
 }
 
 

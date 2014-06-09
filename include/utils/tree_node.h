@@ -144,6 +144,8 @@ public:
    */
   const Elem* find_element (const Point& p) const;
 
+  void find_nodes (const std::pair<Point, Point>& box,
+                   std::vector<const Node*>& result) const;
 
 private:
 
@@ -157,6 +159,12 @@ private:
    * Constructs the bounding box for child \p c.
    */
   std::pair<Point, Point> create_bounding_box (const unsigned int c) const;
+
+  static bool box_box_overlap(const std::pair<Point, Point>& box_a,
+                              const std::pair<Point, Point>& box_b);
+
+  static bool box_point_overlap(const std::pair<Point, Point>& box,
+                                const Point& point);
 
   /**
    * Reference to the mesh.
