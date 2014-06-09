@@ -75,13 +75,7 @@ libmesh_example_requires(false, "--disable-singleprecision");
 
 // Check for proper usage.
 if (argc < 3)
-  {
-    if (init.comm().rank() == 0)
-      std::cerr << "\nUsage: " << argv[0]
-                << " -n <number of eigen values>"
-                << std::endl;
-    libmesh_error();
-  }
+  libmesh_error_msg("\nUsage: " << argv[0] << " -n <number of eigen values>");
 
 // Tell the user what we are doing.
  else
@@ -319,6 +313,9 @@ void assemble_mass(EquationSystems& es,
 
     } // end of element loop
 
+#else
+  // Avoid compiler warnings
+  libmesh_ignore(es);
 #endif // LIBMESH_HAVE_SLEPC
 
   /**

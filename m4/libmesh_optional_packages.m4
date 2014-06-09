@@ -62,8 +62,8 @@ fi
 # support.
 # --------------------------------------------------------------
 AC_ARG_ENABLE(strict-lgpl,
-              AC_HELP_STRING([--enable-strict-lgpl],
-                             [Compile libmesh with LGPL-compatible contrib libraries only]),
+              AC_HELP_STRING([--disable-strict-lgpl],
+                             [Compile libmesh with even non-LGPL-compatible contrib libraries]),
               [case "${enableval}" in
                   yes) enablestrictlgpl=yes ;;
                   no) enablestrictlgpl=no ;;
@@ -395,6 +395,19 @@ fi
 
 AM_CONDITIONAL(LIBMESH_ENABLE_TRIANGLE, test x$enabletriangle = xyes)
 AC_CONFIG_FILES([contrib/triangle/Makefile])
+# -------------------------------------------------------------
+
+
+
+# -------------------------------------------------------------
+# Qhull -- enabled by default
+# -------------------------------------------------------------
+CONFIGURE_QHULL
+if (test $enableqhull = yes); then
+  libmesh_contrib_INCLUDES="$QHULL_INCLUDE $libmesh_contrib_INCLUDES"
+fi
+AM_CONDITIONAL(LIBMESH_ENABLE_QHULL, test x$enableqhull = xyes)
+AC_CONFIG_FILES([contrib/qhull/qhull/Makefile])
 # -------------------------------------------------------------
 
 

@@ -68,6 +68,13 @@ RBEIMConstruction::RBEIMConstruction (EquationSystems& es,
 
   // attach empty RBAssemblyExpansion object
   set_rb_assembly_expansion(_empty_rb_assembly_expansion);
+
+  // We only do "L2 projection" solves in this class, hence
+  // we should set implicit_neighbor_dofs = false. This is
+  // important when we use DISCONTINUOUS basis functions, since
+  // otherwise the L2 projection matrix uses much more memory
+  // than necessary.
+  get_dof_map().set_implicit_neighbor_dofs(false);
 }
 
 RBEIMConstruction::~RBEIMConstruction ()
@@ -412,10 +419,10 @@ Real RBEIMConstruction::compute_best_fit_error()
       {
         // compute the rhs by performing inner products
         DenseVector<Number> best_fit_rhs(RB_size);
+
+        inner_product_matrix->vector_mult(*inner_product_storage_vector, *solution);
         for(unsigned int i=0; i<RB_size; i++)
           {
-            inner_product_matrix->vector_mult(*inner_product_storage_vector, *solution);
-
             best_fit_rhs(i) = inner_product_storage_vector->dot(get_rb_evaluation().get_basis_function(i));
           }
 
@@ -511,26 +518,36 @@ Real RBEIMConstruction::truth_solve(int plot_solution)
           context.pre_fe_reinit(*this, *el);
           context.elem_fe_reinit();
 
-          for(unsigned int var=0; var<n_vars(); var++)
+          // All variables should have the same quadrature rule, hence
+          // we can get JxW and xyz based on first_elem_fe.
+          FEBase* first_elem_fe = NULL;
+          context.get_element_fe( 0, first_elem_fe );
+          unsigned int n_qpoints = context.get_element_qrule().n_points();
+          const std::vector<Real> &JxW = first_elem_fe->get_JxW();
+          const std::vector<Point> &xyz = first_elem_fe->get_xyz();
+
+          // Loop over qp before var because parametrized functions often use
+          // some caching based on qp.
+          for(unsigned int qp=0; qp<n_qpoints; qp++)
+          {
+            for(unsigned int var=0; var<n_vars(); var++)
             {
               FEBase* elem_fe = NULL;
               context.get_element_fe( var, elem_fe );
-              const std::vector<Real> &JxW = elem_fe->get_JxW();
-
               const std::vector<std::vector<Real> >& phi = elem_fe->get_phi();
-
-              const std::vector<Point> &xyz = elem_fe->get_xyz();
-
-              unsigned int n_qpoints = context.get_element_qrule().n_points();
-              unsigned int n_var_dofs = libmesh_cast_int<unsigned int>
-                (context.get_dof_indices( var ).size());
 
               DenseSubVector<Number>& subresidual_var = context.get_elem_residual( var );
 
-              for(unsigned int qp=0; qp<n_qpoints; qp++)
-                for(unsigned int i=0; i != n_var_dofs; i++)
-                  subresidual_var(i) += JxW[qp] * eim_eval.evaluate_parametrized_function(var, xyz[qp], *(*el)) * phi[i][qp];
+              unsigned int n_var_dofs = libmesh_cast_int<unsigned int>
+                (context.get_dof_indices( var ).size());
+
+              Number eval_result = eim_eval.evaluate_parametrized_function(var, xyz[qp], *(*el));
+              for(unsigned int i=0; i != n_var_dofs; i++)
+              {
+                subresidual_var(i) += JxW[qp] * eval_result * phi[i][qp];
+              }
             }
+          }
 
           // Apply constraints, e.g. periodic constraints
           this->get_dof_map().constrain_element_vector(context.get_elem_residual(), context.get_dof_indices() );
@@ -558,7 +575,7 @@ Real RBEIMConstruction::truth_solve(int plot_solution)
   if(plot_solution > 0)
     {
 #ifdef LIBMESH_HAVE_EXODUS_API
-      ExodusII_IO(get_mesh()).write_equation_systems ("truth.e",
+      ExodusII_IO(get_mesh()).write_equation_systems ("truth.exo",
                                                       this->get_equation_systems());
 #endif
     }
