@@ -2,6 +2,11 @@
 #include <set>
 #include "mpi.h"
 
+namespace libMesh {
+namespace Parallel {
+
+//TODO replace MPI calls with calls to Libmesh's Communicator functions
+
 class RankGroupsResolver {
   public:
     void setComm(MPI_Comm comm);
@@ -47,4 +52,7 @@ class RankGroupsResolver {
 
     static const int tagRequest, tagResponse, tagNeighbor;
 };
+
+} // namespace Parallel
+} // namespace libMesh
 

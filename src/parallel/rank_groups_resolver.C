@@ -1,5 +1,8 @@
 #include "libmesh/rank_groups_resolver.h"
 
+namespace libMesh {
+namespace Parallel {
+
 void RankGroupsResolver::setComm(MPI_Comm comm) {
   this->comm = comm;
   MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
@@ -159,4 +162,7 @@ bool RankGroupsResolver::allProcessorsDone() {
 const int RankGroupsResolver::tagRequest = 8147;
 const int RankGroupsResolver::tagResponse = 8148;
 const int RankGroupsResolver::tagNeighbor = 8149;
+
+} // namespace Parallel
+} // namespace libMesh
 
