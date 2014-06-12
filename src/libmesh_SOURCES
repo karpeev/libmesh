@@ -179,6 +179,7 @@ libmesh_SOURCES =  \
         src/mesh/gmsh_io.C \
         src/mesh/gmv_io.C \
         src/mesh/gnuplot_io.C \
+        src/mesh/halo_manager.C \
         src/mesh/inf_elem_builder.C \
         src/mesh/legacy_xdr_io.C \
         src/mesh/matlab_io.C \
@@ -259,6 +260,7 @@ libmesh_SOURCES =  \
         src/numerics/trilinos_preconditioner.C \
         src/numerics/type_tensor.C \
         src/numerics/type_vector.C \
+        src/parallel/neighbors_extender.C \
         src/parallel/parallel_bin_sorter.C \
         src/parallel/parallel_elem.C \
         src/parallel/parallel_ghost_sync.C \
@@ -402,6 +404,7 @@ libmesh_SOURCES =  \
         src/utils/point_locator_base.C \
         src/utils/point_locator_list.C \
         src/utils/point_locator_tree.C \
+        src/utils/point_tree.C \
         src/utils/statistics.C \
         src/utils/string_to_enum.C \
         src/utils/timestamp.C \

@@ -283,8 +283,9 @@ am__libmesh_dbg_la_SOURCES_DIST = src/base/dof_map.C \
 	src/mesh/ensight_io.C src/mesh/exodusII_io.C \
 	src/mesh/exodusII_io_helper.C src/mesh/fro_io.C \
 	src/mesh/gmsh_io.C src/mesh/gmv_io.C src/mesh/gnuplot_io.C \
-	src/mesh/inf_elem_builder.C src/mesh/legacy_xdr_io.C \
-	src/mesh/matlab_io.C src/mesh/medit_io.C src/mesh/mesh_base.C \
+	src/mesh/halo_manager.C src/mesh/inf_elem_builder.C \
+	src/mesh/legacy_xdr_io.C src/mesh/matlab_io.C \
+	src/mesh/medit_io.C src/mesh/mesh_base.C \
 	src/mesh/mesh_communication.C \
 	src/mesh/mesh_communication_global_indices.C \
 	src/mesh/mesh_data.C src/mesh/mesh_data_tetgen_support.C \
@@ -334,6 +335,7 @@ am__libmesh_dbg_la_SOURCES_DIST = src/base/dof_map.C \
 	src/numerics/trilinos_epetra_vector.C \
 	src/numerics/trilinos_preconditioner.C \
 	src/numerics/type_tensor.C src/numerics/type_vector.C \
+	src/parallel/neighbors_extender.C \
 	src/parallel/parallel_bin_sorter.C \
 	src/parallel/parallel_elem.C \
 	src/parallel/parallel_ghost_sync.C \
@@ -451,10 +453,10 @@ am__libmesh_dbg_la_SOURCES_DIST = src/base/dof_map.C \
 	src/utils/perf_log.C src/utils/plt_loader.C \
 	src/utils/plt_loader_read.C src/utils/plt_loader_write.C \
 	src/utils/point_locator_base.C src/utils/point_locator_list.C \
-	src/utils/point_locator_tree.C src/utils/statistics.C \
-	src/utils/string_to_enum.C src/utils/timestamp.C \
-	src/utils/tree.C src/utils/tree_node.C src/utils/utility.C \
-	src/utils/xdr_cxx.C
+	src/utils/point_locator_tree.C src/utils/point_tree.C \
+	src/utils/statistics.C src/utils/string_to_enum.C \
+	src/utils/timestamp.C src/utils/tree.C src/utils/tree_node.C \
+	src/utils/utility.C src/utils/xdr_cxx.C
 am__dirstamp = $(am__leading_dot)dirstamp
 am__objects_1 = src/base/libmesh_dbg_la-dof_map.lo \
 	src/base/libmesh_dbg_la-dof_map_constraints.lo \
@@ -634,6 +636,7 @@ am__objects_1 = src/base/libmesh_dbg_la-dof_map.lo \
 	src/mesh/libmesh_dbg_la-gmsh_io.lo \
 	src/mesh/libmesh_dbg_la-gmv_io.lo \
 	src/mesh/libmesh_dbg_la-gnuplot_io.lo \
+	src/mesh/libmesh_dbg_la-halo_manager.lo \
 	src/mesh/libmesh_dbg_la-inf_elem_builder.lo \
 	src/mesh/libmesh_dbg_la-legacy_xdr_io.lo \
 	src/mesh/libmesh_dbg_la-matlab_io.lo \
@@ -714,6 +717,7 @@ am__objects_1 = src/base/libmesh_dbg_la-dof_map.lo \
 	src/numerics/libmesh_dbg_la-trilinos_preconditioner.lo \
 	src/numerics/libmesh_dbg_la-type_tensor.lo \
 	src/numerics/libmesh_dbg_la-type_vector.lo \
+	src/parallel/libmesh_dbg_la-neighbors_extender.lo \
 	src/parallel/libmesh_dbg_la-parallel_bin_sorter.lo \
 	src/parallel/libmesh_dbg_la-parallel_elem.lo \
 	src/parallel/libmesh_dbg_la-parallel_ghost_sync.lo \
@@ -857,6 +861,7 @@ am__objects_1 = src/base/libmesh_dbg_la-dof_map.lo \
 	src/utils/libmesh_dbg_la-point_locator_base.lo \
 	src/utils/libmesh_dbg_la-point_locator_list.lo \
 	src/utils/libmesh_dbg_la-point_locator_tree.lo \
+	src/utils/libmesh_dbg_la-point_tree.lo \
 	src/utils/libmesh_dbg_la-statistics.lo \
 	src/utils/libmesh_dbg_la-string_to_enum.lo \
 	src/utils/libmesh_dbg_la-timestamp.lo \
@@ -977,8 +982,9 @@ am__libmesh_devel_la_SOURCES_DIST = src/base/dof_map.C \
 	src/mesh/ensight_io.C src/mesh/exodusII_io.C \
 	src/mesh/exodusII_io_helper.C src/mesh/fro_io.C \
 	src/mesh/gmsh_io.C src/mesh/gmv_io.C src/mesh/gnuplot_io.C \
-	src/mesh/inf_elem_builder.C src/mesh/legacy_xdr_io.C \
-	src/mesh/matlab_io.C src/mesh/medit_io.C src/mesh/mesh_base.C \
+	src/mesh/halo_manager.C src/mesh/inf_elem_builder.C \
+	src/mesh/legacy_xdr_io.C src/mesh/matlab_io.C \
+	src/mesh/medit_io.C src/mesh/mesh_base.C \
 	src/mesh/mesh_communication.C \
 	src/mesh/mesh_communication_global_indices.C \
 	src/mesh/mesh_data.C src/mesh/mesh_data_tetgen_support.C \
@@ -1028,6 +1034,7 @@ am__libmesh_devel_la_SOURCES_DIST = src/base/dof_map.C \
 	src/numerics/trilinos_epetra_vector.C \
 	src/numerics/trilinos_preconditioner.C \
 	src/numerics/type_tensor.C src/numerics/type_vector.C \
+	src/parallel/neighbors_extender.C \
 	src/parallel/parallel_bin_sorter.C \
 	src/parallel/parallel_elem.C \
 	src/parallel/parallel_ghost_sync.C \
@@ -1145,10 +1152,10 @@ am__libmesh_devel_la_SOURCES_DIST = src/base/dof_map.C \
 	src/utils/perf_log.C src/utils/plt_loader.C \
 	src/utils/plt_loader_read.C src/utils/plt_loader_write.C \
 	src/utils/point_locator_base.C src/utils/point_locator_list.C \
-	src/utils/point_locator_tree.C src/utils/statistics.C \
-	src/utils/string_to_enum.C src/utils/timestamp.C \
-	src/utils/tree.C src/utils/tree_node.C src/utils/utility.C \
-	src/utils/xdr_cxx.C
+	src/utils/point_locator_tree.C src/utils/point_tree.C \
+	src/utils/statistics.C src/utils/string_to_enum.C \
+	src/utils/timestamp.C src/utils/tree.C src/utils/tree_node.C \
+	src/utils/utility.C src/utils/xdr_cxx.C
 am__objects_2 = src/base/libmesh_devel_la-dof_map.lo \
 	src/base/libmesh_devel_la-dof_map_constraints.lo \
 	src/base/libmesh_devel_la-dof_object.lo \
@@ -1327,6 +1334,7 @@ am__objects_2 = src/base/libmesh_devel_la-dof_map.lo \
 	src/mesh/libmesh_devel_la-gmsh_io.lo \
 	src/mesh/libmesh_devel_la-gmv_io.lo \
 	src/mesh/libmesh_devel_la-gnuplot_io.lo \
+	src/mesh/libmesh_devel_la-halo_manager.lo \
 	src/mesh/libmesh_devel_la-inf_elem_builder.lo \
 	src/mesh/libmesh_devel_la-legacy_xdr_io.lo \
 	src/mesh/libmesh_devel_la-matlab_io.lo \
@@ -1407,6 +1415,7 @@ am__objects_2 = src/base/libmesh_devel_la-dof_map.lo \
 	src/numerics/libmesh_devel_la-trilinos_preconditioner.lo \
 	src/numerics/libmesh_devel_la-type_tensor.lo \
 	src/numerics/libmesh_devel_la-type_vector.lo \
+	src/parallel/libmesh_devel_la-neighbors_extender.lo \
 	src/parallel/libmesh_devel_la-parallel_bin_sorter.lo \
 	src/parallel/libmesh_devel_la-parallel_elem.lo \
 	src/parallel/libmesh_devel_la-parallel_ghost_sync.lo \
@@ -1550,6 +1559,7 @@ am__objects_2 = src/base/libmesh_devel_la-dof_map.lo \
 	src/utils/libmesh_devel_la-point_locator_base.lo \
 	src/utils/libmesh_devel_la-point_locator_list.lo \
 	src/utils/libmesh_devel_la-point_locator_tree.lo \
+	src/utils/libmesh_devel_la-point_tree.lo \
 	src/utils/libmesh_devel_la-statistics.lo \
 	src/utils/libmesh_devel_la-string_to_enum.lo \
 	src/utils/libmesh_devel_la-timestamp.lo \
@@ -1667,8 +1677,9 @@ am__libmesh_oprof_la_SOURCES_DIST = src/base/dof_map.C \
 	src/mesh/ensight_io.C src/mesh/exodusII_io.C \
 	src/mesh/exodusII_io_helper.C src/mesh/fro_io.C \
 	src/mesh/gmsh_io.C src/mesh/gmv_io.C src/mesh/gnuplot_io.C \
-	src/mesh/inf_elem_builder.C src/mesh/legacy_xdr_io.C \
-	src/mesh/matlab_io.C src/mesh/medit_io.C src/mesh/mesh_base.C \
+	src/mesh/halo_manager.C src/mesh/inf_elem_builder.C \
+	src/mesh/legacy_xdr_io.C src/mesh/matlab_io.C \
+	src/mesh/medit_io.C src/mesh/mesh_base.C \
 	src/mesh/mesh_communication.C \
 	src/mesh/mesh_communication_global_indices.C \
 	src/mesh/mesh_data.C src/mesh/mesh_data_tetgen_support.C \
@@ -1718,6 +1729,7 @@ am__libmesh_oprof_la_SOURCES_DIST = src/base/dof_map.C \
 	src/numerics/trilinos_epetra_vector.C \
 	src/numerics/trilinos_preconditioner.C \
 	src/numerics/type_tensor.C src/numerics/type_vector.C \
+	src/parallel/neighbors_extender.C \
 	src/parallel/parallel_bin_sorter.C \
 	src/parallel/parallel_elem.C \
 	src/parallel/parallel_ghost_sync.C \
@@ -1835,10 +1847,10 @@ am__libmesh_oprof_la_SOURCES_DIST = src/base/dof_map.C \
 	src/utils/perf_log.C src/utils/plt_loader.C \
 	src/utils/plt_loader_read.C src/utils/plt_loader_write.C \
 	src/utils/point_locator_base.C src/utils/point_locator_list.C \
-	src/utils/point_locator_tree.C src/utils/statistics.C \
-	src/utils/string_to_enum.C src/utils/timestamp.C \
-	src/utils/tree.C src/utils/tree_node.C src/utils/utility.C \
-	src/utils/xdr_cxx.C
+	src/utils/point_locator_tree.C src/utils/point_tree.C \
+	src/utils/statistics.C src/utils/string_to_enum.C \
+	src/utils/timestamp.C src/utils/tree.C src/utils/tree_node.C \
+	src/utils/utility.C src/utils/xdr_cxx.C
 am__objects_3 = src/base/libmesh_oprof_la-dof_map.lo \
 	src/base/libmesh_oprof_la-dof_map_constraints.lo \
 	src/base/libmesh_oprof_la-dof_object.lo \
@@ -2017,6 +2029,7 @@ am__objects_3 = src/base/libmesh_oprof_la-dof_map.lo \
 	src/mesh/libmesh_oprof_la-gmsh_io.lo \
 	src/mesh/libmesh_oprof_la-gmv_io.lo \
 	src/mesh/libmesh_oprof_la-gnuplot_io.lo \
+	src/mesh/libmesh_oprof_la-halo_manager.lo \
 	src/mesh/libmesh_oprof_la-inf_elem_builder.lo \
 	src/mesh/libmesh_oprof_la-legacy_xdr_io.lo \
 	src/mesh/libmesh_oprof_la-matlab_io.lo \
@@ -2097,6 +2110,7 @@ am__objects_3 = src/base/libmesh_oprof_la-dof_map.lo \
 	src/numerics/libmesh_oprof_la-trilinos_preconditioner.lo \
 	src/numerics/libmesh_oprof_la-type_tensor.lo \
 	src/numerics/libmesh_oprof_la-type_vector.lo \
+	src/parallel/libmesh_oprof_la-neighbors_extender.lo \
 	src/parallel/libmesh_oprof_la-parallel_bin_sorter.lo \
 	src/parallel/libmesh_oprof_la-parallel_elem.lo \
 	src/parallel/libmesh_oprof_la-parallel_ghost_sync.lo \
@@ -2240,6 +2254,7 @@ am__objects_3 = src/base/libmesh_oprof_la-dof_map.lo \
 	src/utils/libmesh_oprof_la-point_locator_base.lo \
 	src/utils/libmesh_oprof_la-point_locator_list.lo \
 	src/utils/libmesh_oprof_la-point_locator_tree.lo \
+	src/utils/libmesh_oprof_la-point_tree.lo \
 	src/utils/libmesh_oprof_la-statistics.lo \
 	src/utils/libmesh_oprof_la-string_to_enum.lo \
 	src/utils/libmesh_oprof_la-timestamp.lo \
@@ -2357,8 +2372,9 @@ am__libmesh_opt_la_SOURCES_DIST = src/base/dof_map.C \
 	src/mesh/ensight_io.C src/mesh/exodusII_io.C \
 	src/mesh/exodusII_io_helper.C src/mesh/fro_io.C \
 	src/mesh/gmsh_io.C src/mesh/gmv_io.C src/mesh/gnuplot_io.C \
-	src/mesh/inf_elem_builder.C src/mesh/legacy_xdr_io.C \
-	src/mesh/matlab_io.C src/mesh/medit_io.C src/mesh/mesh_base.C \
+	src/mesh/halo_manager.C src/mesh/inf_elem_builder.C \
+	src/mesh/legacy_xdr_io.C src/mesh/matlab_io.C \
+	src/mesh/medit_io.C src/mesh/mesh_base.C \
 	src/mesh/mesh_communication.C \
 	src/mesh/mesh_communication_global_indices.C \
 	src/mesh/mesh_data.C src/mesh/mesh_data_tetgen_support.C \
@@ -2408,6 +2424,7 @@ am__libmesh_opt_la_SOURCES_DIST = src/base/dof_map.C \
 	src/numerics/trilinos_epetra_vector.C \
 	src/numerics/trilinos_preconditioner.C \
 	src/numerics/type_tensor.C src/numerics/type_vector.C \
+	src/parallel/neighbors_extender.C \
 	src/parallel/parallel_bin_sorter.C \
 	src/parallel/parallel_elem.C \
 	src/parallel/parallel_ghost_sync.C \
@@ -2525,10 +2542,10 @@ am__libmesh_opt_la_SOURCES_DIST = src/base/dof_map.C \
 	src/utils/perf_log.C src/utils/plt_loader.C \
 	src/utils/plt_loader_read.C src/utils/plt_loader_write.C \
 	src/utils/point_locator_base.C src/utils/point_locator_list.C \
-	src/utils/point_locator_tree.C src/utils/statistics.C \
-	src/utils/string_to_enum.C src/utils/timestamp.C \
-	src/utils/tree.C src/utils/tree_node.C src/utils/utility.C \
-	src/utils/xdr_cxx.C
+	src/utils/point_locator_tree.C src/utils/point_tree.C \
+	src/utils/statistics.C src/utils/string_to_enum.C \
+	src/utils/timestamp.C src/utils/tree.C src/utils/tree_node.C \
+	src/utils/utility.C src/utils/xdr_cxx.C
 am__objects_4 = src/base/libmesh_opt_la-dof_map.lo \
 	src/base/libmesh_opt_la-dof_map_constraints.lo \
 	src/base/libmesh_opt_la-dof_object.lo \
@@ -2707,6 +2724,7 @@ am__objects_4 = src/base/libmesh_opt_la-dof_map.lo \
 	src/mesh/libmesh_opt_la-gmsh_io.lo \
 	src/mesh/libmesh_opt_la-gmv_io.lo \
 	src/mesh/libmesh_opt_la-gnuplot_io.lo \
+	src/mesh/libmesh_opt_la-halo_manager.lo \
 	src/mesh/libmesh_opt_la-inf_elem_builder.lo \
 	src/mesh/libmesh_opt_la-legacy_xdr_io.lo \
 	src/mesh/libmesh_opt_la-matlab_io.lo \
@@ -2787,6 +2805,7 @@ am__objects_4 = src/base/libmesh_opt_la-dof_map.lo \
 	src/numerics/libmesh_opt_la-trilinos_preconditioner.lo \
 	src/numerics/libmesh_opt_la-type_tensor.lo \
 	src/numerics/libmesh_opt_la-type_vector.lo \
+	src/parallel/libmesh_opt_la-neighbors_extender.lo \
 	src/parallel/libmesh_opt_la-parallel_bin_sorter.lo \
 	src/parallel/libmesh_opt_la-parallel_elem.lo \
 	src/parallel/libmesh_opt_la-parallel_ghost_sync.lo \
@@ -2930,6 +2949,7 @@ am__objects_4 = src/base/libmesh_opt_la-dof_map.lo \
 	src/utils/libmesh_opt_la-point_locator_base.lo \
 	src/utils/libmesh_opt_la-point_locator_list.lo \
 	src/utils/libmesh_opt_la-point_locator_tree.lo \
+	src/utils/libmesh_opt_la-point_tree.lo \
 	src/utils/libmesh_opt_la-statistics.lo \
 	src/utils/libmesh_opt_la-string_to_enum.lo \
 	src/utils/libmesh_opt_la-timestamp.lo \
@@ -3046,8 +3066,9 @@ am__libmesh_prof_la_SOURCES_DIST = src/base/dof_map.C \
 	src/mesh/ensight_io.C src/mesh/exodusII_io.C \
 	src/mesh/exodusII_io_helper.C src/mesh/fro_io.C \
 	src/mesh/gmsh_io.C src/mesh/gmv_io.C src/mesh/gnuplot_io.C \
-	src/mesh/inf_elem_builder.C src/mesh/legacy_xdr_io.C \
-	src/mesh/matlab_io.C src/mesh/medit_io.C src/mesh/mesh_base.C \
+	src/mesh/halo_manager.C src/mesh/inf_elem_builder.C \
+	src/mesh/legacy_xdr_io.C src/mesh/matlab_io.C \
+	src/mesh/medit_io.C src/mesh/mesh_base.C \
 	src/mesh/mesh_communication.C \
 	src/mesh/mesh_communication_global_indices.C \
 	src/mesh/mesh_data.C src/mesh/mesh_data_tetgen_support.C \
@@ -3097,6 +3118,7 @@ am__libmesh_prof_la_SOURCES_DIST = src/base/dof_map.C \
 	src/numerics/trilinos_epetra_vector.C \
 	src/numerics/trilinos_preconditioner.C \
 	src/numerics/type_tensor.C src/numerics/type_vector.C \
+	src/parallel/neighbors_extender.C \
 	src/parallel/parallel_bin_sorter.C \
 	src/parallel/parallel_elem.C \
 	src/parallel/parallel_ghost_sync.C \
@@ -3214,10 +3236,10 @@ am__libmesh_prof_la_SOURCES_DIST = src/base/dof_map.C \
 	src/utils/perf_log.C src/utils/plt_loader.C \
 	src/utils/plt_loader_read.C src/utils/plt_loader_write.C \
 	src/utils/point_locator_base.C src/utils/point_locator_list.C \
-	src/utils/point_locator_tree.C src/utils/statistics.C \
-	src/utils/string_to_enum.C src/utils/timestamp.C \
-	src/utils/tree.C src/utils/tree_node.C src/utils/utility.C \
-	src/utils/xdr_cxx.C
+	src/utils/point_locator_tree.C src/utils/point_tree.C \
+	src/utils/statistics.C src/utils/string_to_enum.C \
+	src/utils/timestamp.C src/utils/tree.C src/utils/tree_node.C \
+	src/utils/utility.C src/utils/xdr_cxx.C
 am__objects_5 = src/base/libmesh_prof_la-dof_map.lo \
 	src/base/libmesh_prof_la-dof_map_constraints.lo \
 	src/base/libmesh_prof_la-dof_object.lo \
@@ -3396,6 +3418,7 @@ am__objects_5 = src/base/libmesh_prof_la-dof_map.lo \
 	src/mesh/libmesh_prof_la-gmsh_io.lo \
 	src/mesh/libmesh_prof_la-gmv_io.lo \
 	src/mesh/libmesh_prof_la-gnuplot_io.lo \
+	src/mesh/libmesh_prof_la-halo_manager.lo \
 	src/mesh/libmesh_prof_la-inf_elem_builder.lo \
 	src/mesh/libmesh_prof_la-legacy_xdr_io.lo \
 	src/mesh/libmesh_prof_la-matlab_io.lo \
@@ -3476,6 +3499,7 @@ am__objects_5 = src/base/libmesh_prof_la-dof_map.lo \
 	src/numerics/libmesh_prof_la-trilinos_preconditioner.lo \
 	src/numerics/libmesh_prof_la-type_tensor.lo \
 	src/numerics/libmesh_prof_la-type_vector.lo \
+	src/parallel/libmesh_prof_la-neighbors_extender.lo \
 	src/parallel/libmesh_prof_la-parallel_bin_sorter.lo \
 	src/parallel/libmesh_prof_la-parallel_elem.lo \
 	src/parallel/libmesh_prof_la-parallel_ghost_sync.lo \
@@ -3619,6 +3643,7 @@ am__objects_5 = src/base/libmesh_prof_la-dof_map.lo \
 	src/utils/libmesh_prof_la-point_locator_base.lo \
 	src/utils/libmesh_prof_la-point_locator_list.lo \
 	src/utils/libmesh_prof_la-point_locator_tree.lo \
+	src/utils/libmesh_prof_la-point_tree.lo \
 	src/utils/libmesh_prof_la-statistics.lo \
 	src/utils/libmesh_prof_la-string_to_enum.lo \
 	src/utils/libmesh_prof_la-timestamp.lo \
@@ -4618,6 +4643,7 @@ libmesh_SOURCES = \
         src/mesh/gmsh_io.C \
         src/mesh/gmv_io.C \
         src/mesh/gnuplot_io.C \
+        src/mesh/halo_manager.C \
         src/mesh/inf_elem_builder.C \
         src/mesh/legacy_xdr_io.C \
         src/mesh/matlab_io.C \
@@ -4698,6 +4724,7 @@ libmesh_SOURCES = \
         src/numerics/trilinos_preconditioner.C \
         src/numerics/type_tensor.C \
         src/numerics/type_vector.C \
+        src/parallel/neighbors_extender.C \
         src/parallel/parallel_bin_sorter.C \
         src/parallel/parallel_elem.C \
         src/parallel/parallel_ghost_sync.C \
@@ -4841,6 +4868,7 @@ libmesh_SOURCES = \
         src/utils/point_locator_base.C \
         src/utils/point_locator_list.C \
         src/utils/point_locator_tree.C \
+        src/utils/point_tree.C \
         src/utils/statistics.C \
         src/utils/string_to_enum.C \
         src/utils/timestamp.C \
@@ -5559,6 +5587,8 @@ src/mesh/libmesh_dbg_la-gmv_io.lo: src/mesh/$(am__dirstamp) \
 	src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_dbg_la-gnuplot_io.lo: src/mesh/$(am__dirstamp) \
 	src/mesh/$(DEPDIR)/$(am__dirstamp)
+src/mesh/libmesh_dbg_la-halo_manager.lo: src/mesh/$(am__dirstamp) \
+	src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_dbg_la-inf_elem_builder.lo: src/mesh/$(am__dirstamp) \
 	src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_dbg_la-legacy_xdr_io.lo: src/mesh/$(am__dirstamp) \
@@ -5762,6 +5792,9 @@ src/parallel/$(am__dirstamp):
 src/parallel/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) src/parallel/$(DEPDIR)
 	@: > src/parallel/$(DEPDIR)/$(am__dirstamp)
+src/parallel/libmesh_dbg_la-neighbors_extender.lo:  \
+	src/parallel/$(am__dirstamp) \
+	src/parallel/$(DEPDIR)/$(am__dirstamp)
 src/parallel/libmesh_dbg_la-parallel_bin_sorter.lo:  \
 	src/parallel/$(am__dirstamp) \
 	src/parallel/$(DEPDIR)/$(am__dirstamp)
@@ -6221,6 +6254,8 @@ src/utils/libmesh_dbg_la-point_locator_list.lo:  \
 	src/utils/$(am__dirstamp) src/utils/$(DEPDIR)/$(am__dirstamp)
 src/utils/libmesh_dbg_la-point_locator_tree.lo:  \
 	src/utils/$(am__dirstamp) src/utils/$(DEPDIR)/$(am__dirstamp)
+src/utils/libmesh_dbg_la-point_tree.lo: src/utils/$(am__dirstamp) \
+	src/utils/$(DEPDIR)/$(am__dirstamp)
 src/utils/libmesh_dbg_la-statistics.lo: src/utils/$(am__dirstamp) \
 	src/utils/$(DEPDIR)/$(am__dirstamp)
 src/utils/libmesh_dbg_la-string_to_enum.lo: src/utils/$(am__dirstamp) \
@@ -6608,6 +6643,8 @@ src/mesh/libmesh_devel_la-gmv_io.lo: src/mesh/$(am__dirstamp) \
 	src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_devel_la-gnuplot_io.lo: src/mesh/$(am__dirstamp) \
 	src/mesh/$(DEPDIR)/$(am__dirstamp)
+src/mesh/libmesh_devel_la-halo_manager.lo: src/mesh/$(am__dirstamp) \
+	src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_devel_la-inf_elem_builder.lo:  \
 	src/mesh/$(am__dirstamp) src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_devel_la-legacy_xdr_io.lo: src/mesh/$(am__dirstamp) \
@@ -6799,6 +6836,9 @@ src/numerics/libmesh_devel_la-type_tensor.lo:  \
 src/numerics/libmesh_devel_la-type_vector.lo:  \
 	src/numerics/$(am__dirstamp) \
 	src/numerics/$(DEPDIR)/$(am__dirstamp)
+src/parallel/libmesh_devel_la-neighbors_extender.lo:  \
+	src/parallel/$(am__dirstamp) \
+	src/parallel/$(DEPDIR)/$(am__dirstamp)
 src/parallel/libmesh_devel_la-parallel_bin_sorter.lo:  \
 	src/parallel/$(am__dirstamp) \
 	src/parallel/$(DEPDIR)/$(am__dirstamp)
@@ -7213,6 +7253,8 @@ src/utils/libmesh_devel_la-point_locator_list.lo:  \
 	src/utils/$(am__dirstamp) src/utils/$(DEPDIR)/$(am__dirstamp)
 src/utils/libmesh_devel_la-point_locator_tree.lo:  \
 	src/utils/$(am__dirstamp) src/utils/$(DEPDIR)/$(am__dirstamp)
+src/utils/libmesh_devel_la-point_tree.lo: src/utils/$(am__dirstamp) \
+	src/utils/$(DEPDIR)/$(am__dirstamp)
 src/utils/libmesh_devel_la-statistics.lo: src/utils/$(am__dirstamp) \
 	src/utils/$(DEPDIR)/$(am__dirstamp)
 src/utils/libmesh_devel_la-string_to_enum.lo:  \
@@ -7600,6 +7642,8 @@ src/mesh/libmesh_oprof_la-gmv_io.lo: src/mesh/$(am__dirstamp) \
 	src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_oprof_la-gnuplot_io.lo: src/mesh/$(am__dirstamp) \
 	src/mesh/$(DEPDIR)/$(am__dirstamp)
+src/mesh/libmesh_oprof_la-halo_manager.lo: src/mesh/$(am__dirstamp) \
+	src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_oprof_la-inf_elem_builder.lo:  \
 	src/mesh/$(am__dirstamp) src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_oprof_la-legacy_xdr_io.lo: src/mesh/$(am__dirstamp) \
@@ -7791,6 +7835,9 @@ src/numerics/libmesh_oprof_la-type_tensor.lo:  \
 src/numerics/libmesh_oprof_la-type_vector.lo:  \
 	src/numerics/$(am__dirstamp) \
 	src/numerics/$(DEPDIR)/$(am__dirstamp)
+src/parallel/libmesh_oprof_la-neighbors_extender.lo:  \
+	src/parallel/$(am__dirstamp) \
+	src/parallel/$(DEPDIR)/$(am__dirstamp)
 src/parallel/libmesh_oprof_la-parallel_bin_sorter.lo:  \
 	src/parallel/$(am__dirstamp) \
 	src/parallel/$(DEPDIR)/$(am__dirstamp)
@@ -8205,6 +8252,8 @@ src/utils/libmesh_oprof_la-point_locator_list.lo:  \
 	src/utils/$(am__dirstamp) src/utils/$(DEPDIR)/$(am__dirstamp)
 src/utils/libmesh_oprof_la-point_locator_tree.lo:  \
 	src/utils/$(am__dirstamp) src/utils/$(DEPDIR)/$(am__dirstamp)
+src/utils/libmesh_oprof_la-point_tree.lo: src/utils/$(am__dirstamp) \
+	src/utils/$(DEPDIR)/$(am__dirstamp)
 src/utils/libmesh_oprof_la-statistics.lo: src/utils/$(am__dirstamp) \
 	src/utils/$(DEPDIR)/$(am__dirstamp)
 src/utils/libmesh_oprof_la-string_to_enum.lo:  \
@@ -8592,6 +8641,8 @@ src/mesh/libmesh_opt_la-gmv_io.lo: src/mesh/$(am__dirstamp) \
 	src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_opt_la-gnuplot_io.lo: src/mesh/$(am__dirstamp) \
 	src/mesh/$(DEPDIR)/$(am__dirstamp)
+src/mesh/libmesh_opt_la-halo_manager.lo: src/mesh/$(am__dirstamp) \
+	src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_opt_la-inf_elem_builder.lo: src/mesh/$(am__dirstamp) \
 	src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_opt_la-legacy_xdr_io.lo: src/mesh/$(am__dirstamp) \
@@ -8783,6 +8834,9 @@ src/numerics/libmesh_opt_la-type_tensor.lo:  \
 src/numerics/libmesh_opt_la-type_vector.lo:  \
 	src/numerics/$(am__dirstamp) \
 	src/numerics/$(DEPDIR)/$(am__dirstamp)
+src/parallel/libmesh_opt_la-neighbors_extender.lo:  \
+	src/parallel/$(am__dirstamp) \
+	src/parallel/$(DEPDIR)/$(am__dirstamp)
 src/parallel/libmesh_opt_la-parallel_bin_sorter.lo:  \
 	src/parallel/$(am__dirstamp) \
 	src/parallel/$(DEPDIR)/$(am__dirstamp)
@@ -9194,6 +9248,8 @@ src/utils/libmesh_opt_la-point_locator_list.lo:  \
 	src/utils/$(am__dirstamp) src/utils/$(DEPDIR)/$(am__dirstamp)
 src/utils/libmesh_opt_la-point_locator_tree.lo:  \
 	src/utils/$(am__dirstamp) src/utils/$(DEPDIR)/$(am__dirstamp)
+src/utils/libmesh_opt_la-point_tree.lo: src/utils/$(am__dirstamp) \
+	src/utils/$(DEPDIR)/$(am__dirstamp)
 src/utils/libmesh_opt_la-statistics.lo: src/utils/$(am__dirstamp) \
 	src/utils/$(DEPDIR)/$(am__dirstamp)
 src/utils/libmesh_opt_la-string_to_enum.lo: src/utils/$(am__dirstamp) \
@@ -9581,6 +9637,8 @@ src/mesh/libmesh_prof_la-gmv_io.lo: src/mesh/$(am__dirstamp) \
 	src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_prof_la-gnuplot_io.lo: src/mesh/$(am__dirstamp) \
 	src/mesh/$(DEPDIR)/$(am__dirstamp)
+src/mesh/libmesh_prof_la-halo_manager.lo: src/mesh/$(am__dirstamp) \
+	src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_prof_la-inf_elem_builder.lo:  \
 	src/mesh/$(am__dirstamp) src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_prof_la-legacy_xdr_io.lo: src/mesh/$(am__dirstamp) \
@@ -9772,6 +9830,9 @@ src/numerics/libmesh_prof_la-type_tensor.lo:  \
 src/numerics/libmesh_prof_la-type_vector.lo:  \
 	src/numerics/$(am__dirstamp) \
 	src/numerics/$(DEPDIR)/$(am__dirstamp)
+src/parallel/libmesh_prof_la-neighbors_extender.lo:  \
+	src/parallel/$(am__dirstamp) \
+	src/parallel/$(DEPDIR)/$(am__dirstamp)
 src/parallel/libmesh_prof_la-parallel_bin_sorter.lo:  \
 	src/parallel/$(am__dirstamp) \
 	src/parallel/$(DEPDIR)/$(am__dirstamp)
@@ -10184,6 +10245,8 @@ src/utils/libmesh_prof_la-point_locator_list.lo:  \
 	src/utils/$(am__dirstamp) src/utils/$(DEPDIR)/$(am__dirstamp)
 src/utils/libmesh_prof_la-point_locator_tree.lo:  \
 	src/utils/$(am__dirstamp) src/utils/$(DEPDIR)/$(am__dirstamp)
+src/utils/libmesh_prof_la-point_tree.lo: src/utils/$(am__dirstamp) \
+	src/utils/$(DEPDIR)/$(am__dirstamp)
 src/utils/libmesh_prof_la-statistics.lo: src/utils/$(am__dirstamp) \
 	src/utils/$(DEPDIR)/$(am__dirstamp)
 src/utils/libmesh_prof_la-string_to_enum.lo:  \
@@ -11435,6 +11498,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_dbg_la-gmsh_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_dbg_la-gmv_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_dbg_la-gnuplot_io.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_dbg_la-halo_manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_dbg_la-inf_elem_builder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_dbg_la-legacy_xdr_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_dbg_la-matlab_io.Plo@am__quote@
@@ -11496,6 +11560,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_devel_la-gmsh_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_devel_la-gmv_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_devel_la-gnuplot_io.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_devel_la-halo_manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_devel_la-inf_elem_builder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_devel_la-legacy_xdr_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_devel_la-matlab_io.Plo@am__quote@
@@ -11557,6 +11622,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_oprof_la-gmsh_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_oprof_la-gmv_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_oprof_la-gnuplot_io.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_oprof_la-halo_manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_oprof_la-inf_elem_builder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_oprof_la-legacy_xdr_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_oprof_la-matlab_io.Plo@am__quote@
@@ -11618,6 +11684,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_opt_la-gmsh_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_opt_la-gmv_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_opt_la-gnuplot_io.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_opt_la-halo_manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_opt_la-inf_elem_builder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_opt_la-legacy_xdr_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_opt_la-matlab_io.Plo@am__quote@
@@ -11679,6 +11746,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_prof_la-gmsh_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_prof_la-gmv_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_prof_la-gnuplot_io.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_prof_la-halo_manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_prof_la-inf_elem_builder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_prof_la-legacy_xdr_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_prof_la-matlab_io.Plo@am__quote@
@@ -11883,6 +11951,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/numerics/$(DEPDIR)/libmesh_prof_la-trilinos_preconditioner.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/numerics/$(DEPDIR)/libmesh_prof_la-type_tensor.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/numerics/$(DEPDIR)/libmesh_prof_la-type_vector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_dbg_la-neighbors_extender.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_dbg_la-parallel_bin_sorter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_dbg_la-parallel_elem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_dbg_la-parallel_ghost_sync.Plo@am__quote@
@@ -11890,6 +11959,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_dbg_la-parallel_node.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_dbg_la-parallel_sort.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_dbg_la-threads.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_devel_la-neighbors_extender.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_devel_la-parallel_bin_sorter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_devel_la-parallel_elem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_devel_la-parallel_ghost_sync.Plo@am__quote@
@@ -11897,6 +11967,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_devel_la-parallel_node.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_devel_la-parallel_sort.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_devel_la-threads.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_oprof_la-neighbors_extender.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_oprof_la-parallel_bin_sorter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_oprof_la-parallel_elem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_oprof_la-parallel_ghost_sync.Plo@am__quote@
@@ -11904,6 +11975,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_oprof_la-parallel_node.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_oprof_la-parallel_sort.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_oprof_la-threads.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_opt_la-neighbors_extender.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_opt_la-parallel_bin_sorter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_opt_la-parallel_elem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_opt_la-parallel_ghost_sync.Plo@am__quote@
@@ -11911,6 +11983,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_opt_la-parallel_node.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_opt_la-parallel_sort.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_opt_la-threads.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_prof_la-neighbors_extender.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_prof_la-parallel_bin_sorter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_prof_la-parallel_elem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_prof_la-parallel_ghost_sync.Plo@am__quote@
@@ -12550,6 +12623,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_dbg_la-point_locator_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_dbg_la-point_locator_list.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_dbg_la-point_locator_tree.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_dbg_la-point_tree.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_dbg_la-statistics.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_dbg_la-string_to_enum.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_dbg_la-timestamp.Plo@am__quote@
@@ -12569,6 +12643,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_devel_la-point_locator_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_devel_la-point_locator_list.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_devel_la-point_locator_tree.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_devel_la-point_tree.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_devel_la-statistics.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_devel_la-string_to_enum.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_devel_la-timestamp.Plo@am__quote@
@@ -12588,6 +12663,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_oprof_la-point_locator_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_oprof_la-point_locator_list.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_oprof_la-point_locator_tree.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_oprof_la-point_tree.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_oprof_la-statistics.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_oprof_la-string_to_enum.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_oprof_la-timestamp.Plo@am__quote@
@@ -12607,6 +12683,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_opt_la-point_locator_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_opt_la-point_locator_list.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_opt_la-point_locator_tree.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_opt_la-point_tree.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_opt_la-statistics.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_opt_la-string_to_enum.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_opt_la-timestamp.Plo@am__quote@
@@ -12626,6 +12703,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_prof_la-point_locator_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_prof_la-point_locator_list.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_prof_la-point_locator_tree.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_prof_la-point_tree.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_prof_la-statistics.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_prof_la-string_to_enum.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/utils/$(DEPDIR)/libmesh_prof_la-timestamp.Plo@am__quote@
@@ -13897,6 +13975,13 @@ src/mesh/libmesh_dbg_la-gnuplot_io.lo: src/mesh/gnuplot_io.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -c -o src/mesh/libmesh_dbg_la-gnuplot_io.lo `test -f 'src/mesh/gnuplot_io.C' || echo '$(srcdir)/'`src/mesh/gnuplot_io.C
 
+src/mesh/libmesh_dbg_la-halo_manager.lo: src/mesh/halo_manager.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -MT src/mesh/libmesh_dbg_la-halo_manager.lo -MD -MP -MF src/mesh/$(DEPDIR)/libmesh_dbg_la-halo_manager.Tpo -c -o src/mesh/libmesh_dbg_la-halo_manager.lo `test -f 'src/mesh/halo_manager.C' || echo '$(srcdir)/'`src/mesh/halo_manager.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/mesh/$(DEPDIR)/libmesh_dbg_la-halo_manager.Tpo src/mesh/$(DEPDIR)/libmesh_dbg_la-halo_manager.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/mesh/halo_manager.C' object='src/mesh/libmesh_dbg_la-halo_manager.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -c -o src/mesh/libmesh_dbg_la-halo_manager.lo `test -f 'src/mesh/halo_manager.C' || echo '$(srcdir)/'`src/mesh/halo_manager.C
+
 src/mesh/libmesh_dbg_la-inf_elem_builder.lo: src/mesh/inf_elem_builder.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -MT src/mesh/libmesh_dbg_la-inf_elem_builder.lo -MD -MP -MF src/mesh/$(DEPDIR)/libmesh_dbg_la-inf_elem_builder.Tpo -c -o src/mesh/libmesh_dbg_la-inf_elem_builder.lo `test -f 'src/mesh/inf_elem_builder.C' || echo '$(srcdir)/'`src/mesh/inf_elem_builder.C
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/mesh/$(DEPDIR)/libmesh_dbg_la-inf_elem_builder.Tpo src/mesh/$(DEPDIR)/libmesh_dbg_la-inf_elem_builder.Plo
@@ -14456,6 +14541,13 @@ src/numerics/libmesh_dbg_la-type_vector.lo: src/numerics/type_vector.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/numerics/type_vector.C' object='src/numerics/libmesh_dbg_la-type_vector.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -c -o src/numerics/libmesh_dbg_la-type_vector.lo `test -f 'src/numerics/type_vector.C' || echo '$(srcdir)/'`src/numerics/type_vector.C
+
+src/parallel/libmesh_dbg_la-neighbors_extender.lo: src/parallel/neighbors_extender.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -MT src/parallel/libmesh_dbg_la-neighbors_extender.lo -MD -MP -MF src/parallel/$(DEPDIR)/libmesh_dbg_la-neighbors_extender.Tpo -c -o src/parallel/libmesh_dbg_la-neighbors_extender.lo `test -f 'src/parallel/neighbors_extender.C' || echo '$(srcdir)/'`src/parallel/neighbors_extender.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/parallel/$(DEPDIR)/libmesh_dbg_la-neighbors_extender.Tpo src/parallel/$(DEPDIR)/libmesh_dbg_la-neighbors_extender.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/parallel/neighbors_extender.C' object='src/parallel/libmesh_dbg_la-neighbors_extender.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -c -o src/parallel/libmesh_dbg_la-neighbors_extender.lo `test -f 'src/parallel/neighbors_extender.C' || echo '$(srcdir)/'`src/parallel/neighbors_extender.C
 
 src/parallel/libmesh_dbg_la-parallel_bin_sorter.lo: src/parallel/parallel_bin_sorter.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -MT src/parallel/libmesh_dbg_la-parallel_bin_sorter.lo -MD -MP -MF src/parallel/$(DEPDIR)/libmesh_dbg_la-parallel_bin_sorter.Tpo -c -o src/parallel/libmesh_dbg_la-parallel_bin_sorter.lo `test -f 'src/parallel/parallel_bin_sorter.C' || echo '$(srcdir)/'`src/parallel/parallel_bin_sorter.C
@@ -15457,6 +15549,13 @@ src/utils/libmesh_dbg_la-point_locator_tree.lo: src/utils/point_locator_tree.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/utils/point_locator_tree.C' object='src/utils/libmesh_dbg_la-point_locator_tree.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -c -o src/utils/libmesh_dbg_la-point_locator_tree.lo `test -f 'src/utils/point_locator_tree.C' || echo '$(srcdir)/'`src/utils/point_locator_tree.C
+
+src/utils/libmesh_dbg_la-point_tree.lo: src/utils/point_tree.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -MT src/utils/libmesh_dbg_la-point_tree.lo -MD -MP -MF src/utils/$(DEPDIR)/libmesh_dbg_la-point_tree.Tpo -c -o src/utils/libmesh_dbg_la-point_tree.lo `test -f 'src/utils/point_tree.C' || echo '$(srcdir)/'`src/utils/point_tree.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/utils/$(DEPDIR)/libmesh_dbg_la-point_tree.Tpo src/utils/$(DEPDIR)/libmesh_dbg_la-point_tree.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/utils/point_tree.C' object='src/utils/libmesh_dbg_la-point_tree.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -c -o src/utils/libmesh_dbg_la-point_tree.lo `test -f 'src/utils/point_tree.C' || echo '$(srcdir)/'`src/utils/point_tree.C
 
 src/utils/libmesh_dbg_la-statistics.lo: src/utils/statistics.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -MT src/utils/libmesh_dbg_la-statistics.lo -MD -MP -MF src/utils/$(DEPDIR)/libmesh_dbg_la-statistics.Tpo -c -o src/utils/libmesh_dbg_la-statistics.lo `test -f 'src/utils/statistics.C' || echo '$(srcdir)/'`src/utils/statistics.C
@@ -16746,6 +16845,13 @@ src/mesh/libmesh_devel_la-gnuplot_io.lo: src/mesh/gnuplot_io.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -c -o src/mesh/libmesh_devel_la-gnuplot_io.lo `test -f 'src/mesh/gnuplot_io.C' || echo '$(srcdir)/'`src/mesh/gnuplot_io.C
 
+src/mesh/libmesh_devel_la-halo_manager.lo: src/mesh/halo_manager.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -MT src/mesh/libmesh_devel_la-halo_manager.lo -MD -MP -MF src/mesh/$(DEPDIR)/libmesh_devel_la-halo_manager.Tpo -c -o src/mesh/libmesh_devel_la-halo_manager.lo `test -f 'src/mesh/halo_manager.C' || echo '$(srcdir)/'`src/mesh/halo_manager.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/mesh/$(DEPDIR)/libmesh_devel_la-halo_manager.Tpo src/mesh/$(DEPDIR)/libmesh_devel_la-halo_manager.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/mesh/halo_manager.C' object='src/mesh/libmesh_devel_la-halo_manager.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -c -o src/mesh/libmesh_devel_la-halo_manager.lo `test -f 'src/mesh/halo_manager.C' || echo '$(srcdir)/'`src/mesh/halo_manager.C
+
 src/mesh/libmesh_devel_la-inf_elem_builder.lo: src/mesh/inf_elem_builder.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -MT src/mesh/libmesh_devel_la-inf_elem_builder.lo -MD -MP -MF src/mesh/$(DEPDIR)/libmesh_devel_la-inf_elem_builder.Tpo -c -o src/mesh/libmesh_devel_la-inf_elem_builder.lo `test -f 'src/mesh/inf_elem_builder.C' || echo '$(srcdir)/'`src/mesh/inf_elem_builder.C
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/mesh/$(DEPDIR)/libmesh_devel_la-inf_elem_builder.Tpo src/mesh/$(DEPDIR)/libmesh_devel_la-inf_elem_builder.Plo
@@ -17305,6 +17411,13 @@ src/numerics/libmesh_devel_la-type_vector.lo: src/numerics/type_vector.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/numerics/type_vector.C' object='src/numerics/libmesh_devel_la-type_vector.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -c -o src/numerics/libmesh_devel_la-type_vector.lo `test -f 'src/numerics/type_vector.C' || echo '$(srcdir)/'`src/numerics/type_vector.C
+
+src/parallel/libmesh_devel_la-neighbors_extender.lo: src/parallel/neighbors_extender.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -MT src/parallel/libmesh_devel_la-neighbors_extender.lo -MD -MP -MF src/parallel/$(DEPDIR)/libmesh_devel_la-neighbors_extender.Tpo -c -o src/parallel/libmesh_devel_la-neighbors_extender.lo `test -f 'src/parallel/neighbors_extender.C' || echo '$(srcdir)/'`src/parallel/neighbors_extender.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/parallel/$(DEPDIR)/libmesh_devel_la-neighbors_extender.Tpo src/parallel/$(DEPDIR)/libmesh_devel_la-neighbors_extender.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/parallel/neighbors_extender.C' object='src/parallel/libmesh_devel_la-neighbors_extender.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -c -o src/parallel/libmesh_devel_la-neighbors_extender.lo `test -f 'src/parallel/neighbors_extender.C' || echo '$(srcdir)/'`src/parallel/neighbors_extender.C
 
 src/parallel/libmesh_devel_la-parallel_bin_sorter.lo: src/parallel/parallel_bin_sorter.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -MT src/parallel/libmesh_devel_la-parallel_bin_sorter.lo -MD -MP -MF src/parallel/$(DEPDIR)/libmesh_devel_la-parallel_bin_sorter.Tpo -c -o src/parallel/libmesh_devel_la-parallel_bin_sorter.lo `test -f 'src/parallel/parallel_bin_sorter.C' || echo '$(srcdir)/'`src/parallel/parallel_bin_sorter.C
@@ -18306,6 +18419,13 @@ src/utils/libmesh_devel_la-point_locator_tree.lo: src/utils/point_locator_tree.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/utils/point_locator_tree.C' object='src/utils/libmesh_devel_la-point_locator_tree.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -c -o src/utils/libmesh_devel_la-point_locator_tree.lo `test -f 'src/utils/point_locator_tree.C' || echo '$(srcdir)/'`src/utils/point_locator_tree.C
+
+src/utils/libmesh_devel_la-point_tree.lo: src/utils/point_tree.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -MT src/utils/libmesh_devel_la-point_tree.lo -MD -MP -MF src/utils/$(DEPDIR)/libmesh_devel_la-point_tree.Tpo -c -o src/utils/libmesh_devel_la-point_tree.lo `test -f 'src/utils/point_tree.C' || echo '$(srcdir)/'`src/utils/point_tree.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/utils/$(DEPDIR)/libmesh_devel_la-point_tree.Tpo src/utils/$(DEPDIR)/libmesh_devel_la-point_tree.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/utils/point_tree.C' object='src/utils/libmesh_devel_la-point_tree.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -c -o src/utils/libmesh_devel_la-point_tree.lo `test -f 'src/utils/point_tree.C' || echo '$(srcdir)/'`src/utils/point_tree.C
 
 src/utils/libmesh_devel_la-statistics.lo: src/utils/statistics.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -MT src/utils/libmesh_devel_la-statistics.lo -MD -MP -MF src/utils/$(DEPDIR)/libmesh_devel_la-statistics.Tpo -c -o src/utils/libmesh_devel_la-statistics.lo `test -f 'src/utils/statistics.C' || echo '$(srcdir)/'`src/utils/statistics.C
@@ -19595,6 +19715,13 @@ src/mesh/libmesh_oprof_la-gnuplot_io.lo: src/mesh/gnuplot_io.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/mesh/libmesh_oprof_la-gnuplot_io.lo `test -f 'src/mesh/gnuplot_io.C' || echo '$(srcdir)/'`src/mesh/gnuplot_io.C
 
+src/mesh/libmesh_oprof_la-halo_manager.lo: src/mesh/halo_manager.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -MT src/mesh/libmesh_oprof_la-halo_manager.lo -MD -MP -MF src/mesh/$(DEPDIR)/libmesh_oprof_la-halo_manager.Tpo -c -o src/mesh/libmesh_oprof_la-halo_manager.lo `test -f 'src/mesh/halo_manager.C' || echo '$(srcdir)/'`src/mesh/halo_manager.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/mesh/$(DEPDIR)/libmesh_oprof_la-halo_manager.Tpo src/mesh/$(DEPDIR)/libmesh_oprof_la-halo_manager.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/mesh/halo_manager.C' object='src/mesh/libmesh_oprof_la-halo_manager.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/mesh/libmesh_oprof_la-halo_manager.lo `test -f 'src/mesh/halo_manager.C' || echo '$(srcdir)/'`src/mesh/halo_manager.C
+
 src/mesh/libmesh_oprof_la-inf_elem_builder.lo: src/mesh/inf_elem_builder.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -MT src/mesh/libmesh_oprof_la-inf_elem_builder.lo -MD -MP -MF src/mesh/$(DEPDIR)/libmesh_oprof_la-inf_elem_builder.Tpo -c -o src/mesh/libmesh_oprof_la-inf_elem_builder.lo `test -f 'src/mesh/inf_elem_builder.C' || echo '$(srcdir)/'`src/mesh/inf_elem_builder.C
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/mesh/$(DEPDIR)/libmesh_oprof_la-inf_elem_builder.Tpo src/mesh/$(DEPDIR)/libmesh_oprof_la-inf_elem_builder.Plo
@@ -20154,6 +20281,13 @@ src/numerics/libmesh_oprof_la-type_vector.lo: src/numerics/type_vector.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/numerics/type_vector.C' object='src/numerics/libmesh_oprof_la-type_vector.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/numerics/libmesh_oprof_la-type_vector.lo `test -f 'src/numerics/type_vector.C' || echo '$(srcdir)/'`src/numerics/type_vector.C
+
+src/parallel/libmesh_oprof_la-neighbors_extender.lo: src/parallel/neighbors_extender.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -MT src/parallel/libmesh_oprof_la-neighbors_extender.lo -MD -MP -MF src/parallel/$(DEPDIR)/libmesh_oprof_la-neighbors_extender.Tpo -c -o src/parallel/libmesh_oprof_la-neighbors_extender.lo `test -f 'src/parallel/neighbors_extender.C' || echo '$(srcdir)/'`src/parallel/neighbors_extender.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/parallel/$(DEPDIR)/libmesh_oprof_la-neighbors_extender.Tpo src/parallel/$(DEPDIR)/libmesh_oprof_la-neighbors_extender.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/parallel/neighbors_extender.C' object='src/parallel/libmesh_oprof_la-neighbors_extender.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/parallel/libmesh_oprof_la-neighbors_extender.lo `test -f 'src/parallel/neighbors_extender.C' || echo '$(srcdir)/'`src/parallel/neighbors_extender.C
 
 src/parallel/libmesh_oprof_la-parallel_bin_sorter.lo: src/parallel/parallel_bin_sorter.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -MT src/parallel/libmesh_oprof_la-parallel_bin_sorter.lo -MD -MP -MF src/parallel/$(DEPDIR)/libmesh_oprof_la-parallel_bin_sorter.Tpo -c -o src/parallel/libmesh_oprof_la-parallel_bin_sorter.lo `test -f 'src/parallel/parallel_bin_sorter.C' || echo '$(srcdir)/'`src/parallel/parallel_bin_sorter.C
@@ -21155,6 +21289,13 @@ src/utils/libmesh_oprof_la-point_locator_tree.lo: src/utils/point_locator_tree.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/utils/point_locator_tree.C' object='src/utils/libmesh_oprof_la-point_locator_tree.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/utils/libmesh_oprof_la-point_locator_tree.lo `test -f 'src/utils/point_locator_tree.C' || echo '$(srcdir)/'`src/utils/point_locator_tree.C
+
+src/utils/libmesh_oprof_la-point_tree.lo: src/utils/point_tree.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -MT src/utils/libmesh_oprof_la-point_tree.lo -MD -MP -MF src/utils/$(DEPDIR)/libmesh_oprof_la-point_tree.Tpo -c -o src/utils/libmesh_oprof_la-point_tree.lo `test -f 'src/utils/point_tree.C' || echo '$(srcdir)/'`src/utils/point_tree.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/utils/$(DEPDIR)/libmesh_oprof_la-point_tree.Tpo src/utils/$(DEPDIR)/libmesh_oprof_la-point_tree.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/utils/point_tree.C' object='src/utils/libmesh_oprof_la-point_tree.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/utils/libmesh_oprof_la-point_tree.lo `test -f 'src/utils/point_tree.C' || echo '$(srcdir)/'`src/utils/point_tree.C
 
 src/utils/libmesh_oprof_la-statistics.lo: src/utils/statistics.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -MT src/utils/libmesh_oprof_la-statistics.lo -MD -MP -MF src/utils/$(DEPDIR)/libmesh_oprof_la-statistics.Tpo -c -o src/utils/libmesh_oprof_la-statistics.lo `test -f 'src/utils/statistics.C' || echo '$(srcdir)/'`src/utils/statistics.C
@@ -22444,6 +22585,13 @@ src/mesh/libmesh_opt_la-gnuplot_io.lo: src/mesh/gnuplot_io.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -c -o src/mesh/libmesh_opt_la-gnuplot_io.lo `test -f 'src/mesh/gnuplot_io.C' || echo '$(srcdir)/'`src/mesh/gnuplot_io.C
 
+src/mesh/libmesh_opt_la-halo_manager.lo: src/mesh/halo_manager.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -MT src/mesh/libmesh_opt_la-halo_manager.lo -MD -MP -MF src/mesh/$(DEPDIR)/libmesh_opt_la-halo_manager.Tpo -c -o src/mesh/libmesh_opt_la-halo_manager.lo `test -f 'src/mesh/halo_manager.C' || echo '$(srcdir)/'`src/mesh/halo_manager.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/mesh/$(DEPDIR)/libmesh_opt_la-halo_manager.Tpo src/mesh/$(DEPDIR)/libmesh_opt_la-halo_manager.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/mesh/halo_manager.C' object='src/mesh/libmesh_opt_la-halo_manager.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -c -o src/mesh/libmesh_opt_la-halo_manager.lo `test -f 'src/mesh/halo_manager.C' || echo '$(srcdir)/'`src/mesh/halo_manager.C
+
 src/mesh/libmesh_opt_la-inf_elem_builder.lo: src/mesh/inf_elem_builder.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -MT src/mesh/libmesh_opt_la-inf_elem_builder.lo -MD -MP -MF src/mesh/$(DEPDIR)/libmesh_opt_la-inf_elem_builder.Tpo -c -o src/mesh/libmesh_opt_la-inf_elem_builder.lo `test -f 'src/mesh/inf_elem_builder.C' || echo '$(srcdir)/'`src/mesh/inf_elem_builder.C
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/mesh/$(DEPDIR)/libmesh_opt_la-inf_elem_builder.Tpo src/mesh/$(DEPDIR)/libmesh_opt_la-inf_elem_builder.Plo
@@ -23003,6 +23151,13 @@ src/numerics/libmesh_opt_la-type_vector.lo: src/numerics/type_vector.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/numerics/type_vector.C' object='src/numerics/libmesh_opt_la-type_vector.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -c -o src/numerics/libmesh_opt_la-type_vector.lo `test -f 'src/numerics/type_vector.C' || echo '$(srcdir)/'`src/numerics/type_vector.C
+
+src/parallel/libmesh_opt_la-neighbors_extender.lo: src/parallel/neighbors_extender.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -MT src/parallel/libmesh_opt_la-neighbors_extender.lo -MD -MP -MF src/parallel/$(DEPDIR)/libmesh_opt_la-neighbors_extender.Tpo -c -o src/parallel/libmesh_opt_la-neighbors_extender.lo `test -f 'src/parallel/neighbors_extender.C' || echo '$(srcdir)/'`src/parallel/neighbors_extender.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/parallel/$(DEPDIR)/libmesh_opt_la-neighbors_extender.Tpo src/parallel/$(DEPDIR)/libmesh_opt_la-neighbors_extender.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/parallel/neighbors_extender.C' object='src/parallel/libmesh_opt_la-neighbors_extender.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -c -o src/parallel/libmesh_opt_la-neighbors_extender.lo `test -f 'src/parallel/neighbors_extender.C' || echo '$(srcdir)/'`src/parallel/neighbors_extender.C
 
 src/parallel/libmesh_opt_la-parallel_bin_sorter.lo: src/parallel/parallel_bin_sorter.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -MT src/parallel/libmesh_opt_la-parallel_bin_sorter.lo -MD -MP -MF src/parallel/$(DEPDIR)/libmesh_opt_la-parallel_bin_sorter.Tpo -c -o src/parallel/libmesh_opt_la-parallel_bin_sorter.lo `test -f 'src/parallel/parallel_bin_sorter.C' || echo '$(srcdir)/'`src/parallel/parallel_bin_sorter.C
@@ -24004,6 +24159,13 @@ src/utils/libmesh_opt_la-point_locator_tree.lo: src/utils/point_locator_tree.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/utils/point_locator_tree.C' object='src/utils/libmesh_opt_la-point_locator_tree.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -c -o src/utils/libmesh_opt_la-point_locator_tree.lo `test -f 'src/utils/point_locator_tree.C' || echo '$(srcdir)/'`src/utils/point_locator_tree.C
+
+src/utils/libmesh_opt_la-point_tree.lo: src/utils/point_tree.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -MT src/utils/libmesh_opt_la-point_tree.lo -MD -MP -MF src/utils/$(DEPDIR)/libmesh_opt_la-point_tree.Tpo -c -o src/utils/libmesh_opt_la-point_tree.lo `test -f 'src/utils/point_tree.C' || echo '$(srcdir)/'`src/utils/point_tree.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/utils/$(DEPDIR)/libmesh_opt_la-point_tree.Tpo src/utils/$(DEPDIR)/libmesh_opt_la-point_tree.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/utils/point_tree.C' object='src/utils/libmesh_opt_la-point_tree.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -c -o src/utils/libmesh_opt_la-point_tree.lo `test -f 'src/utils/point_tree.C' || echo '$(srcdir)/'`src/utils/point_tree.C
 
 src/utils/libmesh_opt_la-statistics.lo: src/utils/statistics.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -MT src/utils/libmesh_opt_la-statistics.lo -MD -MP -MF src/utils/$(DEPDIR)/libmesh_opt_la-statistics.Tpo -c -o src/utils/libmesh_opt_la-statistics.lo `test -f 'src/utils/statistics.C' || echo '$(srcdir)/'`src/utils/statistics.C
@@ -25293,6 +25455,13 @@ src/mesh/libmesh_prof_la-gnuplot_io.lo: src/mesh/gnuplot_io.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/mesh/libmesh_prof_la-gnuplot_io.lo `test -f 'src/mesh/gnuplot_io.C' || echo '$(srcdir)/'`src/mesh/gnuplot_io.C
 
+src/mesh/libmesh_prof_la-halo_manager.lo: src/mesh/halo_manager.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -MT src/mesh/libmesh_prof_la-halo_manager.lo -MD -MP -MF src/mesh/$(DEPDIR)/libmesh_prof_la-halo_manager.Tpo -c -o src/mesh/libmesh_prof_la-halo_manager.lo `test -f 'src/mesh/halo_manager.C' || echo '$(srcdir)/'`src/mesh/halo_manager.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/mesh/$(DEPDIR)/libmesh_prof_la-halo_manager.Tpo src/mesh/$(DEPDIR)/libmesh_prof_la-halo_manager.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/mesh/halo_manager.C' object='src/mesh/libmesh_prof_la-halo_manager.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/mesh/libmesh_prof_la-halo_manager.lo `test -f 'src/mesh/halo_manager.C' || echo '$(srcdir)/'`src/mesh/halo_manager.C
+
 src/mesh/libmesh_prof_la-inf_elem_builder.lo: src/mesh/inf_elem_builder.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -MT src/mesh/libmesh_prof_la-inf_elem_builder.lo -MD -MP -MF src/mesh/$(DEPDIR)/libmesh_prof_la-inf_elem_builder.Tpo -c -o src/mesh/libmesh_prof_la-inf_elem_builder.lo `test -f 'src/mesh/inf_elem_builder.C' || echo '$(srcdir)/'`src/mesh/inf_elem_builder.C
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/mesh/$(DEPDIR)/libmesh_prof_la-inf_elem_builder.Tpo src/mesh/$(DEPDIR)/libmesh_prof_la-inf_elem_builder.Plo
@@ -25852,6 +26021,13 @@ src/numerics/libmesh_prof_la-type_vector.lo: src/numerics/type_vector.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/numerics/type_vector.C' object='src/numerics/libmesh_prof_la-type_vector.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/numerics/libmesh_prof_la-type_vector.lo `test -f 'src/numerics/type_vector.C' || echo '$(srcdir)/'`src/numerics/type_vector.C
+
+src/parallel/libmesh_prof_la-neighbors_extender.lo: src/parallel/neighbors_extender.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -MT src/parallel/libmesh_prof_la-neighbors_extender.lo -MD -MP -MF src/parallel/$(DEPDIR)/libmesh_prof_la-neighbors_extender.Tpo -c -o src/parallel/libmesh_prof_la-neighbors_extender.lo `test -f 'src/parallel/neighbors_extender.C' || echo '$(srcdir)/'`src/parallel/neighbors_extender.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/parallel/$(DEPDIR)/libmesh_prof_la-neighbors_extender.Tpo src/parallel/$(DEPDIR)/libmesh_prof_la-neighbors_extender.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/parallel/neighbors_extender.C' object='src/parallel/libmesh_prof_la-neighbors_extender.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/parallel/libmesh_prof_la-neighbors_extender.lo `test -f 'src/parallel/neighbors_extender.C' || echo '$(srcdir)/'`src/parallel/neighbors_extender.C
 
 src/parallel/libmesh_prof_la-parallel_bin_sorter.lo: src/parallel/parallel_bin_sorter.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -MT src/parallel/libmesh_prof_la-parallel_bin_sorter.lo -MD -MP -MF src/parallel/$(DEPDIR)/libmesh_prof_la-parallel_bin_sorter.Tpo -c -o src/parallel/libmesh_prof_la-parallel_bin_sorter.lo `test -f 'src/parallel/parallel_bin_sorter.C' || echo '$(srcdir)/'`src/parallel/parallel_bin_sorter.C
@@ -26853,6 +27029,13 @@ src/utils/libmesh_prof_la-point_locator_tree.lo: src/utils/point_locator_tree.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/utils/point_locator_tree.C' object='src/utils/libmesh_prof_la-point_locator_tree.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/utils/libmesh_prof_la-point_locator_tree.lo `test -f 'src/utils/point_locator_tree.C' || echo '$(srcdir)/'`src/utils/point_locator_tree.C
+
+src/utils/libmesh_prof_la-point_tree.lo: src/utils/point_tree.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -MT src/utils/libmesh_prof_la-point_tree.lo -MD -MP -MF src/utils/$(DEPDIR)/libmesh_prof_la-point_tree.Tpo -c -o src/utils/libmesh_prof_la-point_tree.lo `test -f 'src/utils/point_tree.C' || echo '$(srcdir)/'`src/utils/point_tree.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/utils/$(DEPDIR)/libmesh_prof_la-point_tree.Tpo src/utils/$(DEPDIR)/libmesh_prof_la-point_tree.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/utils/point_tree.C' object='src/utils/libmesh_prof_la-point_tree.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/utils/libmesh_prof_la-point_tree.lo `test -f 'src/utils/point_tree.C' || echo '$(srcdir)/'`src/utils/point_tree.C
 
 src/utils/libmesh_prof_la-statistics.lo: src/utils/statistics.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -MT src/utils/libmesh_prof_la-statistics.lo -MD -MP -MF src/utils/$(DEPDIR)/libmesh_prof_la-statistics.Tpo -c -o src/utils/libmesh_prof_la-statistics.lo `test -f 'src/utils/statistics.C' || echo '$(srcdir)/'`src/utils/statistics.C

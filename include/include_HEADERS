@@ -160,6 +160,7 @@ include_HEADERS =  \
         mesh/gmsh_io.h \
         mesh/gmv_io.h \
         mesh/gnuplot_io.h \
+        mesh/halo_manager.h \
         mesh/inf_elem_builder.h \
         mesh/legacy_xdr_io.h \
         mesh/matlab_io.h \
@@ -248,6 +249,7 @@ include_HEADERS =  \
         numerics/vector_value.h \
         numerics/wrapped_function.h \
         numerics/zero_function.h \
+        parallel/neighbors_extender.h \
         parallel/parallel.h \
         parallel/parallel_algebra.h \
         parallel/parallel_bin_sorter.h \
@@ -386,8 +388,10 @@ include_HEADERS =  \
         utils/point_locator_base.h \
         utils/point_locator_list.h \
         utils/point_locator_tree.h \
+        utils/point_tree.h \
         utils/pool_allocator.h \
         utils/restore_warnings.h \
+        utils/serializer.h \
         utils/statistics.h \
         utils/string_to_enum.h \
         utils/timestamp.h \

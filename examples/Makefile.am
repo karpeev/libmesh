@@ -31,6 +31,9 @@ SUBDIRS = \
 	miscellaneous/miscellaneous_ex9 \
 	miscellaneous/miscellaneous_ex10 \
 	miscellaneous/miscellaneous_ex11 \
+	particles/particles_ex1 \
+	particles/particles_ex2 \
+	particles/particles_ex3 \
 	subdomains/subdomains_ex1 \
 	subdomains/subdomains_ex2 \
 	systems_of_equations/systems_of_equations_ex1 \

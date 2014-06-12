@@ -243,7 +243,7 @@ bool is_between(Real min, Real check, Real max)
 
 bool MeshTools::BoundingBox::intersect (const BoundingBox & other_box) const
 {
-  // Make local variables first to make thiings more clear in a moment
+  // Make local variables first to make things more clear in a moment
   const Real& my_min_x = this->first(0);
   const Real& my_max_x = this->second(0);
   const Real& other_min_x = other_box.first(0);
