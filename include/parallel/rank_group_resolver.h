@@ -1,53 +1,50 @@
 #include <vector>
-#include <map>
-#include <sstream>
+#include <set>
 #include "mpi.h"
 
 class RankGroupsResolver {
   public:
     void setComm(MPI_Comm comm);
     void setNeighbors(const std::vector<int>& neighbors);
-    void resolve(int edgeTestDataLen, const char* edgeTestData,
+    void resolve(int testDataSize, const char* testData,
         std::vector<int>& result);
 
   protected:
     RankGroupsResolver();
-    virtual ~RankGroupsResolver();
-    virtual void edgeTestInit(int root, int edgeTestDataLen,
-        const char* edgeTestData) = 0;
-    virtual bool edgeTest(int neighbor) = 0;
-    virtual void edgeTestClear() = 0;
+    inline virtual ~RankGroupsResolver() {}
+    virtual void testInit(int root, int testDataSize,
+        const char* testData) = 0;
+    virtual bool testEdge(int neighbor) = 0;
+    virtual bool testNode() = 0;
+    virtual void testClear() = 0;
 
   private:
-    void deleteOutboxes();
-    void recvMsg();
+    void commRequests(int numRecvs);
+    void recvRequest();
+    void commResponses(int numRecvs);
+    void recvResponse();
+    int commNeighbors();
+    int recvNeighbor();
+    void probe(int tag, MPI_Datatype datatype, int& source, int& size);
+    void recv(void* buf, int count, MPI_Datatype datatype, int source,
+        int tag);
     bool allProcessorsDone();
-    void searchRequest(int parent, int root, int edgeTestDataLen,
-        const char* edgeTestData);
-    void finishSearch(int root);
-    void addSearchRequestMsg(int root, int edgeTestDataLen,
-        const char* edgeTestData, std::stringstream* outbox);
-    void addSearchResponseMsg(int root, std::vector<int>& contacts,
-        std::stringstream* outbox);
-    void readMsgs(int msgsLen, char* msgs, int source);
-    char* readSearchRequestMsg(char* msg, int source);
-    char* readSearchResponseMsg(char* msg);
-
-    struct Search {
-      std::vector<int> contacts;
-      int requestCount;
-      int parent;
-
-      inline Search() : requestCount(0) {}
-    };
 
     MPI_Comm comm;
     int myRank;
+    std::vector<int> neighbors;
+    
+    int testDataSize;
+    const char* testData;
+    
+    std::vector<int> contacts;
+    std::set<int> requestSet;
+    std::vector<int> requestLayer;
+    std::set<int> responseSet;
+    std::vector<int> responseLayer;
+    std::vector<std::vector<int> > responseMsgs;
+    std::vector<std::vector<int> > neighborMsgs;
 
-    std::map<int, Search*> searches;
-    std::map<int, std::stringstream*> outboxes;
-
-    static const char code_msgRequest, code_msgResponse;
-    static const int tag;
+    static const int tagRequest, tagResponse, tagNeighbor;
 };
 
