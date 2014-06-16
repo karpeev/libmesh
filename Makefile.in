@@ -334,6 +334,7 @@ am__libmesh_dbg_la_SOURCES_DIST = src/base/dof_map.C \
 	src/numerics/trilinos_epetra_vector.C \
 	src/numerics/trilinos_preconditioner.C \
 	src/numerics/type_tensor.C src/numerics/type_vector.C \
+	src/parallel/neighbors_extender.C \
 	src/parallel/parallel_bin_sorter.C \
 	src/parallel/parallel_elem.C \
 	src/parallel/parallel_ghost_sync.C \
@@ -714,6 +715,7 @@ am__objects_1 = src/base/libmesh_dbg_la-dof_map.lo \
 	src/numerics/libmesh_dbg_la-trilinos_preconditioner.lo \
 	src/numerics/libmesh_dbg_la-type_tensor.lo \
 	src/numerics/libmesh_dbg_la-type_vector.lo \
+	src/parallel/libmesh_dbg_la-neighbors_extender.lo \
 	src/parallel/libmesh_dbg_la-parallel_bin_sorter.lo \
 	src/parallel/libmesh_dbg_la-parallel_elem.lo \
 	src/parallel/libmesh_dbg_la-parallel_ghost_sync.lo \
@@ -1028,6 +1030,7 @@ am__libmesh_devel_la_SOURCES_DIST = src/base/dof_map.C \
 	src/numerics/trilinos_epetra_vector.C \
 	src/numerics/trilinos_preconditioner.C \
 	src/numerics/type_tensor.C src/numerics/type_vector.C \
+	src/parallel/neighbors_extender.C \
 	src/parallel/parallel_bin_sorter.C \
 	src/parallel/parallel_elem.C \
 	src/parallel/parallel_ghost_sync.C \
@@ -1407,6 +1410,7 @@ am__objects_2 = src/base/libmesh_devel_la-dof_map.lo \
 	src/numerics/libmesh_devel_la-trilinos_preconditioner.lo \
 	src/numerics/libmesh_devel_la-type_tensor.lo \
 	src/numerics/libmesh_devel_la-type_vector.lo \
+	src/parallel/libmesh_devel_la-neighbors_extender.lo \
 	src/parallel/libmesh_devel_la-parallel_bin_sorter.lo \
 	src/parallel/libmesh_devel_la-parallel_elem.lo \
 	src/parallel/libmesh_devel_la-parallel_ghost_sync.lo \
@@ -1718,6 +1722,7 @@ am__libmesh_oprof_la_SOURCES_DIST = src/base/dof_map.C \
 	src/numerics/trilinos_epetra_vector.C \
 	src/numerics/trilinos_preconditioner.C \
 	src/numerics/type_tensor.C src/numerics/type_vector.C \
+	src/parallel/neighbors_extender.C \
 	src/parallel/parallel_bin_sorter.C \
 	src/parallel/parallel_elem.C \
 	src/parallel/parallel_ghost_sync.C \
@@ -2097,6 +2102,7 @@ am__objects_3 = src/base/libmesh_oprof_la-dof_map.lo \
 	src/numerics/libmesh_oprof_la-trilinos_preconditioner.lo \
 	src/numerics/libmesh_oprof_la-type_tensor.lo \
 	src/numerics/libmesh_oprof_la-type_vector.lo \
+	src/parallel/libmesh_oprof_la-neighbors_extender.lo \
 	src/parallel/libmesh_oprof_la-parallel_bin_sorter.lo \
 	src/parallel/libmesh_oprof_la-parallel_elem.lo \
 	src/parallel/libmesh_oprof_la-parallel_ghost_sync.lo \
@@ -2408,6 +2414,7 @@ am__libmesh_opt_la_SOURCES_DIST = src/base/dof_map.C \
 	src/numerics/trilinos_epetra_vector.C \
 	src/numerics/trilinos_preconditioner.C \
 	src/numerics/type_tensor.C src/numerics/type_vector.C \
+	src/parallel/neighbors_extender.C \
 	src/parallel/parallel_bin_sorter.C \
 	src/parallel/parallel_elem.C \
 	src/parallel/parallel_ghost_sync.C \
@@ -2787,6 +2794,7 @@ am__objects_4 = src/base/libmesh_opt_la-dof_map.lo \
 	src/numerics/libmesh_opt_la-trilinos_preconditioner.lo \
 	src/numerics/libmesh_opt_la-type_tensor.lo \
 	src/numerics/libmesh_opt_la-type_vector.lo \
+	src/parallel/libmesh_opt_la-neighbors_extender.lo \
 	src/parallel/libmesh_opt_la-parallel_bin_sorter.lo \
 	src/parallel/libmesh_opt_la-parallel_elem.lo \
 	src/parallel/libmesh_opt_la-parallel_ghost_sync.lo \
@@ -3097,6 +3105,7 @@ am__libmesh_prof_la_SOURCES_DIST = src/base/dof_map.C \
 	src/numerics/trilinos_epetra_vector.C \
 	src/numerics/trilinos_preconditioner.C \
 	src/numerics/type_tensor.C src/numerics/type_vector.C \
+	src/parallel/neighbors_extender.C \
 	src/parallel/parallel_bin_sorter.C \
 	src/parallel/parallel_elem.C \
 	src/parallel/parallel_ghost_sync.C \
@@ -3476,6 +3485,7 @@ am__objects_5 = src/base/libmesh_prof_la-dof_map.lo \
 	src/numerics/libmesh_prof_la-trilinos_preconditioner.lo \
 	src/numerics/libmesh_prof_la-type_tensor.lo \
 	src/numerics/libmesh_prof_la-type_vector.lo \
+	src/parallel/libmesh_prof_la-neighbors_extender.lo \
 	src/parallel/libmesh_prof_la-parallel_bin_sorter.lo \
 	src/parallel/libmesh_prof_la-parallel_elem.lo \
 	src/parallel/libmesh_prof_la-parallel_ghost_sync.lo \
@@ -4698,6 +4708,7 @@ libmesh_SOURCES = \
         src/numerics/trilinos_preconditioner.C \
         src/numerics/type_tensor.C \
         src/numerics/type_vector.C \
+        src/parallel/neighbors_extender.C \
         src/parallel/parallel_bin_sorter.C \
         src/parallel/parallel_elem.C \
         src/parallel/parallel_ghost_sync.C \
@@ -5762,6 +5773,9 @@ src/parallel/$(am__dirstamp):
 src/parallel/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) src/parallel/$(DEPDIR)
 	@: > src/parallel/$(DEPDIR)/$(am__dirstamp)
+src/parallel/libmesh_dbg_la-neighbors_extender.lo:  \
+	src/parallel/$(am__dirstamp) \
+	src/parallel/$(DEPDIR)/$(am__dirstamp)
 src/parallel/libmesh_dbg_la-parallel_bin_sorter.lo:  \
 	src/parallel/$(am__dirstamp) \
 	src/parallel/$(DEPDIR)/$(am__dirstamp)
@@ -6799,6 +6813,9 @@ src/numerics/libmesh_devel_la-type_tensor.lo:  \
 src/numerics/libmesh_devel_la-type_vector.lo:  \
 	src/numerics/$(am__dirstamp) \
 	src/numerics/$(DEPDIR)/$(am__dirstamp)
+src/parallel/libmesh_devel_la-neighbors_extender.lo:  \
+	src/parallel/$(am__dirstamp) \
+	src/parallel/$(DEPDIR)/$(am__dirstamp)
 src/parallel/libmesh_devel_la-parallel_bin_sorter.lo:  \
 	src/parallel/$(am__dirstamp) \
 	src/parallel/$(DEPDIR)/$(am__dirstamp)
@@ -7791,6 +7808,9 @@ src/numerics/libmesh_oprof_la-type_tensor.lo:  \
 src/numerics/libmesh_oprof_la-type_vector.lo:  \
 	src/numerics/$(am__dirstamp) \
 	src/numerics/$(DEPDIR)/$(am__dirstamp)
+src/parallel/libmesh_oprof_la-neighbors_extender.lo:  \
+	src/parallel/$(am__dirstamp) \
+	src/parallel/$(DEPDIR)/$(am__dirstamp)
 src/parallel/libmesh_oprof_la-parallel_bin_sorter.lo:  \
 	src/parallel/$(am__dirstamp) \
 	src/parallel/$(DEPDIR)/$(am__dirstamp)
@@ -8783,6 +8803,9 @@ src/numerics/libmesh_opt_la-type_tensor.lo:  \
 src/numerics/libmesh_opt_la-type_vector.lo:  \
 	src/numerics/$(am__dirstamp) \
 	src/numerics/$(DEPDIR)/$(am__dirstamp)
+src/parallel/libmesh_opt_la-neighbors_extender.lo:  \
+	src/parallel/$(am__dirstamp) \
+	src/parallel/$(DEPDIR)/$(am__dirstamp)
 src/parallel/libmesh_opt_la-parallel_bin_sorter.lo:  \
 	src/parallel/$(am__dirstamp) \
 	src/parallel/$(DEPDIR)/$(am__dirstamp)
@@ -9772,6 +9795,9 @@ src/numerics/libmesh_prof_la-type_tensor.lo:  \
 src/numerics/libmesh_prof_la-type_vector.lo:  \
 	src/numerics/$(am__dirstamp) \
 	src/numerics/$(DEPDIR)/$(am__dirstamp)
+src/parallel/libmesh_prof_la-neighbors_extender.lo:  \
+	src/parallel/$(am__dirstamp) \
+	src/parallel/$(DEPDIR)/$(am__dirstamp)
 src/parallel/libmesh_prof_la-parallel_bin_sorter.lo:  \
 	src/parallel/$(am__dirstamp) \
 	src/parallel/$(DEPDIR)/$(am__dirstamp)
@@ -11883,6 +11909,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/numerics/$(DEPDIR)/libmesh_prof_la-trilinos_preconditioner.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/numerics/$(DEPDIR)/libmesh_prof_la-type_tensor.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/numerics/$(DEPDIR)/libmesh_prof_la-type_vector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_dbg_la-neighbors_extender.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_dbg_la-parallel_bin_sorter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_dbg_la-parallel_elem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_dbg_la-parallel_ghost_sync.Plo@am__quote@
@@ -11890,6 +11917,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_dbg_la-parallel_node.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_dbg_la-parallel_sort.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_dbg_la-threads.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_devel_la-neighbors_extender.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_devel_la-parallel_bin_sorter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_devel_la-parallel_elem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_devel_la-parallel_ghost_sync.Plo@am__quote@
@@ -11897,6 +11925,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_devel_la-parallel_node.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_devel_la-parallel_sort.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_devel_la-threads.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_oprof_la-neighbors_extender.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_oprof_la-parallel_bin_sorter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_oprof_la-parallel_elem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_oprof_la-parallel_ghost_sync.Plo@am__quote@
@@ -11904,6 +11933,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_oprof_la-parallel_node.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_oprof_la-parallel_sort.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_oprof_la-threads.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_opt_la-neighbors_extender.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_opt_la-parallel_bin_sorter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_opt_la-parallel_elem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_opt_la-parallel_ghost_sync.Plo@am__quote@
@@ -11911,6 +11941,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_opt_la-parallel_node.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_opt_la-parallel_sort.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_opt_la-threads.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_prof_la-neighbors_extender.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_prof_la-parallel_bin_sorter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_prof_la-parallel_elem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_prof_la-parallel_ghost_sync.Plo@am__quote@
@@ -14456,6 +14487,13 @@ src/numerics/libmesh_dbg_la-type_vector.lo: src/numerics/type_vector.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/numerics/type_vector.C' object='src/numerics/libmesh_dbg_la-type_vector.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -c -o src/numerics/libmesh_dbg_la-type_vector.lo `test -f 'src/numerics/type_vector.C' || echo '$(srcdir)/'`src/numerics/type_vector.C
+
+src/parallel/libmesh_dbg_la-neighbors_extender.lo: src/parallel/neighbors_extender.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -MT src/parallel/libmesh_dbg_la-neighbors_extender.lo -MD -MP -MF src/parallel/$(DEPDIR)/libmesh_dbg_la-neighbors_extender.Tpo -c -o src/parallel/libmesh_dbg_la-neighbors_extender.lo `test -f 'src/parallel/neighbors_extender.C' || echo '$(srcdir)/'`src/parallel/neighbors_extender.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/parallel/$(DEPDIR)/libmesh_dbg_la-neighbors_extender.Tpo src/parallel/$(DEPDIR)/libmesh_dbg_la-neighbors_extender.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/parallel/neighbors_extender.C' object='src/parallel/libmesh_dbg_la-neighbors_extender.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -c -o src/parallel/libmesh_dbg_la-neighbors_extender.lo `test -f 'src/parallel/neighbors_extender.C' || echo '$(srcdir)/'`src/parallel/neighbors_extender.C
 
 src/parallel/libmesh_dbg_la-parallel_bin_sorter.lo: src/parallel/parallel_bin_sorter.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -MT src/parallel/libmesh_dbg_la-parallel_bin_sorter.lo -MD -MP -MF src/parallel/$(DEPDIR)/libmesh_dbg_la-parallel_bin_sorter.Tpo -c -o src/parallel/libmesh_dbg_la-parallel_bin_sorter.lo `test -f 'src/parallel/parallel_bin_sorter.C' || echo '$(srcdir)/'`src/parallel/parallel_bin_sorter.C
@@ -17306,6 +17344,13 @@ src/numerics/libmesh_devel_la-type_vector.lo: src/numerics/type_vector.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -c -o src/numerics/libmesh_devel_la-type_vector.lo `test -f 'src/numerics/type_vector.C' || echo '$(srcdir)/'`src/numerics/type_vector.C
 
+src/parallel/libmesh_devel_la-neighbors_extender.lo: src/parallel/neighbors_extender.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -MT src/parallel/libmesh_devel_la-neighbors_extender.lo -MD -MP -MF src/parallel/$(DEPDIR)/libmesh_devel_la-neighbors_extender.Tpo -c -o src/parallel/libmesh_devel_la-neighbors_extender.lo `test -f 'src/parallel/neighbors_extender.C' || echo '$(srcdir)/'`src/parallel/neighbors_extender.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/parallel/$(DEPDIR)/libmesh_devel_la-neighbors_extender.Tpo src/parallel/$(DEPDIR)/libmesh_devel_la-neighbors_extender.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/parallel/neighbors_extender.C' object='src/parallel/libmesh_devel_la-neighbors_extender.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -c -o src/parallel/libmesh_devel_la-neighbors_extender.lo `test -f 'src/parallel/neighbors_extender.C' || echo '$(srcdir)/'`src/parallel/neighbors_extender.C
+
 src/parallel/libmesh_devel_la-parallel_bin_sorter.lo: src/parallel/parallel_bin_sorter.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -MT src/parallel/libmesh_devel_la-parallel_bin_sorter.lo -MD -MP -MF src/parallel/$(DEPDIR)/libmesh_devel_la-parallel_bin_sorter.Tpo -c -o src/parallel/libmesh_devel_la-parallel_bin_sorter.lo `test -f 'src/parallel/parallel_bin_sorter.C' || echo '$(srcdir)/'`src/parallel/parallel_bin_sorter.C
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/parallel/$(DEPDIR)/libmesh_devel_la-parallel_bin_sorter.Tpo src/parallel/$(DEPDIR)/libmesh_devel_la-parallel_bin_sorter.Plo
@@ -20154,6 +20199,13 @@ src/numerics/libmesh_oprof_la-type_vector.lo: src/numerics/type_vector.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/numerics/type_vector.C' object='src/numerics/libmesh_oprof_la-type_vector.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/numerics/libmesh_oprof_la-type_vector.lo `test -f 'src/numerics/type_vector.C' || echo '$(srcdir)/'`src/numerics/type_vector.C
+
+src/parallel/libmesh_oprof_la-neighbors_extender.lo: src/parallel/neighbors_extender.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -MT src/parallel/libmesh_oprof_la-neighbors_extender.lo -MD -MP -MF src/parallel/$(DEPDIR)/libmesh_oprof_la-neighbors_extender.Tpo -c -o src/parallel/libmesh_oprof_la-neighbors_extender.lo `test -f 'src/parallel/neighbors_extender.C' || echo '$(srcdir)/'`src/parallel/neighbors_extender.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/parallel/$(DEPDIR)/libmesh_oprof_la-neighbors_extender.Tpo src/parallel/$(DEPDIR)/libmesh_oprof_la-neighbors_extender.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/parallel/neighbors_extender.C' object='src/parallel/libmesh_oprof_la-neighbors_extender.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/parallel/libmesh_oprof_la-neighbors_extender.lo `test -f 'src/parallel/neighbors_extender.C' || echo '$(srcdir)/'`src/parallel/neighbors_extender.C
 
 src/parallel/libmesh_oprof_la-parallel_bin_sorter.lo: src/parallel/parallel_bin_sorter.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -MT src/parallel/libmesh_oprof_la-parallel_bin_sorter.lo -MD -MP -MF src/parallel/$(DEPDIR)/libmesh_oprof_la-parallel_bin_sorter.Tpo -c -o src/parallel/libmesh_oprof_la-parallel_bin_sorter.lo `test -f 'src/parallel/parallel_bin_sorter.C' || echo '$(srcdir)/'`src/parallel/parallel_bin_sorter.C
@@ -23004,6 +23056,13 @@ src/numerics/libmesh_opt_la-type_vector.lo: src/numerics/type_vector.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -c -o src/numerics/libmesh_opt_la-type_vector.lo `test -f 'src/numerics/type_vector.C' || echo '$(srcdir)/'`src/numerics/type_vector.C
 
+src/parallel/libmesh_opt_la-neighbors_extender.lo: src/parallel/neighbors_extender.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -MT src/parallel/libmesh_opt_la-neighbors_extender.lo -MD -MP -MF src/parallel/$(DEPDIR)/libmesh_opt_la-neighbors_extender.Tpo -c -o src/parallel/libmesh_opt_la-neighbors_extender.lo `test -f 'src/parallel/neighbors_extender.C' || echo '$(srcdir)/'`src/parallel/neighbors_extender.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/parallel/$(DEPDIR)/libmesh_opt_la-neighbors_extender.Tpo src/parallel/$(DEPDIR)/libmesh_opt_la-neighbors_extender.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/parallel/neighbors_extender.C' object='src/parallel/libmesh_opt_la-neighbors_extender.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -c -o src/parallel/libmesh_opt_la-neighbors_extender.lo `test -f 'src/parallel/neighbors_extender.C' || echo '$(srcdir)/'`src/parallel/neighbors_extender.C
+
 src/parallel/libmesh_opt_la-parallel_bin_sorter.lo: src/parallel/parallel_bin_sorter.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -MT src/parallel/libmesh_opt_la-parallel_bin_sorter.lo -MD -MP -MF src/parallel/$(DEPDIR)/libmesh_opt_la-parallel_bin_sorter.Tpo -c -o src/parallel/libmesh_opt_la-parallel_bin_sorter.lo `test -f 'src/parallel/parallel_bin_sorter.C' || echo '$(srcdir)/'`src/parallel/parallel_bin_sorter.C
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/parallel/$(DEPDIR)/libmesh_opt_la-parallel_bin_sorter.Tpo src/parallel/$(DEPDIR)/libmesh_opt_la-parallel_bin_sorter.Plo
@@ -25852,6 +25911,13 @@ src/numerics/libmesh_prof_la-type_vector.lo: src/numerics/type_vector.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/numerics/type_vector.C' object='src/numerics/libmesh_prof_la-type_vector.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/numerics/libmesh_prof_la-type_vector.lo `test -f 'src/numerics/type_vector.C' || echo '$(srcdir)/'`src/numerics/type_vector.C
+
+src/parallel/libmesh_prof_la-neighbors_extender.lo: src/parallel/neighbors_extender.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -MT src/parallel/libmesh_prof_la-neighbors_extender.lo -MD -MP -MF src/parallel/$(DEPDIR)/libmesh_prof_la-neighbors_extender.Tpo -c -o src/parallel/libmesh_prof_la-neighbors_extender.lo `test -f 'src/parallel/neighbors_extender.C' || echo '$(srcdir)/'`src/parallel/neighbors_extender.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/parallel/$(DEPDIR)/libmesh_prof_la-neighbors_extender.Tpo src/parallel/$(DEPDIR)/libmesh_prof_la-neighbors_extender.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/parallel/neighbors_extender.C' object='src/parallel/libmesh_prof_la-neighbors_extender.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/parallel/libmesh_prof_la-neighbors_extender.lo `test -f 'src/parallel/neighbors_extender.C' || echo '$(srcdir)/'`src/parallel/neighbors_extender.C
 
 src/parallel/libmesh_prof_la-parallel_bin_sorter.lo: src/parallel/parallel_bin_sorter.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -MT src/parallel/libmesh_prof_la-parallel_bin_sorter.lo -MD -MP -MF src/parallel/$(DEPDIR)/libmesh_prof_la-parallel_bin_sorter.Tpo -c -o src/parallel/libmesh_prof_la-parallel_bin_sorter.lo `test -f 'src/parallel/parallel_bin_sorter.C' || echo '$(srcdir)/'`src/parallel/parallel_bin_sorter.C

@@ -1,19 +1,21 @@
-#include "libmesh/rank_groups_resolver.h"
+#include "libmesh/neighbors_extender.h"
+
+//TODO can I use variable length arrays? or should I allocate memory for them?
 
 namespace libMesh {
 namespace Parallel {
 
-void RankGroupsResolver::setComm(MPI_Comm comm) {
+void NeighborsExtender::setComm(MPI_Comm comm) {
   this->comm = comm;
   MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 }
 
-void RankGroupsResolver::setNeighbors(const std::vector<int>& neighbors) {
+void NeighborsExtender::setNeighbors(const std::vector<int>& neighbors) {
   this->neighbors = neighbors;
   neighborMsgs.resize(neighbors.size());
 }
 
-void RankGroupsResolver::resolve(int testDataSize, const char* testData,
+void NeighborsExtender::resolve(int testDataSize, const char* testData,
     std::vector<int>& result)
 {
   this->testDataSize = testDataSize;
@@ -22,7 +24,6 @@ void RankGroupsResolver::resolve(int testDataSize, const char* testData,
   requestLayer.push_back(myRank);
   responseSet.insert(myRank);
   bool isFirstIteration = true;
-  int nextResponseLayerSize = 1;
   do {
     int nextResponseLayerSize;
     if(isFirstIteration) nextResponseLayerSize = 1;
@@ -38,25 +39,25 @@ void RankGroupsResolver::resolve(int testDataSize, const char* testData,
   responseSet.clear();
 }
 
-RankGroupsResolver::RankGroupsResolver() {
+NeighborsExtender::NeighborsExtender() {
   setComm(MPI_COMM_WORLD);
 }
 
-void RankGroupsResolver::commRequests(int numRecvs) {
+void NeighborsExtender::commRequests(int numRecvs) {
   MPI_Request mpiReqs[requestLayer.size()];
-  for(int i = 0; i < requestLayer.size(); i++) {
+  for(int i = 0; i < (int)requestLayer.size(); i++) {
     //we assume MPI_Isend does not alter the contents of the buffer...
     MPI_Isend((void*)testData, testDataSize, MPI_CHAR, requestLayer[i],
         tagRequest, comm, &mpiReqs[i]);
   }
-  for(int i = 0; i < neighborMsgs.size(); i++) neighborMsgs[i].clear();
+  for(int i = 0; i < (int)neighborMsgs.size(); i++) neighborMsgs[i].clear();
   for(; numRecvs > 0; numRecvs--) recvRequest();
   MPI_Status mpiStats[requestLayer.size()];
   MPI_Waitall(requestLayer.size(), mpiReqs, mpiStats);
   requestLayer.clear();
 }
 
-void RankGroupsResolver::recvRequest() {
+void NeighborsExtender::recvRequest() {
   int source, bufferSize;
   probe(tagRequest, MPI_CHAR, source, bufferSize);
   char buffer[bufferSize];
@@ -72,7 +73,7 @@ void RankGroupsResolver::recvRequest() {
   testInit(source, bufferSize, buffer);
   if(testNode()) {
     responseMsg.push_back(1);
-    for(int i = 0; i < neighbors.size(); i++) {
+    for(int i = 0; i < (int)neighbors.size(); i++) {
       if(testEdge(neighbors[i])) {
         responseMsg.push_back(neighbors[i]);
         neighborMsgs[i].push_back(source);
@@ -85,9 +86,9 @@ void RankGroupsResolver::recvRequest() {
   testClear();
 }
 
-void RankGroupsResolver::commResponses(int numRecvs) {
+void NeighborsExtender::commResponses(int numRecvs) {
   MPI_Request mpiReqs[responseLayer.size()];
-  for(int i = 0; i < responseLayer.size(); i++) {
+  for(int i = 0; i < (int)responseLayer.size(); i++) {
     MPI_Isend(&responseMsgs[i][0], responseMsgs[i].size(), MPI_INT,
         responseLayer[i], tagResponse, comm, &mpiReqs[i]);
   }
@@ -97,7 +98,7 @@ void RankGroupsResolver::commResponses(int numRecvs) {
   responseLayer.clear();
 }
 
-void RankGroupsResolver::recvResponse() {
+void NeighborsExtender::recvResponse() {
   int source, bufferSize;
   probe(tagResponse, MPI_INT, source, bufferSize);
   int buffer[bufferSize];
@@ -110,20 +111,20 @@ void RankGroupsResolver::recvResponse() {
   }
 }
 
-int RankGroupsResolver::commNeighbors() {
+int NeighborsExtender::commNeighbors() {
   MPI_Request mpiReqs[neighbors.size()];
-  for(int i = 0; i < neighbors.size(); i++) {
+  for(int i = 0; i < (int)neighbors.size(); i++) {
     MPI_Isend(&neighborMsgs[i][0], neighborMsgs[i].size(), MPI_INT,
         neighbors[i], tagNeighbor, comm, &mpiReqs[i]);
   }
   int result = 0;
-  for(int i = 0; i < neighbors.size(); i++) result += recvNeighbor();
+  for(int i = 0; i < (int)neighbors.size(); i++) result += recvNeighbor();
   MPI_Status mpiStats[neighbors.size()];
   MPI_Waitall(neighbors.size(), mpiReqs, mpiStats);
   return result;
 }
 
-int RankGroupsResolver::recvNeighbor() {
+int NeighborsExtender::recvNeighbor() {
   int source, bufferSize;
   probe(tagNeighbor, MPI_INT, source, bufferSize);
   int buffer[bufferSize];
@@ -136,7 +137,7 @@ int RankGroupsResolver::recvNeighbor() {
   return result;
 }
 
-void RankGroupsResolver::probe(int tag, MPI_Datatype datatype,
+void NeighborsExtender::probe(int tag, MPI_Datatype datatype,
     int& source, int& size)
 {
   MPI_Status status;
@@ -145,23 +146,23 @@ void RankGroupsResolver::probe(int tag, MPI_Datatype datatype,
   source = status.MPI_SOURCE;
 }
 
-void RankGroupsResolver::recv(void* buf, int count, MPI_Datatype datatype,
+void NeighborsExtender::recv(void* buf, int count, MPI_Datatype datatype,
     int source, int tag)
 {
   MPI_Status status;
   MPI_Recv(buf, count, datatype, source, tag, comm, &status);
 }
 
-bool RankGroupsResolver::allProcessorsDone() {
+bool NeighborsExtender::allProcessorsDone() {
   char done = requestLayer.empty();
   char allDone;
   MPI_Allreduce(&done, &allDone, 1, MPI_CHAR, MPI_LAND, comm);
   return allDone;
 }
 
-const int RankGroupsResolver::tagRequest = 8147;
-const int RankGroupsResolver::tagResponse = 8148;
-const int RankGroupsResolver::tagNeighbor = 8149;
+const int NeighborsExtender::tagRequest = 8147;
+const int NeighborsExtender::tagResponse = 8148;
+const int NeighborsExtender::tagNeighbor = 8149;
 
 } // namespace Parallel
 } // namespace libMesh

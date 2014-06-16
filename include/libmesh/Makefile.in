@@ -497,8 +497,8 @@ BUILT_SOURCES = auto_ptr.h dirichlet_boundaries.h dof_map.h \
 	tensor_value.h trilinos_epetra_matrix.h \
 	trilinos_epetra_vector.h trilinos_preconditioner.h \
 	type_n_tensor.h type_tensor.h type_vector.h vector_value.h \
-	wrapped_function.h zero_function.h parallel.h \
-	parallel_algebra.h parallel_bin_sorter.h \
+	wrapped_function.h zero_function.h neighbors_extender.h \
+	parallel.h parallel_algebra.h parallel_bin_sorter.h \
 	parallel_conversion_utils.h parallel_elem.h \
 	parallel_ghost_sync.h parallel_hilbert.h parallel_histogram.h \
 	parallel_implementation.h parallel_node.h parallel_object.h \
@@ -1496,6 +1496,9 @@ wrapped_function.h: $(top_srcdir)/include/numerics/wrapped_function.h
 	$(AM_V_GEN)rm -f $@ && $(LN_S) $< $@
 
 zero_function.h: $(top_srcdir)/include/numerics/zero_function.h
+	$(AM_V_GEN)rm -f $@ && $(LN_S) $< $@
+
+neighbors_extender.h: $(top_srcdir)/include/parallel/neighbors_extender.h
 	$(AM_V_GEN)rm -f $@ && $(LN_S) $< $@
 
 parallel.h: $(top_srcdir)/include/parallel/parallel.h

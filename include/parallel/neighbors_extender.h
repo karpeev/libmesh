@@ -7,7 +7,7 @@ namespace Parallel {
 
 //TODO replace MPI calls with calls to Libmesh's Communicator functions
 
-class RankGroupsResolver {
+class NeighborsExtender {
   public:
     void setComm(MPI_Comm comm);
     void setNeighbors(const std::vector<int>& neighbors);
@@ -15,8 +15,8 @@ class RankGroupsResolver {
         std::vector<int>& result);
 
   protected:
-    RankGroupsResolver();
-    inline virtual ~RankGroupsResolver() {}
+    NeighborsExtender();
+    inline virtual ~NeighborsExtender() {}
     virtual void testInit(int root, int testDataSize,
         const char* testData) = 0;
     virtual bool testEdge(int neighbor) = 0;
