@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include "libmesh/libmesh.h"
 #include "libmesh/mesh_base.h"
 #include "libmesh/mesh.h"
@@ -12,8 +13,6 @@
 using namespace libMesh;
 using MeshTools::BoundingBox;
 using Parallel::NeighborsExtender;
-using std::cout;
-using std::endl;
 
 //TODO move HaloNeighborsExtender into its own files in LibMesh...
 
@@ -21,6 +20,7 @@ class HaloNeighborsExtender : public NeighborsExtender {
   public:
     HaloNeighborsExtender(const MeshBase* mesh);
     void resolve(const BoundingBox& halo, std::vector<int>& result);
+    inline const std::vector<int> getNeighbors() {return neighbors;}
     
   protected:
     void testInit(int root, int testDataSize, const char* testData);
@@ -30,7 +30,8 @@ class HaloNeighborsExtender : public NeighborsExtender {
     
   private:
     std::vector<const Elem*> ghostElems;
-    std::set<bool> testEdges;
+    std::set<int> testEdges;
+    std::vector<int> neighbors;
 };
 
 HaloNeighborsExtender::HaloNeighborsExtender(const MeshBase* mesh) {
@@ -44,7 +45,6 @@ HaloNeighborsExtender::HaloNeighborsExtender(const MeshBase* mesh) {
       neighborSet.insert(elem->processor_id());
     }
   }
-  std::vector<int> neighbors;
   std::copy(neighborSet.begin(), neighborSet.end(),
             std::back_inserter(neighbors));
   setNeighbors(neighbors);
@@ -64,7 +64,7 @@ void HaloNeighborsExtender::testInit(int root, int testDataSize,
     const Elem* elem = ghostElems[i];
     BoundingBox elemBox;
     for(int j = 0; j < (int)elem->n_nodes(); j++) {
-      const Point& point = elem->point(i);
+      const Point& point = elem->point(j);
       elemBox.min()(0) = std::min(elemBox.min()(0), point(0));
       elemBox.min()(1) = std::min(elemBox.min()(1), point(1));
       elemBox.min()(2) = std::min(elemBox.min()(2), point(2));
@@ -84,36 +84,51 @@ void HaloNeighborsExtender::testClear() {
   testEdges.clear();
 }
 
+std::ostream& operator<<(std::ostream& os, const BoundingBox& box) {
+  os << "(" << box.min() << ", " << box.max() << ")";
+  return os;
+}
+
+template <class T>
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
+  os << "[";
+  for(int i = 0; i < (int)vec.size(); i++) {
+    os << vec[i];
+    if(i < (int)vec.size() - 1) os << ", ";
+  }
+  os << "]";
+  return os;
+}
+
 int main(int argc, char** argv) {
   LibMeshInit init(argc, argv);
-  ParallelMesh mesh(init.comm());
+  std::ostringstream sout;
+  Mesh mesh(init.comm());
   MeshTools::Generation::build_cube(mesh, 360, 1, 1, 0, 360, 0, 1, 0, 1);
   mesh.print_info();
   BoundingBox halo = MeshTools::processor_bounding_box(mesh, mesh.processor_id());
-  double loX = halo.min()(0);
-  double hiX = halo.max()(0);
-  //cout << mesh.processor_id() << ": " << halo.min()(0) << " " << halo.max()(0) << endl;
+  sout << "======== Processor " << mesh.processor_id() << " ========\n";
+  sout << "Processor Box: " << halo << "\n";
   double haloPad = 85;
   for(int i = 0; i < 3; i++) {
     halo.min()(i) -= haloPad;
     halo.max()(i) += haloPad;
   }
+  sout << "Halo Box:      " << halo << "\n";
   HaloNeighborsExtender extender(&mesh);
   std::vector<int> result;
   extender.resolve(halo, result);
-  
-  result.insert(result.begin(), (int)hiX);
-  result.insert(result.begin(), (int)loX);
-  result.insert(result.begin(), mesh.processor_id());
-  result.insert(result.begin(), -1);
-  init.comm().gather(0, result);
-  for(int i = 0; i < (int)result.size(); i++) {
-    if(result[i] < 0) {
-      cout << endl << result[i+1] << ": [" << result[i+2] << ", " << result[i+3] << "] : ";
-      i += 4;
-    }
-    cout << result[i] << " ";
+  sout << "Neighbors: " << extender.getNeighbors() << "\n";
+  sout << "Extended Neighbors: " << result << "\n";
+
+  std::string textStr = sout.str();
+  std::vector<char> text(textStr.begin(), textStr.end());
+  text.push_back('\0');
+  init.comm().gather(0, text);
+  int ci = 0;
+  while(ci < (int)text.size()) {
+    std::cout << &text[ci] << std::endl;
+    while(text[ci++] != '\0');
   }
-  cout << endl;
 }
 

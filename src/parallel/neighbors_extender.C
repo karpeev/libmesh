@@ -74,7 +74,7 @@ void NeighborsExtender::recvRequest() {
   if(testNode()) {
     responseMsg.push_back(1);
     for(int i = 0; i < (int)neighbors.size(); i++) {
-      if(testEdge(neighbors[i])) {
+      if(neighbors[i] != source && testEdge(neighbors[i])) {
         responseMsg.push_back(neighbors[i]);
         neighborMsgs[i].push_back(source);
       }
