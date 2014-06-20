@@ -1,10 +1,10 @@
 #ifndef LIBMESH_NEIGHBORS_EXTENDER_H
 #define LIBMESH_NEIGHBORS_EXTENDER_H
 
+#include "libmesh/parallel.h"
+#include "libmesh/parallel_object.h"
 #include <vector>
 #include <set>
-#include "parallel.h"
-#include "parallel_object.h"
 
 namespace libMesh {
 namespace Parallel {
