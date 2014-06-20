@@ -35,11 +35,13 @@
 #include "libmesh/serial_mesh.h"
 #include "libmesh/sphere.h"
 #include "libmesh/threads.h"
+#include "libmesh/neighbors_extender.h"
 
 #ifdef DEBUG
 #  include "libmesh/remote_elem.h"
 #endif
 
+using libMesh::Parallel::NeighborsExtender;
 
 
 // ------------------------------------------------------------
@@ -47,6 +49,7 @@
 namespace {
 
 using namespace libMesh;
+using MeshTools::BoundingBox;
 
 /**
  * SumElemWeight(Range) sums the number of nodes per element
@@ -184,6 +187,46 @@ public:
 private:
   std::vector<Real> _vmin;
   std::vector<Real> _vmax;
+};
+
+class HaloNeighborsExtender : public NeighborsExtender {
+  public:
+    HaloNeighborsExtender(const MeshBase* mesh)
+        : NeighborsExtender(mesh->comm())
+    {
+      processor_id_type pid = mesh->processor_id();
+      MeshBase::const_element_iterator it = mesh->not_local_elements_begin();
+      for(; it != mesh->not_local_elements_end(); it++) {
+        const Elem* elem = *it;
+        if(elem->is_semilocal(pid)) ghostElems.push_back(elem);
+      }
+      std::vector<int> neighbors;
+      MeshTools::find_neighbor_proc_ids(*mesh, neighbors);
+      setNeighbors(neighbors);
+    }
+    
+    void resolve(const BoundingBox& halo, std::vector<int>& result) {
+      NeighborsExtender::resolve(sizeof(BoundingBox),
+          (const char*)&halo, result);
+    }
+    
+  protected:
+    void testInit(int root, int testDataSize, const char* testData) {
+      const BoundingBox& box = *(const BoundingBox*)testData;
+      for(int i = 0; i < (int)ghostElems.size(); i++) {
+        const Elem* elem = ghostElems[i];
+        BoundingBox elemBox = MeshTools::bounding_box(elem);
+        if(box.intersect(elemBox)) testEdges.insert(elem->processor_id());
+      }
+    }
+    
+    bool testEdge(int neighbor) {return testEdges.count(neighbor) > 0;}
+    inline bool testNode() {return true;}
+    void testClear() {testEdges.clear();}
+    
+  private:
+    std::vector<const Elem*> ghostElems;
+    std::set<int> testEdges;
 };
 
 #ifdef DEBUG
@@ -450,6 +493,19 @@ MeshTools::bounding_sphere(const MeshBase& mesh)
   return Sphere (cent, .5*diag);
 }
 
+
+MeshTools::BoundingBox
+MeshTools::bounding_box(const Elem* elem) {
+  BoundingBox box;
+  for(unsigned int i = 0; i < elem->n_nodes(); i++) {
+    const Point& point = elem->point(i);
+    for(unsigned int d = 0; d < LIBMESH_DIM; d++) {
+      box.min()(d) = std::min(box.min()(d), point(d));
+      box.max()(d) = std::max(box.max()(d), point(d));
+    }
+  }
+  return box;
+}
 
 
 MeshTools::BoundingBox
@@ -940,6 +996,31 @@ void MeshTools::correct_node_proc_ids
     (mesh, loc_map);
 }
 
+void MeshTools::find_neighbor_proc_ids(const MeshBase &mesh,
+    std::vector<int> &result)
+{
+  std::set<int> neighborSet;
+  processor_id_type pid = mesh.processor_id();
+  MeshBase::const_element_iterator it = mesh.not_local_elements_begin();
+  for(; it != mesh.not_local_elements_end(); it++) {
+    const Elem* elem = *it;
+    if(elem->is_semilocal(pid)) neighborSet.insert(elem->processor_id());
+  }
+  std::copy(neighborSet.begin(), neighborSet.end(),
+            std::back_inserter(result));
+}
+
+void MeshTools::parallel_find_box_halo_proc_ids(const MeshBase& mesh,
+    double haloPad, std::vector<int>& result)
+{
+  BoundingBox halo = MeshTools::processor_bounding_box(mesh, mesh.processor_id());
+  for(int d = 0; d < LIBMESH_DIM; d++) {
+    halo.min()(d) -= haloPad;
+    halo.max()(d) += haloPad;
+  }
+  HaloNeighborsExtender extender(&mesh);
+  extender.resolve(halo, result);
+}
 
 
 #ifdef DEBUG
