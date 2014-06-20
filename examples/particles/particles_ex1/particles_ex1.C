@@ -34,7 +34,9 @@ class HaloNeighborsExtender : public NeighborsExtender {
     std::vector<int> neighbors;
 };
 
-HaloNeighborsExtender::HaloNeighborsExtender(const MeshBase* mesh) {
+HaloNeighborsExtender::HaloNeighborsExtender(const MeshBase* mesh)
+    : NeighborsExtender(mesh->comm())
+{
   std::set<int> neighborSet;
   processor_id_type pid = mesh->processor_id();
   MeshBase::const_element_iterator it = mesh->not_local_elements_begin();
@@ -103,7 +105,7 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
 int main(int argc, char** argv) {
   LibMeshInit init(argc, argv);
   std::ostringstream sout;
-  Mesh mesh(init.comm());
+  ParallelMesh mesh(init.comm());
   MeshTools::Generation::build_cube(mesh, 360, 1, 1, 0, 360, 0, 1, 0, 1);
   mesh.print_info();
   BoundingBox halo = MeshTools::processor_bounding_box(mesh, mesh.processor_id());

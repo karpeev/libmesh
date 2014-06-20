@@ -5,10 +5,12 @@
 namespace libMesh {
 namespace Parallel {
 
-void NeighborsExtender::setComm(MPI_Comm comm) {
-  this->comm = comm;
-  MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
-}
+NeighborsExtender::NeighborsExtender(const Communicator& comm)
+    : ParallelObject(comm),
+      tagRequest(comm.get_unique_tag(12753)),
+      tagResponse(comm.get_unique_tag(12754)),
+      tagNeighbor(comm.get_unique_tag(12755))
+{}
 
 void NeighborsExtender::setNeighbors(const std::vector<int>& neighbors) {
   this->neighbors = neighbors;
@@ -18,11 +20,12 @@ void NeighborsExtender::setNeighbors(const std::vector<int>& neighbors) {
 void NeighborsExtender::resolve(int testDataSize, const char* testData,
     std::vector<int>& result)
 {
-  this->testDataSize = testDataSize;
-  this->testData = testData;
-  requestSet.insert(myRank);
-  requestLayer.push_back(myRank);
-  responseSet.insert(myRank);
+  this->testData.clear();
+  this->testData.reserve(testDataSize);
+  for(int i = 0; i < testDataSize; i++) this->testData.push_back(testData[i]);
+  requestSet.insert(comm().rank());
+  requestLayer.push_back(comm().rank());
+  responseSet.insert(comm().rank());
   bool isFirstIteration = true;
   do {
     int nextResponseLayerSize;
@@ -39,29 +42,20 @@ void NeighborsExtender::resolve(int testDataSize, const char* testData,
   responseSet.clear();
 }
 
-NeighborsExtender::NeighborsExtender() {
-  setComm(MPI_COMM_WORLD);
-}
-
 void NeighborsExtender::commRequests(int numRecvs) {
-  MPI_Request mpiReqs[requestLayer.size()];
+  Request commReqs[requestLayer.size()];
   for(int i = 0; i < (int)requestLayer.size(); i++) {
-    //we assume MPI_Isend does not alter the contents of the buffer...
-    MPI_Isend((void*)testData, testDataSize, MPI_CHAR, requestLayer[i],
-        tagRequest, comm, &mpiReqs[i]);
+    comm().send(requestLayer[i], testData, commReqs[i], tagRequest);
   }
   for(int i = 0; i < (int)neighborMsgs.size(); i++) neighborMsgs[i].clear();
   for(; numRecvs > 0; numRecvs--) recvRequest();
-  MPI_Status mpiStats[requestLayer.size()];
-  MPI_Waitall(requestLayer.size(), mpiReqs, mpiStats);
+  for(int i = 0; i < (int)requestLayer.size(); i++) commReqs[i].wait();
   requestLayer.clear();
 }
 
 void NeighborsExtender::recvRequest() {
-  int source, bufferSize;
-  probe(tagRequest, MPI_CHAR, source, bufferSize);
-  char buffer[bufferSize];
-  recv(buffer, bufferSize, MPI_CHAR, source, tagRequest);
+  std::vector<char> buffer;
+  int source = comm().receive(any_source, buffer, tagRequest).source();
 
   int layerI = responseLayer.size();
   responseLayer.push_back(source);
@@ -70,7 +64,7 @@ void NeighborsExtender::recvRequest() {
   }
   std::vector<int>& responseMsg = responseMsgs[layerI];
   responseMsg.clear();
-  testInit(source, bufferSize, buffer);
+  testInit(source, buffer.size(), &buffer[0]);
   if(testNode()) {
     responseMsg.push_back(1);
     for(int i = 0; i < (int)neighbors.size(); i++) {
@@ -87,82 +81,53 @@ void NeighborsExtender::recvRequest() {
 }
 
 void NeighborsExtender::commResponses(int numRecvs) {
-  MPI_Request mpiReqs[responseLayer.size()];
+  Request commReqs[responseLayer.size()];
   for(int i = 0; i < (int)responseLayer.size(); i++) {
-    MPI_Isend(&responseMsgs[i][0], responseMsgs[i].size(), MPI_INT,
-        responseLayer[i], tagResponse, comm, &mpiReqs[i]);
+    comm().send(responseLayer[i], responseMsgs[i], commReqs[i], tagResponse);
   }
   for(; numRecvs > 0; numRecvs--) recvResponse();
-  MPI_Status mpiStats[responseLayer.size()];
-  MPI_Waitall(responseLayer.size(), mpiReqs, mpiStats);
+  for(int i = 0; i < (int)responseLayer.size(); i++) commReqs[i].wait();
   responseLayer.clear();
 }
 
 void NeighborsExtender::recvResponse() {
-  int source, bufferSize;
-  probe(tagResponse, MPI_INT, source, bufferSize);
-  int buffer[bufferSize];
-  recv(buffer, bufferSize, MPI_INT, source, tagResponse);
+  std::vector<int> buffer;
+  int source = comm().receive(any_source, buffer, tagResponse).source();
 
   if(buffer[0]) contacts.push_back(source);
-  for(int i = 1; i < bufferSize; i++) {
+  for(int i = 1; i < (int)buffer.size(); i++) {
     bool success = requestSet.insert(buffer[i]).second;
     if(success) requestLayer.push_back(buffer[i]);
   }
 }
 
 int NeighborsExtender::commNeighbors() {
-  MPI_Request mpiReqs[neighbors.size()];
+  Request commReqs[neighbors.size()];
   for(int i = 0; i < (int)neighbors.size(); i++) {
-    MPI_Isend(&neighborMsgs[i][0], neighborMsgs[i].size(), MPI_INT,
-        neighbors[i], tagNeighbor, comm, &mpiReqs[i]);
+    comm().send(neighbors[i], neighborMsgs[i], commReqs[i], tagNeighbor);
   }
   int result = 0;
   for(int i = 0; i < (int)neighbors.size(); i++) result += recvNeighbor();
-  MPI_Status mpiStats[neighbors.size()];
-  MPI_Waitall(neighbors.size(), mpiReqs, mpiStats);
+  for(int i = 0; i < (int)neighbors.size(); i++) commReqs[i].wait();
   return result;
 }
 
 int NeighborsExtender::recvNeighbor() {
-  int source, bufferSize;
-  probe(tagNeighbor, MPI_INT, source, bufferSize);
-  int buffer[bufferSize];
-  recv(buffer, bufferSize, MPI_INT, source, tagNeighbor);
+  std::vector<int> buffer;
+  comm().receive(any_source, buffer, tagNeighbor);
 
   int result = 0;
-  for(int i = 0; i < bufferSize; i++) {
+  for(int i = 0; i < (int)buffer.size(); i++) {
     if(responseSet.insert(buffer[i]).second) result++;
   }
   return result;
 }
 
-void NeighborsExtender::probe(int tag, MPI_Datatype datatype,
-    int& source, int& size)
-{
-  MPI_Status status;
-  MPI_Probe(MPI_ANY_SOURCE, tag, comm, &status);
-  MPI_Get_count(&status, datatype, &size);
-  source = status.MPI_SOURCE;
-}
-
-void NeighborsExtender::recv(void* buf, int count, MPI_Datatype datatype,
-    int source, int tag)
-{
-  MPI_Status status;
-  MPI_Recv(buf, count, datatype, source, tag, comm, &status);
-}
-
 bool NeighborsExtender::allProcessorsDone() {
-  char done = requestLayer.empty();
-  char allDone;
-  MPI_Allreduce(&done, &allDone, 1, MPI_CHAR, MPI_LAND, comm);
-  return allDone;
+  bool done = (requestLayer.empty() ? 1 : 0);
+  comm().max(done);
+  return done;
 }
-
-const int NeighborsExtender::tagRequest = 8147;
-const int NeighborsExtender::tagResponse = 8148;
-const int NeighborsExtender::tagNeighbor = 8149;
 
 } // namespace Parallel
 } // namespace libMesh
