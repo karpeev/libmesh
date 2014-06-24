@@ -1011,7 +1011,7 @@ void MeshTools::find_neighbor_proc_ids(const MeshBase &mesh,
 }
 
 void MeshTools::parallel_find_box_halo_proc_ids(const MeshBase& mesh,
-    double haloPad, std::vector<int>& result)
+    Real haloPad, std::vector<int>& result)
 {
   BoundingBox halo = MeshTools::processor_bounding_box(mesh, mesh.processor_id());
   for(int d = 0; d < LIBMESH_DIM; d++) {

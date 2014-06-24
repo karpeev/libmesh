@@ -1,3 +1,4 @@
+#include "libmesh/libmesh_common.h"
 #include "libmesh/libmesh.h"
 #include "libmesh/parallel_mesh.h"
 #include "libmesh/mesh_tools.h"
@@ -35,7 +36,7 @@ int main(int argc, char** argv) {
   BoundingBox halo
       = MeshTools::processor_bounding_box(mesh, mesh.processor_id());
   sout << "Processor Box: " << halo << "\n";
-  double haloPad = 85;
+  Real haloPad = 85;
   sout << "Halo Pad: " << haloPad << "\n";
   std::vector<int> neighbors;
   MeshTools::find_neighbor_proc_ids(mesh, neighbors);

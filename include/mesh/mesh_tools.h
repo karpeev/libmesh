@@ -349,7 +349,7 @@ void correct_node_proc_ids(MeshBase &, LocationMap<Node> &);
 
 void find_neighbor_proc_ids(const MeshBase& mesh, std::vector<int>& result);
 
-void parallel_find_box_halo_proc_ids(const MeshBase& mesh, double haloPad,
+void parallel_find_box_halo_proc_ids(const MeshBase& mesh, Real haloPad,
     std::vector<int>& result);
 
 #ifdef DEBUG
