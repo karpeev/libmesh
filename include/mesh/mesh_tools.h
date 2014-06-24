@@ -179,9 +179,6 @@ bounding_box (const MeshBase &mesh);
 Sphere
 bounding_sphere (const MeshBase &mesh);
 
-
-BoundingBox bounding_box(const Elem* elem);
-
 /**
  * @returns two points defining a cartesian box that bounds the
  * elements belonging to processor pid.
@@ -347,10 +344,6 @@ void find_hanging_nodes_and_parents(const MeshBase &mesh, std::map<dof_id_type, 
  */
 void correct_node_proc_ids(MeshBase &, LocationMap<Node> &);
 
-void find_neighbor_proc_ids(const MeshBase& mesh, std::vector<int>& result);
-
-void parallel_find_box_halo_proc_ids(const MeshBase& mesh, Real haloPad,
-    std::vector<int>& result);
 
 #ifdef DEBUG
 /**

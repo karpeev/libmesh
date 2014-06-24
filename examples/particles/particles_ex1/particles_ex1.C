@@ -2,6 +2,7 @@
 #include "libmesh/libmesh.h"
 #include "libmesh/parallel_mesh.h"
 #include "libmesh/mesh_tools.h"
+#include "libmesh/halo.h"
 #include "libmesh/mesh_generation.h"
 #include <iostream>
 #include <sstream>
@@ -39,10 +40,10 @@ int main(int argc, char** argv) {
   Real haloPad = 85;
   sout << "Halo Pad: " << haloPad << "\n";
   std::vector<int> neighbors;
-  MeshTools::find_neighbor_proc_ids(mesh, neighbors);
+  Halo::find_neighbor_proc_ids(mesh, neighbors);
   sout << "Neighbors: " << neighbors << "\n";
   std::vector<int> haloPids;
-  MeshTools::parallel_find_box_halo_proc_ids(mesh, haloPad, haloPids);
+  Halo::parallel_find_bounding_box_halo_proc_ids(mesh, haloPad, haloPids);
   sout << "Halo Processors: " << haloPids << "\n";
 
   std::string textStr = sout.str();

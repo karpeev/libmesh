@@ -283,8 +283,9 @@ am__libmesh_dbg_la_SOURCES_DIST = src/base/dof_map.C \
 	src/mesh/ensight_io.C src/mesh/exodusII_io.C \
 	src/mesh/exodusII_io_helper.C src/mesh/fro_io.C \
 	src/mesh/gmsh_io.C src/mesh/gmv_io.C src/mesh/gnuplot_io.C \
-	src/mesh/inf_elem_builder.C src/mesh/legacy_xdr_io.C \
-	src/mesh/matlab_io.C src/mesh/medit_io.C src/mesh/mesh_base.C \
+	src/mesh/halo.C src/mesh/inf_elem_builder.C \
+	src/mesh/legacy_xdr_io.C src/mesh/matlab_io.C \
+	src/mesh/medit_io.C src/mesh/mesh_base.C \
 	src/mesh/mesh_communication.C \
 	src/mesh/mesh_communication_global_indices.C \
 	src/mesh/mesh_data.C src/mesh/mesh_data_tetgen_support.C \
@@ -635,6 +636,7 @@ am__objects_1 = src/base/libmesh_dbg_la-dof_map.lo \
 	src/mesh/libmesh_dbg_la-gmsh_io.lo \
 	src/mesh/libmesh_dbg_la-gmv_io.lo \
 	src/mesh/libmesh_dbg_la-gnuplot_io.lo \
+	src/mesh/libmesh_dbg_la-halo.lo \
 	src/mesh/libmesh_dbg_la-inf_elem_builder.lo \
 	src/mesh/libmesh_dbg_la-legacy_xdr_io.lo \
 	src/mesh/libmesh_dbg_la-matlab_io.lo \
@@ -979,8 +981,9 @@ am__libmesh_devel_la_SOURCES_DIST = src/base/dof_map.C \
 	src/mesh/ensight_io.C src/mesh/exodusII_io.C \
 	src/mesh/exodusII_io_helper.C src/mesh/fro_io.C \
 	src/mesh/gmsh_io.C src/mesh/gmv_io.C src/mesh/gnuplot_io.C \
-	src/mesh/inf_elem_builder.C src/mesh/legacy_xdr_io.C \
-	src/mesh/matlab_io.C src/mesh/medit_io.C src/mesh/mesh_base.C \
+	src/mesh/halo.C src/mesh/inf_elem_builder.C \
+	src/mesh/legacy_xdr_io.C src/mesh/matlab_io.C \
+	src/mesh/medit_io.C src/mesh/mesh_base.C \
 	src/mesh/mesh_communication.C \
 	src/mesh/mesh_communication_global_indices.C \
 	src/mesh/mesh_data.C src/mesh/mesh_data_tetgen_support.C \
@@ -1330,6 +1333,7 @@ am__objects_2 = src/base/libmesh_devel_la-dof_map.lo \
 	src/mesh/libmesh_devel_la-gmsh_io.lo \
 	src/mesh/libmesh_devel_la-gmv_io.lo \
 	src/mesh/libmesh_devel_la-gnuplot_io.lo \
+	src/mesh/libmesh_devel_la-halo.lo \
 	src/mesh/libmesh_devel_la-inf_elem_builder.lo \
 	src/mesh/libmesh_devel_la-legacy_xdr_io.lo \
 	src/mesh/libmesh_devel_la-matlab_io.lo \
@@ -1671,8 +1675,9 @@ am__libmesh_oprof_la_SOURCES_DIST = src/base/dof_map.C \
 	src/mesh/ensight_io.C src/mesh/exodusII_io.C \
 	src/mesh/exodusII_io_helper.C src/mesh/fro_io.C \
 	src/mesh/gmsh_io.C src/mesh/gmv_io.C src/mesh/gnuplot_io.C \
-	src/mesh/inf_elem_builder.C src/mesh/legacy_xdr_io.C \
-	src/mesh/matlab_io.C src/mesh/medit_io.C src/mesh/mesh_base.C \
+	src/mesh/halo.C src/mesh/inf_elem_builder.C \
+	src/mesh/legacy_xdr_io.C src/mesh/matlab_io.C \
+	src/mesh/medit_io.C src/mesh/mesh_base.C \
 	src/mesh/mesh_communication.C \
 	src/mesh/mesh_communication_global_indices.C \
 	src/mesh/mesh_data.C src/mesh/mesh_data_tetgen_support.C \
@@ -2022,6 +2027,7 @@ am__objects_3 = src/base/libmesh_oprof_la-dof_map.lo \
 	src/mesh/libmesh_oprof_la-gmsh_io.lo \
 	src/mesh/libmesh_oprof_la-gmv_io.lo \
 	src/mesh/libmesh_oprof_la-gnuplot_io.lo \
+	src/mesh/libmesh_oprof_la-halo.lo \
 	src/mesh/libmesh_oprof_la-inf_elem_builder.lo \
 	src/mesh/libmesh_oprof_la-legacy_xdr_io.lo \
 	src/mesh/libmesh_oprof_la-matlab_io.lo \
@@ -2363,8 +2369,9 @@ am__libmesh_opt_la_SOURCES_DIST = src/base/dof_map.C \
 	src/mesh/ensight_io.C src/mesh/exodusII_io.C \
 	src/mesh/exodusII_io_helper.C src/mesh/fro_io.C \
 	src/mesh/gmsh_io.C src/mesh/gmv_io.C src/mesh/gnuplot_io.C \
-	src/mesh/inf_elem_builder.C src/mesh/legacy_xdr_io.C \
-	src/mesh/matlab_io.C src/mesh/medit_io.C src/mesh/mesh_base.C \
+	src/mesh/halo.C src/mesh/inf_elem_builder.C \
+	src/mesh/legacy_xdr_io.C src/mesh/matlab_io.C \
+	src/mesh/medit_io.C src/mesh/mesh_base.C \
 	src/mesh/mesh_communication.C \
 	src/mesh/mesh_communication_global_indices.C \
 	src/mesh/mesh_data.C src/mesh/mesh_data_tetgen_support.C \
@@ -2714,6 +2721,7 @@ am__objects_4 = src/base/libmesh_opt_la-dof_map.lo \
 	src/mesh/libmesh_opt_la-gmsh_io.lo \
 	src/mesh/libmesh_opt_la-gmv_io.lo \
 	src/mesh/libmesh_opt_la-gnuplot_io.lo \
+	src/mesh/libmesh_opt_la-halo.lo \
 	src/mesh/libmesh_opt_la-inf_elem_builder.lo \
 	src/mesh/libmesh_opt_la-legacy_xdr_io.lo \
 	src/mesh/libmesh_opt_la-matlab_io.lo \
@@ -3054,8 +3062,9 @@ am__libmesh_prof_la_SOURCES_DIST = src/base/dof_map.C \
 	src/mesh/ensight_io.C src/mesh/exodusII_io.C \
 	src/mesh/exodusII_io_helper.C src/mesh/fro_io.C \
 	src/mesh/gmsh_io.C src/mesh/gmv_io.C src/mesh/gnuplot_io.C \
-	src/mesh/inf_elem_builder.C src/mesh/legacy_xdr_io.C \
-	src/mesh/matlab_io.C src/mesh/medit_io.C src/mesh/mesh_base.C \
+	src/mesh/halo.C src/mesh/inf_elem_builder.C \
+	src/mesh/legacy_xdr_io.C src/mesh/matlab_io.C \
+	src/mesh/medit_io.C src/mesh/mesh_base.C \
 	src/mesh/mesh_communication.C \
 	src/mesh/mesh_communication_global_indices.C \
 	src/mesh/mesh_data.C src/mesh/mesh_data_tetgen_support.C \
@@ -3405,6 +3414,7 @@ am__objects_5 = src/base/libmesh_prof_la-dof_map.lo \
 	src/mesh/libmesh_prof_la-gmsh_io.lo \
 	src/mesh/libmesh_prof_la-gmv_io.lo \
 	src/mesh/libmesh_prof_la-gnuplot_io.lo \
+	src/mesh/libmesh_prof_la-halo.lo \
 	src/mesh/libmesh_prof_la-inf_elem_builder.lo \
 	src/mesh/libmesh_prof_la-legacy_xdr_io.lo \
 	src/mesh/libmesh_prof_la-matlab_io.lo \
@@ -4628,6 +4638,7 @@ libmesh_SOURCES = \
         src/mesh/gmsh_io.C \
         src/mesh/gmv_io.C \
         src/mesh/gnuplot_io.C \
+        src/mesh/halo.C \
         src/mesh/inf_elem_builder.C \
         src/mesh/legacy_xdr_io.C \
         src/mesh/matlab_io.C \
@@ -5569,6 +5580,8 @@ src/mesh/libmesh_dbg_la-gmsh_io.lo: src/mesh/$(am__dirstamp) \
 src/mesh/libmesh_dbg_la-gmv_io.lo: src/mesh/$(am__dirstamp) \
 	src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_dbg_la-gnuplot_io.lo: src/mesh/$(am__dirstamp) \
+	src/mesh/$(DEPDIR)/$(am__dirstamp)
+src/mesh/libmesh_dbg_la-halo.lo: src/mesh/$(am__dirstamp) \
 	src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_dbg_la-inf_elem_builder.lo: src/mesh/$(am__dirstamp) \
 	src/mesh/$(DEPDIR)/$(am__dirstamp)
@@ -6622,6 +6635,8 @@ src/mesh/libmesh_devel_la-gmv_io.lo: src/mesh/$(am__dirstamp) \
 	src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_devel_la-gnuplot_io.lo: src/mesh/$(am__dirstamp) \
 	src/mesh/$(DEPDIR)/$(am__dirstamp)
+src/mesh/libmesh_devel_la-halo.lo: src/mesh/$(am__dirstamp) \
+	src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_devel_la-inf_elem_builder.lo:  \
 	src/mesh/$(am__dirstamp) src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_devel_la-legacy_xdr_io.lo: src/mesh/$(am__dirstamp) \
@@ -7616,6 +7631,8 @@ src/mesh/libmesh_oprof_la-gmsh_io.lo: src/mesh/$(am__dirstamp) \
 src/mesh/libmesh_oprof_la-gmv_io.lo: src/mesh/$(am__dirstamp) \
 	src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_oprof_la-gnuplot_io.lo: src/mesh/$(am__dirstamp) \
+	src/mesh/$(DEPDIR)/$(am__dirstamp)
+src/mesh/libmesh_oprof_la-halo.lo: src/mesh/$(am__dirstamp) \
 	src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_oprof_la-inf_elem_builder.lo:  \
 	src/mesh/$(am__dirstamp) src/mesh/$(DEPDIR)/$(am__dirstamp)
@@ -8612,6 +8629,8 @@ src/mesh/libmesh_opt_la-gmv_io.lo: src/mesh/$(am__dirstamp) \
 	src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_opt_la-gnuplot_io.lo: src/mesh/$(am__dirstamp) \
 	src/mesh/$(DEPDIR)/$(am__dirstamp)
+src/mesh/libmesh_opt_la-halo.lo: src/mesh/$(am__dirstamp) \
+	src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_opt_la-inf_elem_builder.lo: src/mesh/$(am__dirstamp) \
 	src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_opt_la-legacy_xdr_io.lo: src/mesh/$(am__dirstamp) \
@@ -9603,6 +9622,8 @@ src/mesh/libmesh_prof_la-gmsh_io.lo: src/mesh/$(am__dirstamp) \
 src/mesh/libmesh_prof_la-gmv_io.lo: src/mesh/$(am__dirstamp) \
 	src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_prof_la-gnuplot_io.lo: src/mesh/$(am__dirstamp) \
+	src/mesh/$(DEPDIR)/$(am__dirstamp)
+src/mesh/libmesh_prof_la-halo.lo: src/mesh/$(am__dirstamp) \
 	src/mesh/$(DEPDIR)/$(am__dirstamp)
 src/mesh/libmesh_prof_la-inf_elem_builder.lo:  \
 	src/mesh/$(am__dirstamp) src/mesh/$(DEPDIR)/$(am__dirstamp)
@@ -11461,6 +11482,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_dbg_la-gmsh_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_dbg_la-gmv_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_dbg_la-gnuplot_io.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_dbg_la-halo.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_dbg_la-inf_elem_builder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_dbg_la-legacy_xdr_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_dbg_la-matlab_io.Plo@am__quote@
@@ -11522,6 +11544,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_devel_la-gmsh_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_devel_la-gmv_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_devel_la-gnuplot_io.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_devel_la-halo.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_devel_la-inf_elem_builder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_devel_la-legacy_xdr_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_devel_la-matlab_io.Plo@am__quote@
@@ -11583,6 +11606,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_oprof_la-gmsh_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_oprof_la-gmv_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_oprof_la-gnuplot_io.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_oprof_la-halo.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_oprof_la-inf_elem_builder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_oprof_la-legacy_xdr_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_oprof_la-matlab_io.Plo@am__quote@
@@ -11644,6 +11668,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_opt_la-gmsh_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_opt_la-gmv_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_opt_la-gnuplot_io.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_opt_la-halo.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_opt_la-inf_elem_builder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_opt_la-legacy_xdr_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_opt_la-matlab_io.Plo@am__quote@
@@ -11705,6 +11730,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_prof_la-gmsh_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_prof_la-gmv_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_prof_la-gnuplot_io.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_prof_la-halo.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_prof_la-inf_elem_builder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_prof_la-legacy_xdr_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/mesh/$(DEPDIR)/libmesh_prof_la-matlab_io.Plo@am__quote@
@@ -13927,6 +13953,13 @@ src/mesh/libmesh_dbg_la-gnuplot_io.lo: src/mesh/gnuplot_io.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/mesh/gnuplot_io.C' object='src/mesh/libmesh_dbg_la-gnuplot_io.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -c -o src/mesh/libmesh_dbg_la-gnuplot_io.lo `test -f 'src/mesh/gnuplot_io.C' || echo '$(srcdir)/'`src/mesh/gnuplot_io.C
+
+src/mesh/libmesh_dbg_la-halo.lo: src/mesh/halo.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -MT src/mesh/libmesh_dbg_la-halo.lo -MD -MP -MF src/mesh/$(DEPDIR)/libmesh_dbg_la-halo.Tpo -c -o src/mesh/libmesh_dbg_la-halo.lo `test -f 'src/mesh/halo.C' || echo '$(srcdir)/'`src/mesh/halo.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/mesh/$(DEPDIR)/libmesh_dbg_la-halo.Tpo src/mesh/$(DEPDIR)/libmesh_dbg_la-halo.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/mesh/halo.C' object='src/mesh/libmesh_dbg_la-halo.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -c -o src/mesh/libmesh_dbg_la-halo.lo `test -f 'src/mesh/halo.C' || echo '$(srcdir)/'`src/mesh/halo.C
 
 src/mesh/libmesh_dbg_la-inf_elem_builder.lo: src/mesh/inf_elem_builder.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -MT src/mesh/libmesh_dbg_la-inf_elem_builder.lo -MD -MP -MF src/mesh/$(DEPDIR)/libmesh_dbg_la-inf_elem_builder.Tpo -c -o src/mesh/libmesh_dbg_la-inf_elem_builder.lo `test -f 'src/mesh/inf_elem_builder.C' || echo '$(srcdir)/'`src/mesh/inf_elem_builder.C
@@ -16784,6 +16817,13 @@ src/mesh/libmesh_devel_la-gnuplot_io.lo: src/mesh/gnuplot_io.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -c -o src/mesh/libmesh_devel_la-gnuplot_io.lo `test -f 'src/mesh/gnuplot_io.C' || echo '$(srcdir)/'`src/mesh/gnuplot_io.C
 
+src/mesh/libmesh_devel_la-halo.lo: src/mesh/halo.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -MT src/mesh/libmesh_devel_la-halo.lo -MD -MP -MF src/mesh/$(DEPDIR)/libmesh_devel_la-halo.Tpo -c -o src/mesh/libmesh_devel_la-halo.lo `test -f 'src/mesh/halo.C' || echo '$(srcdir)/'`src/mesh/halo.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/mesh/$(DEPDIR)/libmesh_devel_la-halo.Tpo src/mesh/$(DEPDIR)/libmesh_devel_la-halo.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/mesh/halo.C' object='src/mesh/libmesh_devel_la-halo.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -c -o src/mesh/libmesh_devel_la-halo.lo `test -f 'src/mesh/halo.C' || echo '$(srcdir)/'`src/mesh/halo.C
+
 src/mesh/libmesh_devel_la-inf_elem_builder.lo: src/mesh/inf_elem_builder.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -MT src/mesh/libmesh_devel_la-inf_elem_builder.lo -MD -MP -MF src/mesh/$(DEPDIR)/libmesh_devel_la-inf_elem_builder.Tpo -c -o src/mesh/libmesh_devel_la-inf_elem_builder.lo `test -f 'src/mesh/inf_elem_builder.C' || echo '$(srcdir)/'`src/mesh/inf_elem_builder.C
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/mesh/$(DEPDIR)/libmesh_devel_la-inf_elem_builder.Tpo src/mesh/$(DEPDIR)/libmesh_devel_la-inf_elem_builder.Plo
@@ -19639,6 +19679,13 @@ src/mesh/libmesh_oprof_la-gnuplot_io.lo: src/mesh/gnuplot_io.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/mesh/gnuplot_io.C' object='src/mesh/libmesh_oprof_la-gnuplot_io.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/mesh/libmesh_oprof_la-gnuplot_io.lo `test -f 'src/mesh/gnuplot_io.C' || echo '$(srcdir)/'`src/mesh/gnuplot_io.C
+
+src/mesh/libmesh_oprof_la-halo.lo: src/mesh/halo.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -MT src/mesh/libmesh_oprof_la-halo.lo -MD -MP -MF src/mesh/$(DEPDIR)/libmesh_oprof_la-halo.Tpo -c -o src/mesh/libmesh_oprof_la-halo.lo `test -f 'src/mesh/halo.C' || echo '$(srcdir)/'`src/mesh/halo.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/mesh/$(DEPDIR)/libmesh_oprof_la-halo.Tpo src/mesh/$(DEPDIR)/libmesh_oprof_la-halo.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/mesh/halo.C' object='src/mesh/libmesh_oprof_la-halo.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/mesh/libmesh_oprof_la-halo.lo `test -f 'src/mesh/halo.C' || echo '$(srcdir)/'`src/mesh/halo.C
 
 src/mesh/libmesh_oprof_la-inf_elem_builder.lo: src/mesh/inf_elem_builder.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -MT src/mesh/libmesh_oprof_la-inf_elem_builder.lo -MD -MP -MF src/mesh/$(DEPDIR)/libmesh_oprof_la-inf_elem_builder.Tpo -c -o src/mesh/libmesh_oprof_la-inf_elem_builder.lo `test -f 'src/mesh/inf_elem_builder.C' || echo '$(srcdir)/'`src/mesh/inf_elem_builder.C
@@ -22496,6 +22543,13 @@ src/mesh/libmesh_opt_la-gnuplot_io.lo: src/mesh/gnuplot_io.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -c -o src/mesh/libmesh_opt_la-gnuplot_io.lo `test -f 'src/mesh/gnuplot_io.C' || echo '$(srcdir)/'`src/mesh/gnuplot_io.C
 
+src/mesh/libmesh_opt_la-halo.lo: src/mesh/halo.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -MT src/mesh/libmesh_opt_la-halo.lo -MD -MP -MF src/mesh/$(DEPDIR)/libmesh_opt_la-halo.Tpo -c -o src/mesh/libmesh_opt_la-halo.lo `test -f 'src/mesh/halo.C' || echo '$(srcdir)/'`src/mesh/halo.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/mesh/$(DEPDIR)/libmesh_opt_la-halo.Tpo src/mesh/$(DEPDIR)/libmesh_opt_la-halo.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/mesh/halo.C' object='src/mesh/libmesh_opt_la-halo.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -c -o src/mesh/libmesh_opt_la-halo.lo `test -f 'src/mesh/halo.C' || echo '$(srcdir)/'`src/mesh/halo.C
+
 src/mesh/libmesh_opt_la-inf_elem_builder.lo: src/mesh/inf_elem_builder.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -MT src/mesh/libmesh_opt_la-inf_elem_builder.lo -MD -MP -MF src/mesh/$(DEPDIR)/libmesh_opt_la-inf_elem_builder.Tpo -c -o src/mesh/libmesh_opt_la-inf_elem_builder.lo `test -f 'src/mesh/inf_elem_builder.C' || echo '$(srcdir)/'`src/mesh/inf_elem_builder.C
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/mesh/$(DEPDIR)/libmesh_opt_la-inf_elem_builder.Tpo src/mesh/$(DEPDIR)/libmesh_opt_la-inf_elem_builder.Plo
@@ -25351,6 +25405,13 @@ src/mesh/libmesh_prof_la-gnuplot_io.lo: src/mesh/gnuplot_io.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/mesh/gnuplot_io.C' object='src/mesh/libmesh_prof_la-gnuplot_io.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/mesh/libmesh_prof_la-gnuplot_io.lo `test -f 'src/mesh/gnuplot_io.C' || echo '$(srcdir)/'`src/mesh/gnuplot_io.C
+
+src/mesh/libmesh_prof_la-halo.lo: src/mesh/halo.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -MT src/mesh/libmesh_prof_la-halo.lo -MD -MP -MF src/mesh/$(DEPDIR)/libmesh_prof_la-halo.Tpo -c -o src/mesh/libmesh_prof_la-halo.lo `test -f 'src/mesh/halo.C' || echo '$(srcdir)/'`src/mesh/halo.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/mesh/$(DEPDIR)/libmesh_prof_la-halo.Tpo src/mesh/$(DEPDIR)/libmesh_prof_la-halo.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/mesh/halo.C' object='src/mesh/libmesh_prof_la-halo.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/mesh/libmesh_prof_la-halo.lo `test -f 'src/mesh/halo.C' || echo '$(srcdir)/'`src/mesh/halo.C
 
 src/mesh/libmesh_prof_la-inf_elem_builder.lo: src/mesh/inf_elem_builder.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -MT src/mesh/libmesh_prof_la-inf_elem_builder.lo -MD -MP -MF src/mesh/$(DEPDIR)/libmesh_prof_la-inf_elem_builder.Tpo -c -o src/mesh/libmesh_prof_la-inf_elem_builder.lo `test -f 'src/mesh/inf_elem_builder.C' || echo '$(srcdir)/'`src/mesh/inf_elem_builder.C

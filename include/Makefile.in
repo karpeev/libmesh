@@ -650,6 +650,7 @@ include_HEADERS = \
         mesh/gmsh_io.h \
         mesh/gmv_io.h \
         mesh/gnuplot_io.h \
+        mesh/halo.h \
         mesh/inf_elem_builder.h \
         mesh/legacy_xdr_io.h \
         mesh/matlab_io.h \
