@@ -346,7 +346,7 @@ void TreeNode<N>::print_nodes(std::ostream& out_stream) const
   else
     {
       for (unsigned int child=0; child<children.size(); child++)
-        children[child]->print_nodes();
+        children[child]->print_nodes(out_stream);
     }
 }
 
@@ -368,7 +368,7 @@ void TreeNode<N>::print_elements(std::ostream& out_stream) const
   else
     {
       for (unsigned int child=0; child<children.size(); child++)
-        children[child]->print_elements();
+        children[child]->print_elements(out_stream);
     }
 }
 

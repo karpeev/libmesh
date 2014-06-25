@@ -298,6 +298,7 @@ if (test "x$enableexamples" = "xyes"); then
                 examples/fem_system/fem_system_ex1/Makefile
                 examples/fem_system/fem_system_ex2/Makefile
                 examples/particles/particles_ex1/Makefile
+                examples/particles/particles_ex2/Makefile
                 examples/solution_transfer/solution_transfer_ex1/Makefile
                 examples/miscellaneous/miscellaneous_ex1/Makefile
                 examples/miscellaneous/miscellaneous_ex2/Makefile
