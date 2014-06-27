@@ -24,10 +24,7 @@ int main(int argc, char** argv) {
   MeshTools::Generation::build_cube(mesh, 360, 1, 1, 0, 360, 0, 1, 0, 1);
   mesh.print_info();
   Real haloPad = 85;
-  std::vector<int> neighbors;
-  Halo::find_neighbor_proc_ids(mesh, neighbors);
-  std::vector<int> haloPids;
-  Halo::parallel_find_bounding_box_halo_proc_ids(mesh, haloPad, haloPids);
+  HaloManager hm(mesh, haloPad);
   std::vector<Particle*> particles;
   typedef MeshBase::element_iterator ElemIter_t;
   for(ElemIter_t it = mesh.local_elements_begin();
@@ -36,6 +33,11 @@ int main(int argc, char** argv) {
     particles.push_back(new MyParticle(it->centroid(), it->unique_id()));
   }
   std::vector<std::vector<Particle*> > result;
-  Halo::parallel_find_particles_in_halos(particles, haloPids, haloPad,
+  hm.find_particles_in_halos(particles,
       (std::vector<std::vector<Particle*> >)result);
 }
+
+
+//NOTE: finding neighbor processor id's and halo processor id's will
+//      be handled in the HaloManager class when first needed
+
