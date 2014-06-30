@@ -1,3 +1,7 @@
+
+#ifndef SERIALIZABLE_H
+#define SERIALIZABLE_H
+
 class Serializer;
 
 namespace libMesh {
@@ -10,3 +14,5 @@ public:
 };
 
 }
+
+#endif // SERIALIZABLE_H
