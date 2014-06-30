@@ -404,6 +404,7 @@ libmesh_SOURCES =  \
         src/utils/point_locator_base.C \
         src/utils/point_locator_list.C \
         src/utils/point_locator_tree.C \
+        src/utils/serializer.C \
         src/utils/statistics.C \
         src/utils/string_to_enum.C \
         src/utils/timestamp.C \
