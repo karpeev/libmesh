@@ -1,6 +1,6 @@
 
-#ifndef SERIALIZABLE_H
-#define SERIALIZABLE_H
+#ifndef LIBMESH_SERIALIZABLE_H
+#define LIBMESH_SERIALIZABLE_H
 
 class Serializer;
 
@@ -15,4 +15,4 @@ public:
 
 }
 
-#endif // SERIALIZABLE_H
+#endif // LIBMESH_SERIALIZABLE_H

@@ -1,6 +1,6 @@
 
-#ifndef SERIALIZER_H
-#define SERIALIZER_H
+#ifndef LIBMESH_SERIALIZER_H
+#define LIBMESH_SERIALIZER_H
 
 #include <vector>
 #include <cstdint>
@@ -48,4 +48,4 @@ private:
 } // namespace libMesh
 
 
-#endif // SERIALIZER_H
+#endif // LIBMESH_SERIALIZER_H
