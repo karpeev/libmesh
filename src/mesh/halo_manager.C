@@ -80,18 +80,63 @@ const std::vector<int>& HaloManager::box_halo_neighbor_processors() const {
 }
 
 void HaloManager::find_particles_in_halos(
-    const std::vector<Particle*> particles,
-    std::vector<Particle*> particle_inbox,
-    Particle* (*constructor)(),
-    std::vector<std::vector<Particle*> > result) const
+    const std::vector<Point*> particles,
+    const Serializer<Point*>& particle_serializer,
+    std::vector<Point*> particle_inbox,
+    std::vector<std::vector<Point*> > result) const
+{
+  BoxTree tree((std::vector<Point*>)particles);
+  comm_particles(particles, tree, particles_serializer, particles_inbox);
+  //FIXME left off here...
+}
+
+void HaloManager::comm_particles(
+    const std::vector<Point*> particles,
+    const BoxTree tree,
+    const Serializer<Point*>& particle_serializer,
+    std::vector<Point*>& particle_inbox)
 {
   BoundingBox pointsHalo = find_bounding_box(particles);
-  Request reqs[box_halo_neighbors.size()];
-  const Communicator& comm;
+  Request dummyReq;
   for(unsigned int i = 0; i < box_halo_neighbors.size(); i++) {
-    comm.send(box_halo_neighbors[i], pointsHalo, reqs[i], requestTag);
+    comm.send(box_halo_neighbors[i], pointsHalo, dummyReq, tagRequest);
+    //NOTE: we do not need to call wait on these requests,
+    //      because we recieve responses from these processors
   }
-  //FIXME left off here...
+  std::string outboxes[box_halo_neighbors.size()];
+  Request reqs[box_halo_neighbors.size()];
+  for(unsigned int c = 0; c < box_halo_neighbors.size(); c++) {
+    BoundingBox halo;
+    int source = comm().receive(
+        Parallel::any_source, halo, tagRequest).source();
+    std::vector<Particle*> particles_buffer;
+    if(halo.min()(0) != halo.max()(0)) {
+      tree.find_nodes(halo, particles_buffer);
+    }
+    std::ostringstream stream;
+    int size = particles.size();
+    stream.write((char*)&size, sizeof(size));
+    for(unsigned int i = 0; i < size; i++) {
+      particle_serializer.write(stream, particles[i]);
+    }
+    outboxes[c] = stream.str();
+    comm().send(source, outboxes[c], reqs[c], tagResponse);
+  }
+  for(unsigned int c = 0; c < box_halo_neighbors.size(); c++) {
+    std::string buffer;
+    comm().receive(Parallel::any_source, buffer, tagResponse);
+    std::istringstream stream(buffer);
+    int size;
+    stream.read((char*)&size, sizeof(size));
+    unsigned int i = particle_inbox.size();
+    particle_inbox.resize(i + size);
+    for(; i < particle_inbox.size(); i++) {
+      particle_serializer.read(stream, particle_inbox[i]);
+    }
+  }
+  for(unsigned int i = 0 i < box_halo_neighbors.size(); i++) {
+    reqs[i].wait();
+  }
 }
 
 void HaloManager::find_neighbor_processors(const MeshBase& mesh,
@@ -121,3 +166,4 @@ BoundingBox HaloManager::find_bounding_box(
   }
   return box;
 }
+

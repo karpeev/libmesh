@@ -11,8 +11,8 @@ public:
   const std::vector<int>& neighbor_processors() const;
   const std::vector<int>& box_halo_neighbor_processors() const;
   void find_particles_in_halos(const std::vector<Particle*> particles,
-      std::vector<Particle*> particle_inbox,
       Particle* (*constructor)(),
+      std::vector<Particle*> particle_inbox,
       std::vector<std::vector<Particle*> > result) const;
       
   static void find_neighbor_processors(const MeshBase& mesh,
@@ -24,6 +24,7 @@ private:
   std::vector<int> neighbors;
   std::vector<int> box_halo_neighbors;
   double halo_pad;
+  const Parallel::Communicator& comm;
 
 };
 
