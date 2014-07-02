@@ -1,3 +1,10 @@
+#include "libmesh/halo_manager.h"
+#include "libmesh/mesh_base.h"
+#include "libmesh/point_tree.h"
+#include <algorithm>
+
+using namespace libMesh;
+using MeshTools::BoundingBox;
 
 namespace { // anonymous namespace for helper classes/functions
 
@@ -53,6 +60,28 @@ class HaloNeighborsExtender : public NeighborsExtender {
     std::set<int> testEdges;
 };
 
+BoundingBox find_bounding_box(const std::vector<Point*> particles) const
+{
+  if(particles.empty()) return BoundingBox(Point(0,0,0), Point(0,0,0));
+  BoundingBox box(*(Point*)particles[0], *(Point*)particles[0]);
+  for(unsigned int i = 0; i < particles.size(); i++) {
+    for(unsigned int d = 0; d < LIBMESH_DIM; d++) {
+      box.min()(d) = std:min(box.min()(d), particles[i](d));
+      box.max()(d) = std:max(box.max()(d), particles[i](d));
+    }
+  }
+  return box;
+}
+
+double distance(const Point* a, const Point* b) {
+  double sqDist = 0.0;
+  for(unsigned int d = 0; d < LIBMESH_DIM; d++) {
+    diff = a(d) - b(d);
+    sqDist += diff*diff;
+  }
+  return std::sqrt(sqDist);
+}
+
 } // end anonymous namespace
 
 //FIXME make sure box_halo_neighbors is symmetric across processors, i.e. if processor x has neighbor processor y, then processor y has neighbor processor x
@@ -80,23 +109,41 @@ const std::vector<int>& HaloManager::box_halo_neighbor_processors() const {
 }
 
 void HaloManager::find_particles_in_halos(
-    const std::vector<Point*> particles,
+    const std::vector<Point*>& particles,
     const Serializer<Point*>& particle_serializer,
-    std::vector<Point*> particle_inbox,
-    std::vector<std::vector<Point*> > result) const
+    std::vector<Point*>& particle_inbox,
+    std::vector<std::vector<Point*> >& result) const
 {
-  BoxTree tree((std::vector<Point*>)particles);
-  comm_particles(particles, tree, particles_serializer, particles_inbox);
-  //FIXME left off here...
+  particle_inbox.clear();
+  result.clear();
+  PointTree tree();
+  tree.insert((std::vector<Point*>)particles);
+  comm_particles(particles, tree, particle_serializer, particles_inbox);
+  tree.insert((std::vector<Point*>)particle_inbox);
+  vector<Point*> buffer;
+  for(unsigned int i = 0; i < particles.size(); i++) {
+    BoundingBox box;
+    box.min() = *particles[i];
+    box.max() = *particles[i];
+    pad_box(box);
+    tree.find(box, buffer);
+    for(unsigned int j = 0; j < buffer.size(); j++) {
+      Point* point = buffer[j];
+      if(point == particles[i]) continue;
+      if(distance(point, particles[i]) >= halo_pad) continue;
+      result[i].push_back(point);
+    }
+  }
 }
 
 void HaloManager::comm_particles(
-    const std::vector<Point*> particles,
-    const BoxTree tree,
+    const std::vector<Point*>& particles,
+    const PointTree& tree,
     const Serializer<Point*>& particle_serializer,
     std::vector<Point*>& particle_inbox)
 {
   BoundingBox pointsHalo = find_bounding_box(particles);
+  pad_box(pointsHalo);
   Request dummyReq;
   for(unsigned int i = 0; i < box_halo_neighbors.size(); i++) {
     comm.send(box_halo_neighbors[i], pointsHalo, dummyReq, tagRequest);
@@ -153,17 +200,9 @@ void HaloManager::find_neighbor_processors(const MeshBase& mesh,
             std::back_inserter(result));
 }
 
-BoundingBox HaloManager::find_bounding_box(
-    const std::vector<Particle*> particles) const
-{
-  if(particles.empty()) return BoundingBox(Point(0,0,0), Point(0,0,0));
-  BoundingBox box(*(Point*)particles[0], *(Point*)particles[0]);
-  for(unsigned int i = 0; i < particles.size(); i++) {
-    for(unsigned int d = 0; d < LIBMESH_DIM; d++) {
-      box.min()(d) = std:min(box.min()(d), particles[i](d));
-      box.max()(d) = std:max(box.max()(d), particles[i](d));
-    }
+void HaloManager::pad_box(BoundingBox& box) const {
+  for(unsigned int d = 0; d < LIBMESH_DIM; d++) {
+    box.min()(d) -= halo_pad;
+    box.max()(d) += halo_pad;
   }
-  return box;
 }
-

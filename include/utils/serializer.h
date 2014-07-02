@@ -1,4 +1,3 @@
-
 #ifndef LIBMESH_SERIALIZER_H
 #define LIBMESH_SERIALIZER_H
 
