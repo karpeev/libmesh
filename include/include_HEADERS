@@ -389,9 +389,9 @@ include_HEADERS =  \
         utils/point_locator_base.h \
         utils/point_locator_list.h \
         utils/point_locator_tree.h \
+        utils/point_tree.h \
         utils/pool_allocator.h \
         utils/restore_warnings.h \
-        utils/serializable.h \
         utils/serializer.h \
         utils/statistics.h \
         utils/string_to_enum.h \

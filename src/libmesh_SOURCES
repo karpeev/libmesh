@@ -180,6 +180,7 @@ libmesh_SOURCES =  \
         src/mesh/gmv_io.C \
         src/mesh/gnuplot_io.C \
         src/mesh/halo.C \
+        src/mesh/halo_manager.C \
         src/mesh/inf_elem_builder.C \
         src/mesh/legacy_xdr_io.C \
         src/mesh/matlab_io.C \
@@ -404,7 +405,7 @@ libmesh_SOURCES =  \
         src/utils/point_locator_base.C \
         src/utils/point_locator_list.C \
         src/utils/point_locator_tree.C \
-        src/utils/serializer.C \
+        src/utils/point_tree.C \
         src/utils/statistics.C \
         src/utils/string_to_enum.C \
         src/utils/timestamp.C \
