@@ -42,8 +42,10 @@ class HaloNeighborsExtender : public Parallel::NeighborsExtender {
     }
     
     void resolve(const BoundingBox& halo, std::vector<int>& result) {
+      std::vector<int> inNeighbors;
       NeighborsExtender::resolve(sizeof(BoundingBox),
-          (const char*)&halo, result);
+          (const char*)&halo, result, inNeighbors);
+      NeighborsExtender::intersect(result, inNeighbors);
     }
     
   protected:
@@ -88,7 +90,6 @@ double distance(const Point* a, const Point* b) {
 
 } // end anonymous namespace
 
-//FIXME make sure box_halo_neighbors is symmetric across processors, i.e. if processor x has neighbor processor y, then processor y has neighbor processor x
 HaloManager::HaloManager(const MeshBase& mesh, Real halo_pad)
     : halo_pad(halo_pad), comm(mesh.comm()),
       tagRequest(mesh.comm().get_unique_tag(15382)),

@@ -15,12 +15,14 @@ class NeighborsExtender : public ParallelObject {
     inline virtual ~NeighborsExtender() {}
     void setNeighbors(const std::vector<int>& neighbors);
     void resolve(int testDataSize, const char* testData,
-        std::vector<int>& result);
+        std::vector<int>& outNeighbors, std::vector<int>& inNeighbors);
     virtual void testInit(int root, int testDataSize,
         const char* testData) = 0;
     virtual bool testEdge(int neighbor) = 0;
     virtual bool testNode() = 0;
     virtual void testClear() = 0;
+
+    static void intersect(std::vector<int>& a, const std::vector<int>& b);
 
   private:
     void commRequests(int numRecvs);
@@ -38,8 +40,10 @@ class NeighborsExtender : public ParallelObject {
     MessageTag tagNeighbor;
     
     std::vector<char> testData;
+
+    std::vector<int>* outNeighbors;
+    std::vector<int>* inNeighbors;
     
-    std::vector<int> contacts;
     std::set<int> requestSet;
     std::vector<int> requestLayer;
     std::set<int> responseSet;

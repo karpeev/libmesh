@@ -9,7 +9,8 @@ NeighborsExtender::NeighborsExtender(const Communicator& comm)
     : ParallelObject(comm),
       tagRequest(comm.get_unique_tag(12753)),
       tagResponse(comm.get_unique_tag(12754)),
-      tagNeighbor(comm.get_unique_tag(12755))
+      tagNeighbor(comm.get_unique_tag(12755)),
+      outNeighbors(NULL), inNeighbors(NULL)
 {}
 
 void NeighborsExtender::setNeighbors(const std::vector<int>& neighbors) {
@@ -18,8 +19,10 @@ void NeighborsExtender::setNeighbors(const std::vector<int>& neighbors) {
 }
 
 void NeighborsExtender::resolve(int testDataSize, const char* testData,
-    std::vector<int>& result)
+    std::vector<int>& outNeighbors, std::vector<int>& inNeighbors)
 {
+  this->outNeighbors = &outNeighbors;
+  this->inNeighbors = &inNeighbors;
   this->testData.clear();
   this->testData.reserve(testDataSize);
   for(int i = 0; i < testDataSize; i++) this->testData.push_back(testData[i]);
@@ -36,10 +39,21 @@ void NeighborsExtender::resolve(int testDataSize, const char* testData,
     commRequests(nextResponseLayerSize);
     commResponses(numRequestsMade);
   } while(!allProcessorsDone());
-  result = contacts;
-  contacts.clear();
   requestSet.clear();
   responseSet.clear();
+  this->outNeighbors = NULL;
+  this->inNeighbors = NULL;
+}
+
+void NeighborsExtender::intersect(std::vector<int>& a,
+    const std::vector<int>& b)
+{
+  std::set<int> mySet;
+  mySet.insert(a.begin(), a.end());
+  a.clear();
+  for(unsigned int i = 0; i < b.size(); i++) {
+    if(mySet.count(b[i]) > 0) a.push_back(b[i]);
+  }
 }
 
 void NeighborsExtender::commRequests(int numRecvs) {
@@ -67,6 +81,7 @@ void NeighborsExtender::recvRequest() {
   testInit(source, buffer.size(), &buffer[0]);
   if(testNode()) {
     responseMsg.push_back(1);
+    inNeighbors->push_back(source);
     for(int i = 0; i < (int)neighbors.size(); i++) {
       if(neighbors[i] != source && testEdge(neighbors[i])) {
         responseMsg.push_back(neighbors[i]);
@@ -94,7 +109,7 @@ void NeighborsExtender::recvResponse() {
   std::vector<int> buffer;
   int source = comm().receive(any_source, buffer, tagResponse).source();
 
-  if(buffer[0]) contacts.push_back(source);
+  if(buffer[0]) outNeighbors->push_back(source);
   for(int i = 1; i < (int)buffer.size(); i++) {
     bool success = requestSet.insert(buffer[i]).second;
     if(success) requestLayer.push_back(buffer[i]);
