@@ -179,7 +179,6 @@ libmesh_SOURCES =  \
         src/mesh/gmsh_io.C \
         src/mesh/gmv_io.C \
         src/mesh/gnuplot_io.C \
-        src/mesh/halo.C \
         src/mesh/halo_manager.C \
         src/mesh/inf_elem_builder.C \
         src/mesh/legacy_xdr_io.C \

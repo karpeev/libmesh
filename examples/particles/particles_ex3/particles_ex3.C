@@ -1,21 +1,33 @@
-//NOTE: Particle will extend Point and have a virtual serialize function...
-//      Serialize function handles input AND output.
-//      Serializer will have a flag saying whether it's in input or output mode...
+#include "libmesh/libmesh_common.h"
+#include "libmesh/libmesh.h"
+#include "libmesh/halo_manager.h"
+#include "libmesh/serializer.h"
+#include "libmesh/mesh_generation.h"
+#include <iostream>
+#include <istream>
+#include <ostream>
+#include <vector>
 
+class MyParticle : public Point {
+public:
+  MyParticle(Point& point, double value) : Particle(point), value(value)
+  {}
 
-class MyParticle : public Particle {
+  MyParticle() {}
+
+  class PSerializer : public Serializer<Point*> {
   public:
-    MyParticle(Point& point, double val) : Particle(point) {
-      data.push_back(val);
+    void read(std::istream& stream, Point*& buffer) const {
+      buffer = new MyParticle();
+      stream.read((char*)buffer, sizeof(*buffer));
     }
-
-    void serialize(Serializer& s) {
-      Particle::serialize(s);
-      s << data;
+    void write(std::ostream& stream, const Point*& buffer) const {
+      stream.write((char*)buffer, sizeof(*buffer));
     }
+  }
 
-  private:
-    std::vector<double> data;
+private:
+  double val;
 };
 
 int main(int argc, char** argv) {
@@ -32,12 +44,11 @@ int main(int argc, char** argv) {
   {
     particles.push_back(new MyParticle(it->centroid(), it->unique_id()));
   }
-  std::vector<std::vector<Particle*> > result;
-  hm.find_particles_in_halos(particles,
-      (std::vector<std::vector<Particle*> >)result);
+  std::vector<MyParticle*> inbox;
+  std::vector<std::vector<MyParticle*> > result;
+  PSerializer serializer;
+  hm.find_particles_in_halos(particles, serializer,
+      (std::vector<Point*>)inbox,
+      (std::vector<std::vector<Point*> >)result);
 }
-
-
-//NOTE: finding neighbor processor id's and halo processor id's will
-//      be handled in the HaloManager class when first needed
 
