@@ -10,16 +10,13 @@
 #include <vector>
 #include <map>
 
+//TODO change and move this functionality to HaloManager, and delete halo.h
+
 namespace libMesh {
 
 class MeshBase;
 
 namespace Halo {
-
-void find_neighbor_proc_ids(const MeshBase& mesh, std::vector<int>& result);
-
-void parallel_find_bounding_box_halo_proc_ids(const MeshBase& mesh,
-    Real halo_pad, std::vector<int>& result);
 
 template <class T>
 void send_to_neighbors(const Parallel::Communicator& comm,
