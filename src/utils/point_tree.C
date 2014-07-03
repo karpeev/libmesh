@@ -8,7 +8,7 @@ using MeshTools::BoundingBox;
 
 namespace { // anonymous namespace for helper classes/functions
 
-const int max_points_in_leaf = 16;
+const unsigned int max_points_in_leaf = 16;
 
 class PointComp {
 public:
@@ -20,29 +20,18 @@ private:
   int axis;
 };
 
-class AxisComp {
-public:
-  PointComp(const int* splitCounts) : splitCounts(splitCounts) {}
-  bool operator()(int a, int b) {
-    if(splitCounts[a] == splitCounts[b]) return a < b;
-    return splitCounts[a] < splitCounts[b];
-  }
-private:
-  const int* splitCounts;
-};
-
-}; // end anonymous namespace
+} // end anonymous namespace
 
 class PointTree::PTNode {
 public:
-  PTNode(int splitCounts[LIBMESH_DIM]);
+  PTNode(const int* splitCounts);
   ~PTNode();
   void insert(Point* point);
   void find(const BoundingBox& box, std::vector<Point*>& result);
 
 private:
-  PointTree(const PointTree& other) {libmesh_error();}
-  PointTree& operator=(const PointTree& other) {libmesh_error();}
+  PTNode(const PTNode& other) {libmesh_error();}
+  PTNode& operator=(const PTNode& other) {libmesh_error();}
   
   void refine_leaf();
   int select_axis() const;
@@ -56,9 +45,10 @@ private:
   std::vector<Point*> points;
 };
 
-PointTree::PTNode::PTNode(int splitCounts[LIBMESH_DIM])
-  : splitCounts(splitCounts), loChild(NULL), hiChild(NULL)
+PointTree::PTNode::PTNode(const int* splitCounts)
+  : loChild(NULL), hiChild(NULL)
 {
+  for(int i = 0; i < LIBMESH_DIM; i++) this->splitCounts[i] = splitCounts[i];
 }
 
 PointTree::PTNode::~PTNode() {
@@ -87,8 +77,8 @@ void PointTree::PTNode::find(const BoundingBox& box,
     }
   }
   else {
-    if(box.min()(axis) < pivot) loChild.find(box, result);
-    if(box.max()(axis) >= pivot) hiChild.find(box, result);
+    if(box.min()(axis) < pivot) loChild->find(box, result);
+    if(box.max()(axis) >= pivot) hiChild->find(box, result);
   }
 }
 
@@ -99,7 +89,8 @@ void PointTree::PTNode::refine_leaf() {
   if(axis == LIBMESH_DIM) return;
   std::sort(points.begin(), points.end(), PointComp(axis));
   pivot = (*points[points.size()/2])(axis);
-  int newSplitCounts[LIBMESH_DIM] = splitCounts;
+  int newSplitCounts[LIBMESH_DIM];
+  for(int i = 0; i < LIBMESH_DIM; i++) newSplitCounts[i] = splitCounts[i];
   newSplitCounts[axis]++;
   loChild = new PTNode(newSplitCounts);
   hiChild = new PTNode(newSplitCounts);
@@ -117,15 +108,15 @@ int PointTree::PTNode::select_axis() const {
     }
   }
 
-  std::vector<int> choices();
+  int result = LIBMESH_DIM;
   for(int i = 0; i < LIBMESH_DIM; i++) {
-    if(allowedMap[i]) choices.push_back(i);
+    if(!allowedMap[i]) continue;
+    if(result == LIBMESH_DIM || splitCounts[i] < splitCounts[result]) {
+      result = i;
+    }
   }
-  std::sort(choices.begin(), choices.end(), AxisComp(splitCounts));
-  for(int i = 0; i < LIBMESH_DIM; i++) {
-    if(!on_same_plane(choices[i])) return choices[i];
-  }
-  return LIBMESH_DIM;
+
+  return result;
 }
 
 bool PointTree::PTNode::is_leaf() {
@@ -146,7 +137,7 @@ void PointTree::insert(Point* point) {
   node->insert(point);
 }
 
-void PointTree::insert(vector<Point*>& points) {
+void PointTree::insert(std::vector<Point*>& points) {
   for(unsigned int i = 0; i < points.size(); i++) insert(points[i]);
 }
 
@@ -155,4 +146,4 @@ void PointTree::find(const BoundingBox& box, std::vector<Point*>& result) const 
 }
 
 PointTree::PointTree(const PointTree& other) {libmesh_error();}
-PointTree::PointTree& operator=(const PointTree& other) {libmesh_error();}
+PointTree& PointTree::operator=(const PointTree& other) {libmesh_error();}

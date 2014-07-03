@@ -18,7 +18,7 @@ public:
   PointTree();
   ~PointTree();
   void insert(Point* point);
-  void insert(vector<Point*>& points);
+  void insert(std::vector<Point*>& points);
   void find(const MeshTools::BoundingBox& box,
       std::vector<Point*>& result) const;
   

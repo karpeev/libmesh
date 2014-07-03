@@ -10,10 +10,11 @@ template <class T>
 class Serializer {
 
 public:
-  read(std::istream stream, T& buffer);
-  write(std::ostream stream, const T& buffer);
+  virtual void read(std::istream& stream, T& buffer) const = 0;
+  virtual void write(std::ostream& stream, const T& buffer) const = 0;
+
+};
 
 } // namespace libMesh
-
 
 #endif // LIBMESH_SERIALIZER_H
