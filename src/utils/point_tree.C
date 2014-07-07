@@ -28,6 +28,7 @@ public:
   ~PTNode();
   void insert(Point* point);
   void find(const BoundingBox& box, std::vector<Point*>& result);
+  void print(int depth) const;
 
 private:
   PTNode(const PTNode& other) {libmesh_error();}
@@ -35,7 +36,7 @@ private:
   
   void refine_leaf();
   int select_axis() const;
-  bool is_leaf();
+  bool is_leaf() const;
   
   int splitCounts[LIBMESH_DIM];
   int axis;
@@ -82,6 +83,29 @@ void PointTree::PTNode::find(const BoundingBox& box,
   }
 }
 
+void PointTree::PTNode::print(int depth) const {
+  for(int c = 0; c < depth; c++) libMesh::out << "  ";
+  if(is_leaf()) {
+    libMesh::out << "[";
+    for(unsigned int i = 0; i < points.size(); i++) {
+      libMesh::out << "(";
+      for(unsigned int d = 0; d < LIBMESH_DIM; d++) {
+        libMesh::out << (*points[i])(d);
+        if(d < LIBMESH_DIM - 1) libMesh::out << ", ";
+      }
+      libMesh::out << ")";
+      if(i < points.size() - 1) libMesh::out << ", ";
+    }
+    libMesh::out << "]" << std::endl;
+  }
+  else {
+    libmesh_assert(points.size() == 0);
+    libMesh::out << "axis " << axis << " pivot " << pivot << std::endl;
+    loChild->print(depth + 1);
+    hiChild->print(depth + 1);
+  }
+}
+
 void PointTree::PTNode::refine_leaf() {
   if(!is_leaf()) return;
   if(points.size() <= max_points_in_leaf) return;
@@ -119,7 +143,7 @@ int PointTree::PTNode::select_axis() const {
   return result;
 }
 
-bool PointTree::PTNode::is_leaf() {
+bool PointTree::PTNode::is_leaf() const {
   return loChild == NULL;
 }
 
@@ -143,6 +167,10 @@ void PointTree::insert(std::vector<Point*>& points) {
 
 void PointTree::find(const BoundingBox& box, std::vector<Point*>& result) const {
   node->find(box, result);
+}
+
+void PointTree::print() const {
+  node->print(0);
 }
 
 PointTree::PointTree(const PointTree& other) {libmesh_error();}
