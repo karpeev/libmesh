@@ -32,7 +32,7 @@ class HaloNeighborsExtender : public Parallel::NeighborsExtender {
     HaloNeighborsExtender(const MeshBase* mesh,
         const std::vector<int>& neighbors) : NeighborsExtender(mesh->comm())
     {
-      processor_id_type pid = mesh->processor_id();
+      pid = mesh->processor_id();
       MeshBase::const_element_iterator it = mesh->not_local_elements_begin();
       for(; it != mesh->not_local_elements_end(); it++) {
         const Elem* elem = *it;
@@ -46,6 +46,7 @@ class HaloNeighborsExtender : public Parallel::NeighborsExtender {
       NeighborsExtender::resolve(sizeof(BoundingBox),
           (const char*)&halo, result, inNeighbors);
       NeighborsExtender::intersect(result, inNeighbors);
+      result.erase(std::find(result.begin(), result.end(), pid));
     }
     
   protected:
@@ -65,6 +66,7 @@ class HaloNeighborsExtender : public Parallel::NeighborsExtender {
   private:
     std::vector<const Elem*> ghostElems;
     std::set<int> testEdges;
+    processor_id_type pid;
 };
 
 BoundingBox find_bounding_box(const std::vector<Point*> particles) {
@@ -120,6 +122,7 @@ void HaloManager::find_particles_in_halos(
 {
   particle_inbox.clear();
   result.clear();
+  result.resize(particles.size());
   PointTree tree;
   tree.insert(particles);
   comm_particles(particles, tree, particle_serializer, particle_inbox);
@@ -137,6 +140,7 @@ void HaloManager::find_particles_in_halos(
       if(distance(point, particles[i]) >= halo_pad) continue;
       result[i].push_back(point);
     }
+    buffer.clear();
   }
 }
 
@@ -169,13 +173,14 @@ void HaloManager::comm_particles(
       tree.find(halo, particles_buffer);
     }
     std::ostringstream stream;
-    unsigned int size = particles.size();
+    unsigned int size = particles_buffer.size();
     stream.write((char*)&size, sizeof(size));
     for(unsigned int i = 0; i < size; i++) {
-      particle_serializer.write(stream, particles[i]);
+      particle_serializer.write(stream, particles_buffer[i]);
     }
     outboxes[c] = stream.str();
     comm.send(source, outboxes[c], reqs[c], tagResponse);
+    haloBuffer.clear();
   }
   for(unsigned int c = 0; c < box_halo_neighbors.size(); c++) {
     std::string buffer;
