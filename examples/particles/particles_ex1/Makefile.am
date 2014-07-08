@@ -1,7 +1,7 @@
-example_name  = particles_ex2
+example_name  = particles_ex1
 
-install_dir   = $(examples_install_path)/particles/ex2
-data          = particles_ex2.C run.sh
+install_dir   = $(examples_install_path)/particles/ex1
+data          = particles_ex1.C run.sh
 sources       = $(data) run.sh
 CLEANFILES    = 
 
