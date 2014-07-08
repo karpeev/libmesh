@@ -111,7 +111,7 @@ private:
    */
   void comm_particles(
       std::vector<Point*>& particles,
-      const PointTree& tree,
+      PointTree& tree,
       const Serializer<Point*>& particle_serializer,
       std::vector<Point*>& particle_inbox) const;
 

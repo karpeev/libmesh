@@ -148,7 +148,7 @@ void HaloManager::find_particles_in_halos(
 
 void HaloManager::comm_particles(
     std::vector<Point*>& particles,
-    const PointTree& tree,
+    PointTree& tree,
     const Serializer<Point*>& particle_serializer,
     std::vector<Point*>& particle_inbox) const
 {

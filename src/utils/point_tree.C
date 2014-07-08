@@ -165,7 +165,7 @@ void PointTree::insert(std::vector<Point*>& points) {
   for(unsigned int i = 0; i < points.size(); i++) insert(points[i]);
 }
 
-void PointTree::find(const BoundingBox& box, std::vector<Point*>& result) const {
+void PointTree::find(const BoundingBox& box, std::vector<Point*>& result) {
   node->find(box, result);
 }
 
