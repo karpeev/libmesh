@@ -21,8 +21,8 @@
 
 // Local includes
 #include "libmesh/tree.h"
-#include "libmesh/mesh_tools.h"
 #include "libmesh/mesh_base.h"
+#include "libmesh/mesh_tools.h"
 
 namespace libMesh
 {
@@ -90,47 +90,6 @@ Tree<N>::Tree (const MeshBase& m,
     libmesh_error_msg("Unknown build_type = " << build_type);
 }
 
-namespace {
-  template<unsigned int N>
-  MeshTools::BoundingBox find_bounding_box(
-      MeshBase::const_node_iterator nodes_begin,
-      MeshBase::const_node_iterator nodes_end)
-  {
-    unsigned int dim = 3;
-    switch(N) {
-      case 2: dim = 1; break;
-      case 4: dim = 2; break;
-      case 8: dim = 3; break;
-    }
-    MeshTools::BoundingBox box;
-    MeshBase::const_node_iterator it = nodes_begin;
-    for(; it != nodes_end; it++) {
-      const Point& p = *(Point*)*it;
-      for(unsigned int d = 0; d < dim; d++) {
-        box.min()(d) = std::min(box.min()(d), p(d));
-        box.max()(d) = std::max(box.max()(d), p(d));
-      }
-    }
-    return box;
-  }
-}
-
-template <unsigned int N>
-Tree<N>::Tree (const MeshBase& m,
-      unsigned int target_bin_size,
-      MeshBase::const_node_iterator nodes_begin,
-      MeshBase::const_node_iterator nodes_end) :
-  TreeBase(m),
-  root(m,target_bin_size),
-  build_type(Trees::INVALID_BUILD_TYPE)
-{
-  root.set_bounding_box(find_bounding_box<N>(nodes_begin, nodes_end));
-  
-  MeshBase::const_node_iterator it = nodes_begin;
-  for (; it != nodes_end; ++it) {
-    root.insert(*it);
-  }
-}
 
 
 // copy-constructor is not implemented
@@ -178,13 +137,6 @@ template <unsigned int N>
 const Elem* Tree<N>::operator() (const Point& p) const
 {
   return this->find_element(p);
-}
-
-template <unsigned int N>
-void Tree<N>::find_nodes (const std::pair<Point, Point>& box,
-                 std::vector<const Node*>& result) const
-{
-  return root.find_nodes(box, result);
 }
 
 

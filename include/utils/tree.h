@@ -23,7 +23,6 @@
 // Local includes
 #include "libmesh/tree_node.h"
 #include "libmesh/tree_base.h"
-#include "libmesh/mesh_base.h"
 
 // C++ includes
 
@@ -49,11 +48,6 @@ public:
   Tree (const MeshBase& m,
         unsigned int target_bin_size,
         Trees::BuildType bt=Trees::NODES);
-
-  Tree (const MeshBase& m,
-        unsigned int target_bin_size,
-        MeshBase::const_node_iterator nodes_begin,
-        MeshBase::const_node_iterator nodes_end);
 
   /**
    * Copy-constructor.  Not currently implemented.
@@ -89,9 +83,6 @@ public:
    * @returns a pointer to the element containing point p.
    */
   const Elem* operator() (const Point& p) const;
-
-  void find_nodes (const std::pair<Point, Point>& box,
-                   std::vector<const Node*>& result) const;
 
 
 private:
