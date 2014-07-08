@@ -1,6 +1,6 @@
 #include "libmesh/libmesh_common.h"
 #include "libmesh/libmesh.h"
-#include "libmesh/tree.h"
+#include "libmesh/point_tree.h"
 #include "libmesh/mesh_tools.h"
 #include "libmesh/mesh_generation.h"
 #include "libmesh/serial_mesh.h"
@@ -25,14 +25,17 @@ int main(int argc, char** argv) {
   halo.min() = Point(159.5, -1, -1);
   halo.max() = Point(200.5, 2, 2);
   std::cout << "Halo: " << halo << std::endl;
-  std::pair<Point, Point> haloPair(halo.min(), halo.max());
-  std::vector<const Node*> nodes;
-  Trees::OctTree tree(mesh, 50, mesh.nodes_begin(), mesh.nodes_end());
+  PointTree tree;
+  typedef MeshBase::node_iterator iter_t;
+  for(iter_t it = mesh.nodes_begin(); it != mesh.nodes_end(); it++) {
+    tree.insert((Point*)*it);
+  }
   std::cout << std::endl;
-  tree.find_nodes(haloPair, nodes);
+  std::vector<Point*> result;
+  tree.find(halo, result);
   std::cout << "Halo Nodes: " << std::endl;
-  for(unsigned int i = 0; i < nodes.size(); i++) {
-    std::cout << "  " << *(Point*)nodes[i] << std::endl;
+  for(unsigned int i = 0; i < result.size(); i++) {
+    std::cout << "  " << *result[i] << std::endl;
   }
 }
 
