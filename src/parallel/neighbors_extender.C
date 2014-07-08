@@ -144,6 +144,16 @@ bool NeighborsExtender::allProcessorsDone() {
   return done;
 }
 
+//NeighborsExtender::NeighborsExtender(const NeighborsExtender& other) {
+//  libmesh_error();
+//}
+
+NeighborsExtender& NeighborsExtender::operator=(
+    const NeighborsExtender& other)
+{
+  libmesh_error();
+}
+
 } // namespace Parallel
 } // namespace libMesh
 
