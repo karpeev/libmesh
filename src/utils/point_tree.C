@@ -1,15 +1,45 @@
+// The libMesh Finite Element Library.
+// Copyright (C) 2002-2014 Benjamin S. Kirk, John W. Peterson, Roy H. Stogner
+
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+
+// Local Includes -----------------------------------
 #include "libmesh/point_tree.h"
 #include "libmesh/libmesh_common.h"
 #include "libmesh/mesh_tools.h"
+
+// C++ Includes   -----------------------------------
 #include <algorithm>
 
-using namespace libMesh;
+namespace libMesh {
+
 using MeshTools::BoundingBox;
 
 namespace { // anonymous namespace for helper classes/functions
 
+/**
+ * The maximum capacity of a leaf PTNode before it should be refined
+ */
 const unsigned int max_points_in_leaf = 16;
 
+/**
+ * A comparator used for ordering points along a given axis.
+ *
+ * \author  Matthew D. Michelotti
+ */
 class PointComp {
 public:
   PointComp(int axis) : axis(axis) {}
@@ -22,27 +52,105 @@ private:
 
 } // end anonymous namespace
 
+
+/**
+ * This is the \p PTNode class.  Objects of this class represent
+ * nodes in a PointTree.  This is a k-d tree.
+ *
+ * \author  Matthew D. Michelotti
+ */
 class PointTree::PTNode {
 public:
+  /**
+   * Constructor.  The \p splitCounts array is the number of splits
+   * that have occurred along each axis in this node's ancestors.
+   */
   PTNode(const int* splitCounts);
+  
+  /**
+   * Destructor.
+   */
   ~PTNode();
+  
+  /**
+   * Inserts a single \p point into this node.  Tree leaves will not be
+   * refined until needed.
+   */
   void insert(Point* point);
+  
+  /**
+   * Efficiently finds all points in the tree that are contained within
+   * the given \p box.  These points are placed in the \p result vector.
+   */
   void find(const BoundingBox& box, std::vector<Point*>& result);
+  
+  /**
+   * Prints the contents of the subtree in a hierarchical manner.
+   * The \p depth input is the depth of this node.
+   */
   void print(int depth) const;
 
 private:
+
+  /**
+   * Overridden copy constructor that should never be used.
+   */
   PTNode(const PTNode& other) {libmesh_error();}
+
+  /**
+   * Overridden assignment operator that should never be used.
+   */
   PTNode& operator=(const PTNode& other) {libmesh_error();}
   
+  /**
+   * If this is a leaf node and has more points than max_points_in_leaf,
+   * then refines this leaf node into two new leaf node children.
+   * Splits along median of points for the selected axis.
+   * Will not refine new child nodes.
+   */
   void refine_leaf();
+  
+  /**
+   * @returns the axis with the fewest number of splits so far.
+   * If all points have the same value for some axis, will not return
+   * that axis.  If there is no suitable axis, returns LIBMESH_DIM.
+   */
   int select_axis() const;
+  
+  /**
+   * Returns true if this node is a leaf node.
+   */
   bool is_leaf() const;
   
+  /**
+   * The number of splits that have occurred along each axis in
+   * this node's ancestors.
+   */
   int splitCounts[LIBMESH_DIM];
+  
+  /**
+   * The axis of this node's split (if this is not a leaf node).
+   */
   int axis;
+  
+  /**
+   * The location of this node's split (if this is not a leaf node).
+   */
   Real pivot;
+  
+  /**
+   * The first child of this node (NULL if this is a leaf node).
+   */
   PTNode* loChild;
+  
+  /**
+   * The second child of this node (NULL if this is a leaf node).
+   */
   PTNode* hiChild;
+  
+  /**
+   * The points contained in this node (if this is a leaf node).
+   */
   std::vector<Point*> points;
 };
 
@@ -123,6 +231,8 @@ void PointTree::PTNode::refine_leaf() {
 }
 
 int PointTree::PTNode::select_axis() const {
+  //determine which axes we are allowed to split along
+  //(cannot split along an axes in which the split will have no effect)
   bool allowedMap[LIBMESH_DIM];
   for(int i = 0; i < LIBMESH_DIM; i++) allowedMap[i] = false;
   for(unsigned int i = 1; i < points.size(); i++) {
@@ -132,6 +242,7 @@ int PointTree::PTNode::select_axis() const {
     }
   }
 
+  //choose the allowed axis with the fewest splits so far
   int result = LIBMESH_DIM;
   for(int i = 0; i < LIBMESH_DIM; i++) {
     if(!allowedMap[i]) continue;
@@ -139,7 +250,6 @@ int PointTree::PTNode::select_axis() const {
       result = i;
     }
   }
-
   return result;
 }
 
@@ -175,3 +285,5 @@ void PointTree::print() const {
 
 PointTree::PointTree(const PointTree& other) {libmesh_error();}
 PointTree& PointTree::operator=(const PointTree& other) {libmesh_error();}
+
+} // end namespace libMesh
