@@ -122,6 +122,8 @@ class HaloNeighborsExtender : public Parallel::NeighborsExtender {
     
   protected:
     void testInit(int root, int testDataSize, const char* testData) {
+      (void)root;
+      (void)testDataSize;
       const BoundingBox& box = *(const BoundingBox*)testData;
       for(int i = 0; i < (int)ghostElems.size(); i++) {
         const Elem* elem = ghostElems[i];
@@ -233,8 +235,8 @@ void HaloManager::comm_particles(
   }
   
   //receive requests and send responses, giving particles to other processors
-  std::string outboxes[box_halo_neighbors.size()];
-  Request reqs[box_halo_neighbors.size()];
+  std::vector<std::string> outboxes(box_halo_neighbors.size());
+  std::vector<Request> reqs(box_halo_neighbors.size());
   std::vector<char> haloBuffer(sizeof(BoundingBox));
   for(unsigned int c = 0; c < box_halo_neighbors.size(); c++) {
     BoundingBox halo;

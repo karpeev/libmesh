@@ -95,12 +95,18 @@ private:
   /**
    * Overridden copy constructor that should never be used.
    */
-  PTNode(const PTNode& other) {libmesh_error();}
+  PTNode(const PTNode& other) {
+    libmesh_error();
+    (void)other;
+  }
 
   /**
    * Overridden assignment operator that should never be used.
    */
-  PTNode& operator=(const PTNode& other) {libmesh_error();}
+  PTNode& operator=(const PTNode& other) {
+    libmesh_error();
+    (void)other;
+  }
   
   /**
    * If this is a leaf node and has more points than max_points_in_leaf,
@@ -283,7 +289,14 @@ void PointTree::print() const {
   node->print(0);
 }
 
-PointTree::PointTree(const PointTree& other) {libmesh_error();}
-PointTree& PointTree::operator=(const PointTree& other) {libmesh_error();}
+PointTree::PointTree(const PointTree& other) {
+  libmesh_error();
+  (void)other;
+}
+
+PointTree& PointTree::operator=(const PointTree& other) {
+  libmesh_error();
+  (void)other;
+}
 
 } // end namespace libMesh

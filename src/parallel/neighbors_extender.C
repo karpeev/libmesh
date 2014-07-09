@@ -1,3 +1,22 @@
+// The libMesh Finite Element Library.
+// Copyright (C) 2002-2014 Benjamin S. Kirk, John W. Peterson, Roy H. Stogner
+
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+
+// Local Includes -----------------------------------
 #include "libmesh/neighbors_extender.h"
 
 //TODO can I use variable length arrays? or should I allocate memory for them?
@@ -64,7 +83,7 @@ void NeighborsExtender::intersect(std::vector<int>& a,
 }
 
 void NeighborsExtender::commRequests(int numRecvs) {
-  Request commReqs[requestLayer.size()];
+  std::vector<Request> commReqs(requestLayer.size());
   for(int i = 0; i < (int)requestLayer.size(); i++) {
     comm().send(requestLayer[i], testData, commReqs[i], tagRequest);
   }
@@ -103,7 +122,7 @@ void NeighborsExtender::recvRequest() {
 }
 
 void NeighborsExtender::commResponses(int numRecvs) {
-  Request commReqs[responseLayer.size()];
+  std::vector<Request> commReqs(responseLayer.size());
   for(int i = 0; i < (int)responseLayer.size(); i++) {
     comm().send(responseLayer[i], responseMsgs[i], commReqs[i], tagResponse);
   }
@@ -124,7 +143,7 @@ void NeighborsExtender::recvResponse() {
 }
 
 int NeighborsExtender::commNeighbors() {
-  Request commReqs[neighbors.size()];
+  std::vector<Request> commReqs(neighbors.size());
   for(int i = 0; i < (int)neighbors.size(); i++) {
     comm().send(neighbors[i], neighborMsgs[i], commReqs[i], tagNeighbor);
   }
@@ -154,12 +173,14 @@ bool NeighborsExtender::allProcessorsDone() {
 NeighborsExtender::NeighborsExtender(const NeighborsExtender& other)
     : ParallelObject(*(Communicator*)NULL)
 {
+  (void)other;
   libmesh_error();
 }
 
 NeighborsExtender& NeighborsExtender::operator=(
     const NeighborsExtender& other)
 {
+  (void)other;
   libmesh_error();
 }
 
