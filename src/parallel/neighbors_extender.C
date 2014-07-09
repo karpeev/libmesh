@@ -144,9 +144,11 @@ bool NeighborsExtender::allProcessorsDone() {
   return done;
 }
 
-//NeighborsExtender::NeighborsExtender(const NeighborsExtender& other) {
-//  libmesh_error();
-//}
+NeighborsExtender::NeighborsExtender(const NeighborsExtender& other)
+    : ParallelObject(*(Communicator*)NULL)
+{
+  libmesh_error();
+}
 
 NeighborsExtender& NeighborsExtender::operator=(
     const NeighborsExtender& other)

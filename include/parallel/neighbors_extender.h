@@ -16,8 +16,6 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-//TODO finish documenting NeighborsExtender
-
 #ifndef LIBMESH_NEIGHBORS_EXTENDER_H
 #define LIBMESH_NEIGHBORS_EXTENDER_H
 
@@ -117,11 +115,44 @@ class NeighborsExtender : public ParallelObject {
     static void intersect(std::vector<int>& a, const std::vector<int>& b);
 
   private:
+  
+    /**
+     * Send and receive request messages.  A request message will send
+     * the testData.  \p numRecvs is the number of request messages that
+     * will be received from other processors.
+     */
     void commRequests(int numRecvs);
+    
+    /**
+     * Receive a single request message.
+     */
     void recvRequest();
+  
+    /**
+     * Send and receive response messages.  A response message will send
+     * whether the source processor should be included in the dest processor's
+     * extended neighbors, along with the neighbors of the source processor
+     * that should be checked.  \p numRecvs is the number of response messages
+     * that will be received from other processors.
+     */
     void commResponses(int numRecvs);
+    
+    /**
+     * Receive a single response message.
+     */
     void recvResponse();
+    
+    /**
+     * Send and receive messages from neighbors.  These neighbor messages
+     * contain the processor IDs that the source processor referred the
+     * destination processor to.  This is needed  to determine how many
+     * requests will be received for the next commRequests call.
+     */
     int commNeighbors();
+    
+    /**
+     * Receive a single neighbor message.
+     */
     int recvNeighbor();
 
     /**
@@ -133,8 +164,7 @@ class NeighborsExtender : public ParallelObject {
     /**
      * Overridden copy constructor that should never be used.
      */
-    //NeighborsExtender(const NeighborsExtender& other);
-    //TODO uncomment copy constructor
+    NeighborsExtender(const NeighborsExtender& other);
 
     /**
      * Overridden assignment operator that should never be used.
@@ -180,11 +210,35 @@ class NeighborsExtender : public ParallelObject {
      */
     std::vector<int>* inNeighbors;
     
+    /**
+     * Processor IDs that requests were sent to, including
+     * contents of requestLayer.
+     */
     std::set<int> requestSet;
+    
+    /**
+     * Processor IDs that requests should be sent to next.
+     */
     std::vector<int> requestLayer;
+    
+    /**
+     * Processor IDs that responses were sent to or are about to be sent to.
+     */
     std::set<int> responseSet;
+    
+    /**
+     * Processor IDs that responses should be sent to next.
+     */
     std::vector<int> responseLayer;
+    
+    /**
+     * Buffers for response messages.
+     */
     std::vector<std::vector<int> > responseMsgs;
+    
+    /**
+     * Buffers for neighbor messages.
+     */
     std::vector<std::vector<int> > neighborMsgs;
 };
 
