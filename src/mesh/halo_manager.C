@@ -1,3 +1,22 @@
+// The libMesh Finite Element Library.
+// Copyright (C) 2002-2014 Benjamin S. Kirk, John W. Peterson, Roy H. Stogner
+
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+
+// Local Includes -----------------------------------
 #include "libmesh/halo_manager.h"
 #include "libmesh/mesh_base.h"
 #include "libmesh/elem.h"
@@ -6,15 +25,20 @@
 #include "libmesh/point.h"
 #include "libmesh/parallel.h"
 
+// C++ Includes   -----------------------------------
 #include <algorithm>
 
-using namespace libMesh;
+namespace libMesh {
+
 using MeshTools::BoundingBox;
 using Parallel::Request;
 using Parallel::MessageTag;
 
 namespace { // anonymous namespace for helper classes/functions
 
+/**
+ * @returns a box that bounds the given \p elem
+ */
 BoundingBox bounding_box(const Elem* elem) {
   BoundingBox box;
   for(unsigned int i = 0; i < elem->n_nodes(); i++) {
@@ -27,8 +51,50 @@ BoundingBox bounding_box(const Elem* elem) {
   return box;
 }
 
+/**
+ * @returns a box that bounds all points in the \p particles vector
+ */
+BoundingBox find_bounding_box(const std::vector<Point*> particles) {
+  if(particles.empty()) return BoundingBox(Point(0,0,0), Point(0,0,0));
+  BoundingBox box(*(Point*)particles[0], *(Point*)particles[0]);
+  for(unsigned int i = 0; i < particles.size(); i++) {
+    for(unsigned int d = 0; d < LIBMESH_DIM; d++) {
+      box.min()(d) = std::min(box.min()(d), (*particles[i])(d));
+      box.max()(d) = std::max(box.max()(d), (*particles[i])(d));
+    }
+  }
+  return box;
+}
+
+/**
+ * @returns the distance between points \p a and \p b
+ */
+Real distance(const Point* a, const Point* b) {
+  Real sqDist = 0.0;
+  for(unsigned int d = 0; d < LIBMESH_DIM; d++) {
+    Real diff = (*a)(d) - (*b)(d);
+    sqDist += diff*diff;
+  }
+  return std::sqrt(sqDist);
+}
+
+/**
+ * This is the \p HaloNeighborsExtender class.  It is used to form a set
+ * of extended neighbors corresponding to which processors are touching this
+ * processor's box halo (the bounding box of this processor expanded by
+ * a certain amount).
+ *
+ * \author  Matthew D. Michelotti
+ */
 class HaloNeighborsExtender : public Parallel::NeighborsExtender {
+
   public:
+  
+    /**
+     * Constructor.  Uses \p mesh for its Communicator and ghost elements.
+     * The \p neighbors vector contains the processor IDs of the immediate
+     * neighbors, and it should be consistent with the mesh.
+     */
     HaloNeighborsExtender(const MeshBase* mesh,
         const std::vector<int>& neighbors) : NeighborsExtender(mesh->comm())
     {
@@ -41,6 +107,11 @@ class HaloNeighborsExtender : public Parallel::NeighborsExtender {
       setNeighbors(neighbors);
     }
     
+    /**
+     * Finds the processor IDs of processors that overlap the given \p halo,
+     * and places these values in the \p result vector.  This is a
+     * collective operation.
+     */
     void resolve(const BoundingBox& halo, std::vector<int>& result) {
       std::vector<int> inNeighbors;
       NeighborsExtender::resolve(sizeof(BoundingBox),
@@ -64,31 +135,23 @@ class HaloNeighborsExtender : public Parallel::NeighborsExtender {
     void testClear() {testEdges.clear();}
     
   private:
+  
+    /**
+     * Elements belonging to neighboring processors.
+     */
     std::vector<const Elem*> ghostElems;
+    
+    /**
+     * Set of processors that have ghost elements on this processor that
+     * overlap the halo given in testInit.
+     */
     std::set<int> testEdges;
+    
+    /**
+     * The processor ID of this processor.
+     */
     processor_id_type pid;
 };
-
-BoundingBox find_bounding_box(const std::vector<Point*> particles) {
-  if(particles.empty()) return BoundingBox(Point(0,0,0), Point(0,0,0));
-  BoundingBox box(*(Point*)particles[0], *(Point*)particles[0]);
-  for(unsigned int i = 0; i < particles.size(); i++) {
-    for(unsigned int d = 0; d < LIBMESH_DIM; d++) {
-      box.min()(d) = std::min(box.min()(d), (*particles[i])(d));
-      box.max()(d) = std::max(box.max()(d), (*particles[i])(d));
-    }
-  }
-  return box;
-}
-
-double distance(const Point* a, const Point* b) {
-  Real sqDist = 0.0;
-  for(unsigned int d = 0; d < LIBMESH_DIM; d++) {
-    Real diff = (*a)(d) - (*b)(d);
-    sqDist += diff*diff;
-  }
-  return std::sqrt(sqDist);
-}
 
 } // end anonymous namespace
 
@@ -122,13 +185,18 @@ void HaloManager::find_particles_in_halos(
     std::vector<Point*>& particle_inbox,
     std::vector<std::vector<Point*> >& result) const
 {
+  //clear result vectors
   particle_inbox.clear();
   result.clear();
   result.resize(particles.size());
+  
+  //form tree and communicate particles between processors
   PointTree tree;
   tree.insert(particles);
   comm_particles(particles, tree, particle_serializer, particle_inbox);
   tree.insert(particle_inbox);
+  
+  //find particles in each particle's halo, using tree for efficiency
   std::vector<Point*> buffer;
   for(unsigned int i = 0; i < particles.size(); i++) {
     BoundingBox box;
@@ -152,6 +220,7 @@ void HaloManager::comm_particles(
     const Serializer<Point*>& particle_serializer,
     std::vector<Point*>& particle_inbox) const
 {
+  //send requests, giving halo to other processors
   BoundingBox pointsHalo = find_bounding_box(particles);
   pad_box(pointsHalo);
   std::vector<char> pointsHaloBuffer(sizeof(BoundingBox));
@@ -162,6 +231,8 @@ void HaloManager::comm_particles(
     //NOTE: we do not need to call wait on these requests,
     //      because we recieve responses from these processors
   }
+  
+  //receive requests and send responses, giving particles to other processors
   std::string outboxes[box_halo_neighbors.size()];
   Request reqs[box_halo_neighbors.size()];
   std::vector<char> haloBuffer(sizeof(BoundingBox));
@@ -184,6 +255,8 @@ void HaloManager::comm_particles(
     comm.send(source, outboxes[c], reqs[c], tagResponse);
     haloBuffer.clear();
   }
+  
+  //receive responses
   for(unsigned int c = 0; c < box_halo_neighbors.size(); c++) {
     std::string buffer;
     comm.receive(Parallel::any_source, buffer, tagResponse);
@@ -196,6 +269,8 @@ void HaloManager::comm_particles(
       particle_serializer.read(stream, particle_inbox[i]);
     }
   }
+  
+  //wait for all response sends to finish
   for(unsigned int i = 0; i < box_halo_neighbors.size(); i++) {
     reqs[i].wait();
   }
@@ -221,3 +296,5 @@ void HaloManager::pad_box(BoundingBox& box) const {
     box.max()(d) += halo_pad;
   }
 }
+
+} // end namespace libMesh
