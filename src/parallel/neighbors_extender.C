@@ -21,14 +21,19 @@ void NeighborsExtender::setNeighbors(const std::vector<int>& neighbors) {
 void NeighborsExtender::resolve(int testDataSize, const char* testData,
     std::vector<int>& outNeighbors, std::vector<int>& inNeighbors)
 {
+  //initialize vectors
   this->outNeighbors = &outNeighbors;
   this->inNeighbors = &inNeighbors;
   this->testData.clear();
   this->testData.reserve(testDataSize);
   for(int i = 0; i < testDataSize; i++) this->testData.push_back(testData[i]);
+  
+  //start by making request to this processor
   requestSet.insert(comm().rank());
   requestLayer.push_back(comm().rank());
   responseSet.insert(comm().rank());
+  
+  //loop for expanding extended neighbors
   bool isFirstIteration = true;
   do {
     int nextResponseLayerSize;
@@ -39,6 +44,8 @@ void NeighborsExtender::resolve(int testDataSize, const char* testData,
     commRequests(nextResponseLayerSize);
     commResponses(numRequestsMade);
   } while(!allProcessorsDone());
+  
+  //cleanup
   requestSet.clear();
   responseSet.clear();
   this->outNeighbors = NULL;
