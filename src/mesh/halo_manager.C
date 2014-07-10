@@ -79,6 +79,37 @@ Real distance(const Point* a, const Point* b) {
 }
 
 /**
+ * Writes the \p points vector to the \p bytes buffer using \p serializer.
+ */
+void write(const std::vector<Point*>& points, std::string& bytes,
+    const Serializer<Point*>& serializer)
+{
+  std::ostringstream stream;
+  unsigned int size = points.size();
+  stream.write((char*)&size, sizeof(size));
+  for(unsigned int i = 0; i < size; i++) {
+    serializer.write(stream, points[i]);
+  }
+  bytes = stream.str();
+}
+
+/**
+ * Reads the \p points vector from the \p bytes buffer using \p serializer.
+ */
+void read(std::vector<Point*>& points, const std::string& bytes,
+    const Serializer<Point*>& serializer)
+{
+  std::istringstream stream(bytes);
+  unsigned int size;
+  stream.read((char*)&size, sizeof(size));
+  unsigned int i = points.size();
+  points.resize(i + size);
+  for(; i < points.size(); i++) {
+    serializer.read(stream, points[i]);
+  }
+}
+
+/**
  * This is the \p HaloNeighborsExtender class.  It is used to form a set
  * of extended neighbors corresponding to which processors are touching this
  * processor's box halo (the bounding box of this processor expanded by
@@ -158,7 +189,7 @@ class HaloNeighborsExtender : public Parallel::NeighborsExtender {
 } // end anonymous namespace
 
 HaloManager::HaloManager(const MeshBase& mesh, Real halo_pad)
-    : halo_pad(halo_pad), comm(mesh.comm()),
+    : halo_pad(halo_pad), mesh(mesh), comm(mesh.comm()),
       tagRequest(mesh.comm().get_unique_tag(15382)),
       tagResponse(mesh.comm().get_unique_tag(15383))
 {
@@ -215,6 +246,60 @@ void HaloManager::find_particles_in_halos(
     buffer.clear();
   }
 }
+      
+void HaloManager::redistribute_particles(std::vector<Point*>& particles,
+    const std::vector<int>& destinations,
+    const Serializer<Point*>& serializer)
+{
+  libmesh_assert(particles.size() == destinations.size());
+  if(neighbors.empty()) return;
+  std::vector<Point*> newParticles;
+  std::map<int, std::vector<Point*> > outboxes;
+  for(unsigned int i = 0; i < neighbors.size(); i++) outboxes[neighbors[i]];
+  for(unsigned int i = 0; i < particles.size(); i++) {
+    if(destinations[i] == mesh.processor_id()) {
+      newParticles.push_back(particles[i]);
+    }
+    else if(outboxes.count(destinations[i]) > 0) {
+      outboxes[destinations[i]].push_back(particles[i]);
+    }
+    else {
+      libMesh::err << "ERROR, pid " << destinations[i]
+          << " is not a neighbor processor of pid " << mesh.processor_id()
+          << std::endl;
+      libmesh_error();
+    }
+  }
+  std::vector<std::string> buffers(neighbors.size());
+  std::vector<Request> reqs(neighbors.size());
+  for(unsigned int i = 0; i < neighbors.size(); i++) {
+    write(outboxes[neighbors[i]], buffers[i], serializer);
+    comm.send(neighbors[i], buffers[i], reqs[i], tagRedistribute);
+  }
+  for(unsigned int c = 0; c < neighbors.size(); c++) {
+    std::string buffer;
+    comm.receive(Parallel::any_source, buffer, tagRedistribute);
+    read(newParticles, buffer, serializer);
+  }
+  particles.swap(newParticles);
+  for(unsigned int i = 0; i < reqs.size(); i++) {
+    reqs[i].wait();
+  }
+}
+      
+void HaloManager::redistribute_particles(std::vector<Point*>& particles,
+    const Serializer<Point*>& serializer)
+{
+  std::vector<int> destinations(particles.size());
+  for(unsigned int i = 0; i < particles.size(); i++) {
+    const Elem* elem = mesh.point_locator()(*particles[i]);
+    if(elem == NULL) {
+      libMesh::err << "No element at point " << *particles[i] << std::endl;
+    }
+    destinations[i] = elem->processor_id();
+  }
+  redistribute_particles(particles, destinations, serializer);
+}
 
 void HaloManager::comm_particles(
     std::vector<Point*>& particles,
@@ -247,13 +332,7 @@ void HaloManager::comm_particles(
     if(halo.min()(0) != halo.max()(0)) {
       tree.find(halo, particles_buffer);
     }
-    std::ostringstream stream;
-    unsigned int size = particles_buffer.size();
-    stream.write((char*)&size, sizeof(size));
-    for(unsigned int i = 0; i < size; i++) {
-      particle_serializer.write(stream, particles_buffer[i]);
-    }
-    outboxes[c] = stream.str();
+    write(particles_buffer, outboxes[c], particle_serializer);
     comm.send(source, outboxes[c], reqs[c], tagResponse);
     haloBuffer.clear();
   }
@@ -262,18 +341,11 @@ void HaloManager::comm_particles(
   for(unsigned int c = 0; c < box_halo_neighbors.size(); c++) {
     std::string buffer;
     comm.receive(Parallel::any_source, buffer, tagResponse);
-    std::istringstream stream(buffer);
-    unsigned int size;
-    stream.read((char*)&size, sizeof(size));
-    unsigned int i = particle_inbox.size();
-    particle_inbox.resize(i + size);
-    for(; i < particle_inbox.size(); i++) {
-      particle_serializer.read(stream, particle_inbox[i]);
-    }
+    read(particle_inbox, buffer, particle_serializer);
   }
   
   //wait for all response sends to finish
-  for(unsigned int i = 0; i < box_halo_neighbors.size(); i++) {
+  for(unsigned int i = 0; i < reqs.size(); i++) {
     reqs[i].wait();
   }
 }

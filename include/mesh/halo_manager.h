@@ -26,6 +26,7 @@
 
 // C++ Includes   -----------------------------------
 #include <vector>
+#include <string>
 
 namespace libMesh {
 
@@ -80,13 +81,39 @@ public:
    * were received from nearby processors and were newly allocated.
    * HaloManager is not responsible for deleting these points.
    * In case the particle class used is a subclass of Point,
-   * the \p particle_serializer is used to read and write particles
+   * the \p serializer is used to read and write particles
    * to a buffer for communication between processors.
    */
   void find_particles_in_halos(std::vector<Point*>& particles,
-      const Serializer<Point*>& particle_serializer,
+      const Serializer<Point*>& serializer,
       std::vector<Point*>& particle_inbox,
       std::vector<std::vector<Point*> >& result) const;
+  
+  /**
+   * Transfers particles between neighboring processors.
+   * The \p particles vector is the local set of particles.
+   * The \p destinations vector is the set of destination
+   * processor IDs for each particle (same size as particles vector).
+   * Each of these IDs must correspond either to a neighbor
+   * processor or this processor.  The outgoing particles will
+   * be removed from the \p particles vector, and incoming particles
+   * will be added to the \p particles vector.
+   * In case the particle class used is a subclass of Point,
+   * the \p serializer is used to read and write particles
+   * to a buffer for communication between processors.
+   */
+  void redistribute_particles(std::vector<Point*>& particles,
+      const std::vector<int>& destinations,
+      const Serializer<Point*>& serializer);
+      
+  /**
+   * Same as other redistribute_particles method, but uses
+   * the processor IDs of mesh elements to determine the destinations
+   * of the particles.  Each particle must be within some element
+   * on the local mesh (could be a ghost element).
+   */
+  void redistribute_particles(std::vector<Point*>& particles,
+      const Serializer<Point*>& serializer);
 
   /**
    * Finds the processor IDs that are immediately neighboring
@@ -135,6 +162,11 @@ private:
    * The radius of the halos around points.
    */
   Real halo_pad;
+  
+  /**
+   * The mesh used for looking up elements.
+   */
+  const MeshBase& mesh;
 
   /**
    * Communicator used to send particles between processors.
@@ -150,6 +182,11 @@ private:
    * Communication tag used for sending particles to another processor.
    */
   const Parallel::MessageTag tagResponse;
+
+  /**
+   * Communication tag used for redistributing particles.
+   */
+  const Parallel::MessageTag tagRedistribute;
 };
 
 } // end namespace libMesh

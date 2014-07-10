@@ -19,8 +19,6 @@
 // Local Includes -----------------------------------
 #include "libmesh/neighbors_extender.h"
 
-//TODO can I use variable length arrays? or should I allocate memory for them?
-
 namespace libMesh {
 namespace Parallel {
 
