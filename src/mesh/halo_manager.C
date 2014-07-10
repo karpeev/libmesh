@@ -228,8 +228,10 @@ void HaloManager::find_particles_in_halos(
   tree.insert(particles);
   comm_particles(particles, tree, particle_serializer, particle_inbox);
   tree.insert(particle_inbox);
+  std::set<Point*> inbox_set(particle_inbox.begin(), particle_inbox.end());
   
   //find particles in each particle's halo, using tree for efficiency
+  std::set<Point*> inbox_used;
   std::vector<Point*> buffer;
   for(unsigned int i = 0; i < particles.size(); i++) {
     BoundingBox box;
@@ -242,9 +244,18 @@ void HaloManager::find_particles_in_halos(
       if(point == particles[i]) continue;
       if(distance(point, particles[i]) >= halo_pad) continue;
       result[i].push_back(point);
+      if(inbox_set.count(point)) inbox_used.insert(point);
     }
     buffer.clear();
   }
+  
+  //only return the used particles in the particle_inbox
+  for(unsigned int i = 0; i < particle_inbox.size(); i++) {
+    if(inbox_used.count(particle_inbox[i]) == 0) delete particle_inbox[i];
+  }
+  particle_inbox.clear();
+  std::copy(inbox_used.begin(), inbox_used.end(),
+      std::back_inserter(particle_inbox));
 }
       
 void HaloManager::redistribute_particles(std::vector<Point*>& particles,
