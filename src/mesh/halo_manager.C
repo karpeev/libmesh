@@ -199,8 +199,8 @@ HaloManager::HaloManager(const MeshBase& mesh, Real halo_pad)
       = MeshTools::processor_bounding_box(mesh, mesh.processor_id());
   pad_box(halo);
   HaloNeighborsExtender extender(&mesh, neighbors);
-  //TODO if we are using a SerialMesh, do not communicate with
-  //     other processors to find box_halo_neighbors
+  //TODO If we are using a SerialMesh, perhaps do not communicate with
+  //     other processors to find box_halo_neighbors?
   extender.resolve(halo, box_halo_neighbors);
 }
 
