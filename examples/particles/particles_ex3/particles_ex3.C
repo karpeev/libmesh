@@ -86,14 +86,6 @@ std::ostream& operator<<(std::ostream& os, const Particle* particle) {
   return os;
 }
 
-void print_x_coords(std::ostream& os, const std::vector<Particle*> points) {
-  std::vector<Real> coords;
-  for(unsigned int i = 0; i < points.size(); i++) {
-    coords.push_back((*points[i])(0));
-  }
-  os << coords;
-}
-
 Real time_diff(timeval start, timeval end) {
   return (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec)*1e-6;
 }
@@ -104,32 +96,27 @@ int main(int argc, char** argv) {
   gettimeofday(&time1, NULL);
   LibMeshInit init(argc, argv);
   
-  if (argc != 3) {
-    libmesh_error_msg("Usage: " << argv[0] << " width particles_per_cell");
-  }
-  unsigned int width = std::atoi(argv[1]);
-  unsigned int particles_per_cell = std::atoi(argv[2]);
-  
   std::ostringstream sout;
   ParallelMesh mesh(init.comm());
-  mesh.partitioner().reset(new CentroidPartitioner(CentroidPartitioner::X));
-  MeshTools::Generation::build_cube(mesh, width, 1, 1, -.5,
-      width - .5, 0, 1, 0, 1);
+  mesh.read("tile.e");
   mesh.print_info();
-  Real haloPad = 7.1;
+  Real haloPad = 1;
   HaloManager hm(mesh, haloPad);
   std::vector<Particle*> particles;
+  processor_id_type pid = mesh.processor_id();
   typedef MeshBase::element_iterator ElemIter_t;
-  for(ElemIter_t it = mesh.local_elements_begin();
-      it != mesh.local_elements_end(); it++)
+  typedef Elem::side_iterator SideIter_t;
+  for(ElemIter_t elem_it = mesh.local_elements_begin();
+      elem_it != mesh.local_elements_end(); elem_it++)
   {
-    Point centroid = (*it)->centroid();
-    for(unsigned int i = 0; i < particles_per_cell; i++) {
-      Real y = .5 + (i - .5*(particles_per_cell - 1))*.8/particles_per_cell;
-      Point point(centroid(0), y, y);
-      particles.push_back(new Particle(point, point(0)*10));
+    Elem* elem = *elem_it;
+    for(SideIter_t it = elem->boundary_sides_begin();
+        it != elem->boundary_sides_end(); it++)
+    {
+      if((*it)->processor_id() != pid) continue;
+      Point centroid = (*it)->centroid();
+      particles.push_back(new Particle(centroid, centroid(0)*10));
     }
-    //particles.push_back(new Particle(centroid, centroid(0)*10));
   }
   std::vector<Particle*> inbox;
   std::vector<std::vector<Particle*> > result;
@@ -160,7 +147,6 @@ int main(int argc, char** argv) {
   sout << "Neighbors: " << hm.neighbor_processors() << "\n";
   sout << "Halo Neighbors: " << hm.box_halo_neighbor_processors() << "\n";
   sout << "Particles Inbox: " << inbox;
-  //print_x_coords(sout, inbox);
   sout << "\n";
   sout << "Particle Groups:\n";
   for(unsigned int i = 0; i < result.size(); i++) {
@@ -168,7 +154,6 @@ int main(int argc, char** argv) {
       libmesh_assert(result[i][j]->getValue() == 10*(*result[i][j])(0));
     }
     sout << "  " << particles[i] << ": " << result[i];
-    //print_x_coords(sout, result[i]);
     sout << "\n";
   }
   sout << "Setup time: " << setup_time << " seconds\n";
