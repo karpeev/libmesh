@@ -25,6 +25,7 @@
 #include "libmesh/parallel_mesh.h"
 #include "libmesh/elem.h"
 #include "libmesh/mesh_tools.h"
+#include "libmesh/centroid_partitioner.h"
 #include <iostream>
 #include <istream>
 #include <ostream>
@@ -79,7 +80,7 @@ std::ostream& operator<<(std::ostream& os, const Particle* particle) {
   os << "(";
   for(unsigned int i = 0; i < LIBMESH_DIM; i++) {
     os << (*particle)(i);
-    if(i < LIBMESH_DIM - 1) os << ", ";
+    if(i < LIBMESH_DIM - 1) os << ",";
   }
   os << ")";
   return os;
@@ -101,7 +102,6 @@ int main(int argc, char** argv) {
   int num_reps = 100;
   timeval time1, time2, time3;
   gettimeofday(&time1, NULL);
-  //timeval time1 = std::time(NULL);
   LibMeshInit init(argc, argv);
   
   if (argc != 3) {
@@ -112,6 +112,7 @@ int main(int argc, char** argv) {
   
   std::ostringstream sout;
   ParallelMesh mesh(init.comm());
+  mesh.partitioner().reset(new CentroidPartitioner(CentroidPartitioner::X));
   MeshTools::Generation::build_cube(mesh, width, 1, 1, -.5,
       width - .5, 0, 1, 0, 1);
   mesh.print_info();
@@ -133,7 +134,6 @@ int main(int argc, char** argv) {
   std::vector<Particle*> inbox;
   std::vector<std::vector<Particle*> > result;
   Particle::PSerializer serializer;
-  //std::time_t time2 = std::time(NULL);
   gettimeofday(&time2, NULL);
   for(int c = 0; c < num_reps; c++) {
     for(unsigned int i = 0; i < inbox.size(); i++) {
@@ -147,12 +147,10 @@ int main(int argc, char** argv) {
         reinterpret_cast<std::vector<Point*>& >(inbox),
         reinterpret_cast<std::vector<std::vector<Point*> >& >(result));
   }
-  //std::time_t time3 = std::time(NULL);
   gettimeofday(&time3, NULL);
   
-  //sout << time1 << " " << time2 << " " << time3 << " " << CLOCKS_PER_SEC << "\n";
-  Real setup_time = time_diff(time1, time2);//(time2 - time1)/((Real)CLOCKS_PER_SEC);
-  Real comm_time = time_diff(time2, time3)/num_reps;//(time3 - time2)/((Real)CLOCKS_PER_SEC);
+  Real setup_time = time_diff(time1, time2);
+  Real comm_time = time_diff(time2, time3)/num_reps;
   
   sout << "======== Processor " << mesh.processor_id() << " ========\n";
   BoundingBox processor_box
@@ -169,7 +167,7 @@ int main(int argc, char** argv) {
     for(unsigned int j = 0; j < result[i].size(); j++) {
       libmesh_assert(result[i][j]->getValue() == 10*(*result[i][j])(0));
     }
-    sout << "  " << (*particles[i])(0) << ": " << result[i];
+    sout << "  " << particles[i] << ": " << result[i];
     //print_x_coords(sout, result[i]);
     sout << "\n";
   }
