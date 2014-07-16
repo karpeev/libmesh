@@ -76,16 +76,6 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
   return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const Particle* particle) {
-  os << "(";
-  for(unsigned int i = 0; i < LIBMESH_DIM; i++) {
-    os << (*particle)(i);
-    if(i < LIBMESH_DIM - 1) os << ",";
-  }
-  os << ")";
-  return os;
-}
-
 void print_x_coords(std::ostream& os, const std::vector<Particle*> points) {
   std::vector<Real> coords;
   for(unsigned int i = 0; i < points.size(); i++) {
@@ -99,38 +89,40 @@ Real time_diff(timeval start, timeval end) {
 }
 
 int main(int argc, char** argv) {
-  int num_reps = 100;
   timeval time1, time2, time3;
   gettimeofday(&time1, NULL);
   LibMeshInit init(argc, argv);
   
-  if (argc != 3) {
-    libmesh_error_msg("Usage: " << argv[0] << " width particles_per_cell");
+  if (argc != 4) {
+    libmesh_error_msg("Usage: " << argv[0]
+        << " width particles_per_cell num_reps");
   }
-  unsigned int width = std::atoi(argv[1]);
-  unsigned int particles_per_cell = std::atoi(argv[2]);
+  int width = std::atoi(argv[1]);
+  int num_particles = std::atoi(argv[2]);
+  int num_reps = std::atoi(argv[3]);
   
   std::ostringstream sout;
   ParallelMesh mesh(init.comm());
   mesh.partitioner().reset(new CentroidPartitioner(CentroidPartitioner::X));
-  MeshTools::Generation::build_cube(mesh, width, 1, 1, -.5,
-      width - .5, 0, 1, 0, 1);
+  MeshTools::Generation::build_cube(mesh, width, 1, 1, 0, width, 0, 1, 0, 1);
   mesh.print_info();
   Real haloPad = 7.1;
   HaloManager hm(mesh, haloPad);
   std::vector<Particle*> particles;
-  typedef MeshBase::element_iterator ElemIter_t;
-  for(ElemIter_t it = mesh.local_elements_begin();
-      it != mesh.local_elements_end(); it++)
-  {
-    Point centroid = (*it)->centroid();
-    for(unsigned int i = 0; i < particles_per_cell; i++) {
-      Real y = .5 + (i - .5*(particles_per_cell - 1))*.8/particles_per_cell;
-      Point point(centroid(0), y, y);
-      particles.push_back(new Particle(point, point(0)*10));
-    }
-    //particles.push_back(new Particle(centroid, centroid(0)*10));
+
+  BoundingBox processor_box
+      = MeshTools::processor_bounding_box(mesh, mesh.processor_id());
+  double minX = processor_box.min()(0);
+  double maxX = processor_box.max()(0);
+  double interval = width/(double)num_particles;
+  int minI = (int)ceil(minX/interval - .5);
+  int maxI = (int)ceil(maxX/interval - .5);
+  if(maxX == width) maxI = num_particles;
+  for(int i = minI; i < maxI; i++) {
+    Point point((i + .5)*interval, .5, .5);
+    particles.push_back(new Particle(point, point(0)*10));
   }
+
   std::vector<Particle*> inbox;
   std::vector<std::vector<Particle*> > result;
   Particle::PSerializer serializer;
@@ -153,26 +145,24 @@ int main(int argc, char** argv) {
   Real comm_time = time_diff(time2, time3)/num_reps;
   
   sout << "======== Processor " << mesh.processor_id() << " ========\n";
-  BoundingBox processor_box
-      = MeshTools::processor_bounding_box(mesh, mesh.processor_id());
   sout << "Processor Box: " << processor_box << "\n";
   sout << "Halo Pad: " << haloPad << "\n";
   sout << "Neighbors: " << hm.neighbor_processors() << "\n";
   sout << "Halo Neighbors: " << hm.box_halo_neighbor_processors() << "\n";
-  sout << "Particles Inbox: " << inbox;
-  //print_x_coords(sout, inbox);
+  sout << "Particles Inbox: ";
+  print_x_coords(sout, inbox);
   sout << "\n";
   sout << "Particle Groups:\n";
   for(unsigned int i = 0; i < result.size(); i++) {
     for(unsigned int j = 0; j < result[i].size(); j++) {
       libmesh_assert(result[i][j]->getValue() == 10*(*result[i][j])(0));
     }
-    sout << "  " << particles[i] << ": " << result[i];
-    //print_x_coords(sout, result[i]);
+    sout << "  " << (*particles[i])(0) << ": ";
+    print_x_coords(sout, result[i]);
     sout << "\n";
   }
   sout << "Setup time: " << setup_time << " seconds\n";
-  sout << "Communication time: " << comm_time << " seconds\n";
+  sout << "Halo finding time: " << comm_time << " seconds\n";
 
   std::string textStr = sout.str();
   std::vector<char> text(textStr.begin(), textStr.end());

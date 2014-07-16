@@ -157,7 +157,7 @@ int main(int argc, char** argv) {
     sout << "\n";
   }
   sout << "Setup time: " << setup_time << " seconds\n";
-  sout << "Communication time: " << comm_time << " seconds\n";
+  sout << "Halo finding time: " << comm_time << " seconds\n";
 
   std::string textStr = sout.str();
   std::vector<char> text(textStr.begin(), textStr.end());
