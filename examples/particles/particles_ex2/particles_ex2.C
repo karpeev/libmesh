@@ -95,7 +95,7 @@ int main(int argc, char** argv) {
   
   if (argc != 4) {
     libmesh_error_msg("Usage: " << argv[0]
-        << " width particles_per_cell num_reps");
+        << " width num_particles num_reps");
   }
   int width = std::atoi(argv[1]);
   int num_particles = std::atoi(argv[2]);
