@@ -152,20 +152,19 @@ class HaloNeighborsExtender : public Parallel::NeighborsExtender {
     }
     
   protected:
-    void testInit(int root, int testDataSize, const char* testData) {
+    void test(int root, int testDataSize, const char* testData, bool& nodePass,
+        std::set<int>& neighborsPass)
+    {
       (void)root;
       (void)testDataSize;
+      nodePass = true;
       const BoundingBox& box = *(const BoundingBox*)testData;
       for(int i = 0; i < (int)ghostElems.size(); i++) {
         const Elem* elem = ghostElems[i];
         BoundingBox elemBox = bounding_box(elem);
-        if(box.intersect(elemBox)) testEdges.insert(elem->processor_id());
+        if(box.intersect(elemBox)) neighborsPass.insert(elem->processor_id());
       }
     }
-    
-    bool testEdge(int neighbor) {return testEdges.count(neighbor) > 0;}
-    inline bool testNode() {return true;}
-    void testClear() {testEdges.clear();}
     
   private:
   
@@ -173,12 +172,6 @@ class HaloNeighborsExtender : public Parallel::NeighborsExtender {
      * Elements belonging to neighboring processors.
      */
     std::vector<const Elem*> ghostElems;
-    
-    /**
-     * Set of processors that have ghost elements on this processor that
-     * overlap the halo given in testInit.
-     */
-    std::set<int> testEdges;
     
     /**
      * The processor ID of this processor.

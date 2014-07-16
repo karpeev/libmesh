@@ -35,6 +35,10 @@ void NeighborsExtender::setNeighbors(const std::vector<int>& neighbors) {
   neighborMsgs.resize(neighbors.size());
 }
 
+const std::vector<int>& NeighborsExtender::getNeighbors() {
+  return neighbors;
+}
+
 void NeighborsExtender::resolve(int testDataSize, const char* testData,
     std::vector<int>& outNeighbors, std::vector<int>& inNeighbors)
 {
@@ -102,12 +106,14 @@ void NeighborsExtender::recvRequest() {
   }
   std::vector<int>& responseMsg = responseMsgs[layerI];
   responseMsg.clear();
-  testInit(source, buffer.size(), &buffer[0]);
-  if(testNode()) {
+  bool nodePass = false;
+  std::set<int> neighborsPass;
+  test(source, buffer.size(), &buffer[0], nodePass, neighborsPass);
+  if(nodePass) {
     responseMsg.push_back(1);
     inNeighbors->push_back(source);
     for(int i = 0; i < (int)neighbors.size(); i++) {
-      if(neighbors[i] != source && testEdge(neighbors[i])) {
+      if(neighbors[i] != source && neighborsPass.count(neighbors[i]) > 0) {
         responseMsg.push_back(neighbors[i]);
         neighborMsgs[i].push_back(source);
       }
@@ -116,7 +122,6 @@ void NeighborsExtender::recvRequest() {
   else {
     responseMsg.push_back(0);
   }
-  testClear();
 }
 
 void NeighborsExtender::commResponses(int numRecvs) {

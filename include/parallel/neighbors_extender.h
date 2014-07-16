@@ -62,9 +62,15 @@ class NeighborsExtender : public ParallelObject {
      * Set the immediate neighbors of this processor.  The \p neighbors
      * vector contains the processor IDs of these neighbors.  These
      * neighbors can be chosen however you like, perhaps by calling
-     * HaloManager::find_neighbor_processors(...).
+     * HaloManager::find_neighbor_processors(...).  Will make an
+     * independent copy of the given vector.
      */
     void setNeighbors(const std::vector<int>& neighbors);
+    
+    /**
+     * @returns the neighbors vector that was set using setNeighbors.
+     */
+    const std::vector<int>& getNeighbors();
 
     /**
      * Determine the extended neighbors of this processor based on a graph
@@ -81,31 +87,18 @@ class NeighborsExtender : public ParallelObject {
         std::vector<int>& outNeighbors, std::vector<int>& inNeighbors);
 
     /**
-     * Prepare for testing nodes and edges.  Given the \p root processor
-     * ID that is requesting the tests, as well as a \p testData block
-     * of memory of length \p testDataSize from that root processor
-     * that is important for the tests.
+     * Tests this node and its edges to determine which nodes/edges
+     * should be followed.  Given the \p root processor ID that is
+     * requesting the tests, as well as a \p testData block of memory
+     * of length \p testDataSize from that root processor that is important
+     * for the tests.  Should set \p nodePass to be true if this
+     * processor should be accepted as an extended neighbor of \p root.
+     * Should add neighboring processor IDs to \p neighborsPass for
+     * each edge that should be followed (this should be a subset of
+     * getNeighbors()).
      */
-    virtual void testInit(int root, int testDataSize,
-        const char* testData) = 0;
-
-    /**
-     * @returns true if the edge between this processor and the processor
-     * with processor ID specified by \p neighbor should be followed
-     * for the current testData passed to testInit.
-     */
-    virtual bool testEdge(int neighbor) = 0;
-
-    /**
-     * @returns true if this processor should be accepted as an extended
-     * neighbor of the processor specified in testInit.
-     */
-    virtual bool testNode() = 0;
-
-    /**
-     * Clear any data that was stored from a call to testInit.
-     */
-    virtual void testClear() = 0;
+    virtual void test(int root, int testDataSize, const char* testData,
+        bool& nodePass, std::set<int>& neighborsPass) = 0;
 
     /**
      * Computes the set intersection of the two vectors \p a and \p b,
