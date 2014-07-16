@@ -50,6 +50,27 @@ private:
   int axis;
 };
 
+/**
+ * @returns a pivot at the median of of the \p points vector along the
+ * \p axis.  The \p points are assumed to be sorted in increasing order
+ * along the \p axis, and we also assume that not all points have
+ * the same value on that axis. Will not choose a pivot that has no effect
+ * (i.e. after splitting along pivot, at least one point will fall on either
+ * side of the pivot).
+ */
+Real select_pivot(const std::vector<Point*>& points, int axis) {
+  libmesh_assert(points.size() > 0);
+  libmesh_assert((*points[0])(axis) < (*points.back())(axis));
+  unsigned int i = points.size()/2;
+  while((*points[i])(axis) == (*points[0])(axis)) i++;
+  while((*points[i])(axis) == (*points[i-1])(axis)) i--;
+  Real lo = (*points[i-1])(axis);
+  Real hi = (*points[i])(axis);
+  Real result = .5*(lo + hi);
+  if(result > lo && result < hi) return result;
+  return hi;
+}
+
 } // end anonymous namespace
 
 
@@ -226,7 +247,7 @@ void PointTree::PTNode::refine_leaf() {
   axis = select_axis();
   if(axis == LIBMESH_DIM) return;
   std::sort(points.begin(), points.end(), PointComp(axis));
-  pivot = (*points[points.size()/2])(axis);
+  pivot = select_pivot(points, axis);
   int newSplitCounts[LIBMESH_DIM];
   for(int i = 0; i < LIBMESH_DIM; i++) newSplitCounts[i] = splitCounts[i];
   newSplitCounts[axis]++;
