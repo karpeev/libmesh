@@ -24,6 +24,7 @@
 #include "libmesh/neighbors_extender.h"
 #include "libmesh/point.h"
 #include "libmesh/parallel.h"
+#include "libmesh/libmesh_logging.h"
 
 // C++ Includes   -----------------------------------
 #include <algorithm>
@@ -186,6 +187,8 @@ HaloManager::HaloManager(const MeshBase& mesh, Real halo_pad)
       tagRequest(mesh.comm().get_unique_tag(15382)),
       tagResponse(mesh.comm().get_unique_tag(15383))
 {
+  START_LOG("constructor", "HaloManager");
+
   find_neighbor_processors(mesh, neighbors);
   
   BoundingBox halo
@@ -195,6 +198,8 @@ HaloManager::HaloManager(const MeshBase& mesh, Real halo_pad)
   //TODO If we are using a SerialMesh, perhaps do not communicate with
   //     other processors to find box_halo_neighbors?
   extender.resolve(halo, box_halo_neighbors);
+  
+  STOP_LOG("constructor", "HaloManager");
 }
 
 void HaloManager::set_serializer(const Serializer<Point*>& serializer) {
@@ -215,6 +220,8 @@ void HaloManager::find_particles_in_halos(
     std::vector<Point*>& particle_inbox,
     std::vector<std::vector<Point*> >& result) const
 {
+  START_LOG("find_particles_in_halos", "HaloManager");
+
   //clear result vectors
   particle_inbox.clear();
   result.clear();
@@ -255,6 +262,8 @@ void HaloManager::find_particles_in_halos(
   particle_inbox.clear();
   std::copy(inbox_used.begin(), inbox_used.end(),
       std::back_inserter(particle_inbox));
+      
+  STOP_LOG("find_particles_in_halos", "HaloManager");
 }
 
 void HaloManager::find_particles_in_halos(
