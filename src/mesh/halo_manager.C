@@ -182,7 +182,7 @@ class HaloNeighborsExtender : public Parallel::NeighborsExtender {
 } // end anonymous namespace
 
 HaloManager::HaloManager(const MeshBase& mesh, Real halo_pad)
-    : halo_pad(halo_pad), mesh(mesh), comm(mesh.comm()),
+    : halo_pad(halo_pad), serializer(NULL), mesh(mesh), comm(mesh.comm()),
       tagRequest(mesh.comm().get_unique_tag(15382)),
       tagResponse(mesh.comm().get_unique_tag(15383))
 {
@@ -197,6 +197,10 @@ HaloManager::HaloManager(const MeshBase& mesh, Real halo_pad)
   extender.resolve(halo, box_halo_neighbors);
 }
 
+void HaloManager::set_serializer(const Serializer<Point*>& serializer) {
+  this->serializer = &serializer;
+}
+
 const std::vector<int>& HaloManager::neighbor_processors() const {
   return neighbors;
 }
@@ -206,36 +210,38 @@ const std::vector<int>& HaloManager::box_halo_neighbor_processors() const {
 }
 
 void HaloManager::find_particles_in_halos(
-    std::vector<Point*>& particles,
-    const Serializer<Point*>& particle_serializer,
+    const std::vector<Point*>& halo_centers,
+    const std::vector<Point*>& particles,
     std::vector<Point*>& particle_inbox,
     std::vector<std::vector<Point*> >& result) const
 {
   //clear result vectors
   particle_inbox.clear();
   result.clear();
-  result.resize(particles.size());
+  result.resize(halo_centers.size());
   
   //form tree and communicate particles between processors
   PointTree tree;
   tree.insert(particles);
-  comm_particles(particles, tree, particle_serializer, particle_inbox);
+  BoundingBox box_halo = find_bounding_box(halo_centers);
+  pad_box(box_halo);
+  comm_particles(box_halo, tree, particle_inbox);
   tree.insert(particle_inbox);
   std::set<Point*> inbox_set(particle_inbox.begin(), particle_inbox.end());
   
   //find particles in each particle's halo, using tree for efficiency
   std::set<Point*> inbox_used;
   std::vector<Point*> buffer;
-  for(unsigned int i = 0; i < particles.size(); i++) {
+  for(unsigned int i = 0; i < halo_centers.size(); i++) {
     BoundingBox box;
-    box.min() = *particles[i];
-    box.max() = *particles[i];
+    box.min() = *halo_centers[i];
+    box.max() = *halo_centers[i];
     pad_box(box);
     tree.find(box, buffer);
     for(unsigned int j = 0; j < buffer.size(); j++) {
       Point* point = buffer[j];
-      if(point == particles[i]) continue;
-      if(distance(point, particles[i]) >= halo_pad) continue;
+      if(point == halo_centers[i]) continue;
+      if(distance(point, halo_centers[i]) >= halo_pad) continue;
       result[i].push_back(point);
       if(inbox_set.count(point)) inbox_used.insert(point);
     }
@@ -250,10 +256,17 @@ void HaloManager::find_particles_in_halos(
   std::copy(inbox_used.begin(), inbox_used.end(),
       std::back_inserter(particle_inbox));
 }
+
+void HaloManager::find_particles_in_halos(
+    const std::vector<Point*>& particles,
+    std::vector<Point*>& particle_inbox,
+    std::vector<std::vector<Point*> >& result) const
+{
+  find_particles_in_halos(particles, particles, particle_inbox, result);
+}
       
 void HaloManager::redistribute_particles(std::vector<Point*>& particles,
-    const std::vector<int>& destinations,
-    const Serializer<Point*>& serializer)
+    const std::vector<int>& destinations)
 {
   libmesh_assert(particles.size() == destinations.size());
   if(neighbors.empty()) return;
@@ -277,13 +290,13 @@ void HaloManager::redistribute_particles(std::vector<Point*>& particles,
   std::vector<std::string> buffers(neighbors.size());
   std::vector<Request> reqs(neighbors.size());
   for(unsigned int i = 0; i < neighbors.size(); i++) {
-    write(outboxes[neighbors[i]], buffers[i], serializer);
+    write(outboxes[neighbors[i]], buffers[i], *serializer);
     comm.send(neighbors[i], buffers[i], reqs[i], tagRedistribute);
   }
   for(unsigned int c = 0; c < neighbors.size(); c++) {
     std::string buffer;
     comm.receive(Parallel::any_source, buffer, tagRedistribute);
-    read(newParticles, buffer, serializer);
+    read(newParticles, buffer, *serializer);
   }
   particles.swap(newParticles);
   for(unsigned int i = 0; i < reqs.size(); i++) {
@@ -291,8 +304,7 @@ void HaloManager::redistribute_particles(std::vector<Point*>& particles,
   }
 }
       
-void HaloManager::redistribute_particles(std::vector<Point*>& particles,
-    const Serializer<Point*>& serializer)
+void HaloManager::redistribute_particles(std::vector<Point*>& particles)
 {
   std::vector<int> destinations(particles.size());
   for(unsigned int i = 0; i < particles.size(); i++) {
@@ -302,20 +314,15 @@ void HaloManager::redistribute_particles(std::vector<Point*>& particles,
     }
     destinations[i] = elem->processor_id();
   }
-  redistribute_particles(particles, destinations, serializer);
+  redistribute_particles(particles, destinations);
 }
 
-void HaloManager::comm_particles(
-    std::vector<Point*>& particles,
-    PointTree& tree,
-    const Serializer<Point*>& particle_serializer,
+void HaloManager::comm_particles(BoundingBox box_halo, PointTree& tree,
     std::vector<Point*>& particle_inbox) const
 {
   //send requests, giving halo to other processors
-  BoundingBox pointsHalo = find_bounding_box(particles);
-  pad_box(pointsHalo);
   std::vector<char> pointsHaloBuffer(sizeof(BoundingBox));
-  (*((BoundingBox*)&pointsHaloBuffer[0])) = pointsHalo;
+  (*((BoundingBox*)&pointsHaloBuffer[0])) = box_halo;
   Request dummyReq;
   for(unsigned int i = 0; i < box_halo_neighbors.size(); i++) {
     comm.send(box_halo_neighbors[i], pointsHaloBuffer, dummyReq, tagRequest);
@@ -336,7 +343,7 @@ void HaloManager::comm_particles(
     if(halo.min()(0) != halo.max()(0)) {
       tree.find(halo, particles_buffer);
     }
-    write(particles_buffer, outboxes[c], particle_serializer);
+    write(particles_buffer, outboxes[c], *serializer);
     comm.send(source, outboxes[c], reqs[c], tagResponse);
     haloBuffer.clear();
   }
@@ -345,7 +352,7 @@ void HaloManager::comm_particles(
   for(unsigned int c = 0; c < box_halo_neighbors.size(); c++) {
     std::string buffer;
     comm.receive(Parallel::any_source, buffer, tagResponse);
-    read(particle_inbox, buffer, particle_serializer);
+    read(particle_inbox, buffer, *serializer);
   }
   
   //wait for all response sends to finish

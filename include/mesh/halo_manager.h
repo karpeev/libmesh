@@ -59,6 +59,12 @@ public:
    * processors.  \p halo_pad is the radius of the halos.
    */
   HaloManager(const MeshBase& mesh, Real halo_pad);
+  
+  /**
+   * Set the \p serializer used to read/write particles
+   * from/to a buffer for communication between processors.
+   */
+  void set_serializer(const Serializer<Point*>& serializer);
 
   /**
    * @returns the processor IDs that are immediately neighboring
@@ -74,18 +80,28 @@ public:
   const std::vector<int>& box_halo_neighbor_processors() const;
 
   /**
-   * For each point in the \p particles vector, finds all other points
-   * that are a distance of at most halo_pad from the given point,
-   * and stores those values in \p result at the same index.
-   * The \p particle_inbox vector will be filled with points that
+   * For each point in the \p halo_centers vector, finds all other points
+   * in the \p particles vector that are a distance of at most halo_pad
+   * from the given point, and stores those values in \p result at the same
+   * index.  The \p particle_inbox vector will be filled with points that
    * were received from nearby processors and were newly allocated.
    * HaloManager is not responsible for deleting these points.
    * In case the particle class used is a subclass of Point,
    * the \p serializer is used to read and write particles
    * to a buffer for communication between processors.
    */
-  void find_particles_in_halos(std::vector<Point*>& particles,
-      const Serializer<Point*>& serializer,
+  void find_particles_in_halos(
+      const std::vector<Point*>& halo_centers,
+      const std::vector<Point*>& particles,
+      std::vector<Point*>& particle_inbox,
+      std::vector<std::vector<Point*> >& result) const;
+  
+  /**
+   * Same as other find_particles_in_halos method, except
+   * uses the same vector for particles and halo_centers.
+   */
+  void find_particles_in_halos(
+      const std::vector<Point*>& particles,
       std::vector<Point*>& particle_inbox,
       std::vector<std::vector<Point*> >& result) const;
   
@@ -103,8 +119,7 @@ public:
    * to a buffer for communication between processors.
    */
   void redistribute_particles(std::vector<Point*>& particles,
-      const std::vector<int>& destinations,
-      const Serializer<Point*>& serializer);
+      const std::vector<int>& destinations);
       
   /**
    * Same as other redistribute_particles method, but uses
@@ -112,8 +127,7 @@ public:
    * of the particles.  Each particle must be within some element
    * on the local mesh (could be a ghost element).
    */
-  void redistribute_particles(std::vector<Point*>& particles,
-      const Serializer<Point*>& serializer);
+  void redistribute_particles(std::vector<Point*>& particles);
 
   /**
    * Finds the processor IDs that are immediately neighboring
@@ -127,8 +141,7 @@ private:
 
   /**
    * Receives points (from other processors) that are within
-   * the box halo based on the bounding box of the \p particles vector
-   * expanded by halo_pad.  The received particles are placed
+   * the given \p box_halo.  The received particles are placed
    * into the \p inbox vector.  The \p tree should contain
    * the same points as in the \p particles vector, and is used
    * for quick lookup of points in box halos to send to other processors.
@@ -136,10 +149,7 @@ private:
    * the \p particle_serializer is used to read and write particles
    * to a buffer for communication between processors.
    */
-  void comm_particles(
-      std::vector<Point*>& particles,
-      PointTree& tree,
-      const Serializer<Point*>& particle_serializer,
+  void comm_particles(MeshTools::BoundingBox box_halo, PointTree& tree,
       std::vector<Point*>& particle_inbox) const;
 
   /**
@@ -162,6 +172,12 @@ private:
    * The radius of the halos around points.
    */
   Real halo_pad;
+  
+  /**
+   * The serializer used to read/write particles
+   * from/to a buffer for communication between processors.
+   */
+  const Serializer<Point*>* serializer;
   
   /**
    * The mesh used for looking up elements.

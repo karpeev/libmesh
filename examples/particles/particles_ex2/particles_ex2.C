@@ -107,7 +107,9 @@ int main(int argc, char** argv) {
   MeshTools::Generation::build_cube(mesh, width, 1, 1, 0, width, 0, 1, 0, 1);
   mesh.print_info();
   Real haloPad = 7.1;
+  Particle::PSerializer serializer;
   HaloManager hm(mesh, haloPad);
+  hm.set_serializer(serializer);
   std::vector<Particle*> particles;
 
   BoundingBox processor_box
@@ -125,7 +127,6 @@ int main(int argc, char** argv) {
 
   std::vector<Particle*> inbox;
   std::vector<std::vector<Particle*> > result;
-  Particle::PSerializer serializer;
   gettimeofday(&time2, NULL);
   for(int c = 0; c < num_reps; c++) {
     for(unsigned int i = 0; i < inbox.size(); i++) {
@@ -135,7 +136,6 @@ int main(int argc, char** argv) {
     result.clear();
     hm.find_particles_in_halos(
         reinterpret_cast<std::vector<Point*>& >(particles),
-        serializer,
         reinterpret_cast<std::vector<Point*>& >(inbox),
         reinterpret_cast<std::vector<std::vector<Point*> >& >(result));
   }

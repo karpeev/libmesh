@@ -101,7 +101,9 @@ int main(int argc, char** argv) {
   mesh.read("tile.e");
   mesh.print_info();
   Real haloPad = 1;
+  Particle::PSerializer serializer;
   HaloManager hm(mesh, haloPad);
+  hm.set_serializer(serializer);
   std::vector<Particle*> particles;
   processor_id_type pid = mesh.processor_id();
   typedef MeshBase::element_iterator ElemIter_t;
@@ -120,7 +122,6 @@ int main(int argc, char** argv) {
   }
   std::vector<Particle*> inbox;
   std::vector<std::vector<Particle*> > result;
-  Particle::PSerializer serializer;
   gettimeofday(&time2, NULL);
   for(int c = 0; c < num_reps; c++) {
     for(unsigned int i = 0; i < inbox.size(); i++) {
@@ -130,7 +131,6 @@ int main(int argc, char** argv) {
     result.clear();
     hm.find_particles_in_halos(
         reinterpret_cast<std::vector<Point*>& >(particles),
-        serializer,
         reinterpret_cast<std::vector<Point*>& >(inbox),
         reinterpret_cast<std::vector<std::vector<Point*> >& >(result));
   }

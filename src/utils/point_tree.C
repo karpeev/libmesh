@@ -298,7 +298,7 @@ void PointTree::insert(Point* point) {
   node->insert(point);
 }
 
-void PointTree::insert(std::vector<Point*>& points) {
+void PointTree::insert(const std::vector<Point*>& points) {
   for(unsigned int i = 0; i < points.size(); i++) insert(points[i]);
 }
 

@@ -65,7 +65,7 @@ public:
    * Tree leaves will not be refined until needed (e.g. when find(...)
    * is called).
    */
-  void insert(std::vector<Point*>& points);
+  void insert(const std::vector<Point*>& points);
 
   /**
    * Efficiently finds all points in the tree that are contained within
