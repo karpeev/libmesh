@@ -93,20 +93,20 @@ int main(int argc, char** argv) {
   gettimeofday(&time1, NULL);
   LibMeshInit init(argc, argv);
   
-  if (argc != 4) {
+  if (argc != 5) {
     libmesh_error_msg("Usage: " << argv[0]
-        << " width num_particles num_reps");
+        << " width halo_pad num_particles num_reps");
   }
   int width = std::atoi(argv[1]);
-  int num_particles = std::atoi(argv[2]);
-  int num_reps = std::atoi(argv[3]);
+  Real haloPad = std::atof(argv[2]);
+  int num_particles = std::atoi(argv[3]);
+  int num_reps = std::atoi(argv[4]);
   
   std::ostringstream sout;
   ParallelMesh mesh(init.comm());
   mesh.partitioner().reset(new CentroidPartitioner(CentroidPartitioner::X));
   MeshTools::Generation::build_cube(mesh, width, 1, 1, 0, width, 0, 1, 0, 1);
   mesh.print_info();
-  Real haloPad = 7.1;
   Particle::PSerializer serializer;
   HaloManager hm(mesh, haloPad);
   hm.set_serializer(serializer);
