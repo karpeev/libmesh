@@ -24,53 +24,55 @@ namespace Parallel {
 
 NeighborsExtender::NeighborsExtender(const Communicator& comm)
     : ParallelObject(comm),
-      tagRequest(comm.get_unique_tag(12753)),
-      tagResponse(comm.get_unique_tag(12754)),
-      tagNeighbor(comm.get_unique_tag(12755)),
-      outNeighbors(NULL), inNeighbors(NULL)
+      tag_request(comm.get_unique_tag(12753)),
+      tag_response(comm.get_unique_tag(12754)),
+      tag_neighbor(comm.get_unique_tag(12755)),
+      out_neighbors(NULL), in_neighbors(NULL)
 {}
 
-void NeighborsExtender::setNeighbors(const std::vector<int>& neighbors) {
+void NeighborsExtender::set_neighbors(const std::vector<int>& neighbors) {
   this->neighbors = neighbors;
-  neighborMsgs.resize(neighbors.size());
+  neighbor_msgs.resize(neighbors.size());
 }
 
-const std::vector<int>& NeighborsExtender::getNeighbors() {
+const std::vector<int>& NeighborsExtender::get_neighbors() {
   return neighbors;
 }
 
-void NeighborsExtender::resolve(int testDataSize, const char* testData,
-    std::vector<int>& outNeighbors, std::vector<int>& inNeighbors)
+void NeighborsExtender::resolve(int test_data_size, const char* test_data,
+    std::vector<int>& out_neighbors, std::vector<int>& in_neighbors)
 {
   //initialize vectors
-  this->outNeighbors = &outNeighbors;
-  this->inNeighbors = &inNeighbors;
-  this->testData.clear();
-  this->testData.reserve(testDataSize);
-  for(int i = 0; i < testDataSize; i++) this->testData.push_back(testData[i]);
+  this->out_neighbors = &out_neighbors;
+  this->in_neighbors = &in_neighbors;
+  this->test_data.clear();
+  this->test_data.reserve(test_data_size);
+  for(int i = 0; i < test_data_size; i++) {
+    this->test_data.push_back(test_data[i]);
+  }
   
   //start by making request to this processor
-  requestSet.insert(comm().rank());
-  requestLayer.push_back(comm().rank());
-  responseSet.insert(comm().rank());
+  request_set.insert(comm().rank());
+  request_layer.push_back(comm().rank());
+  response_set.insert(comm().rank());
   
   //loop for expanding extended neighbors
-  bool isFirstIteration = true;
+  bool is_first_iteration = true;
   do {
-    int nextResponseLayerSize;
-    if(isFirstIteration) nextResponseLayerSize = 1;
-    else nextResponseLayerSize = commNeighbors();
-    isFirstIteration = false;
-    int numRequestsMade = requestLayer.size();
-    commRequests(nextResponseLayerSize);
-    commResponses(numRequestsMade);
-  } while(!allProcessorsDone());
+    int next_response_layer_size;
+    if(is_first_iteration) next_response_layer_size = 1;
+    else next_response_layer_size = comm_neighbors();
+    is_first_iteration = false;
+    int num_requests_made = request_layer.size();
+    comm_requests(next_response_layer_size);
+    comm_responses(num_requests_made);
+  } while(!all_processors_done());
   
   //cleanup
-  requestSet.clear();
-  responseSet.clear();
-  this->outNeighbors = NULL;
-  this->inNeighbors = NULL;
+  request_set.clear();
+  response_set.clear();
+  this->out_neighbors = NULL;
+  this->in_neighbors = NULL;
 }
 
 void NeighborsExtender::intersect(std::vector<int>& a,
@@ -84,38 +86,38 @@ void NeighborsExtender::intersect(std::vector<int>& a,
   }
 }
 
-void NeighborsExtender::commRequests(int numRecvs) {
-  std::vector<Request> commReqs(requestLayer.size());
-  for(int i = 0; i < (int)requestLayer.size(); i++) {
-    comm().send(requestLayer[i], testData, commReqs[i], tagRequest);
+void NeighborsExtender::comm_requests(int n_recvs) {
+  std::vector<Request> comm_reqs(request_layer.size());
+  for(int i = 0; i < (int)request_layer.size(); i++) {
+    comm().send(request_layer[i], test_data, comm_reqs[i], tag_request);
   }
-  for(int i = 0; i < (int)neighborMsgs.size(); i++) neighborMsgs[i].clear();
-  for(; numRecvs > 0; numRecvs--) recvRequest();
-  for(int i = 0; i < (int)requestLayer.size(); i++) commReqs[i].wait();
-  requestLayer.clear();
+  for(int i = 0; i < (int)neighbor_msgs.size(); i++) neighbor_msgs[i].clear();
+  for(; n_recvs > 0; n_recvs--) recv_request();
+  for(int i = 0; i < (int)request_layer.size(); i++) comm_reqs[i].wait();
+  request_layer.clear();
 }
 
-void NeighborsExtender::recvRequest() {
+void NeighborsExtender::recv_request() {
   std::vector<char> buffer;
-  int source = comm().receive(any_source, buffer, tagRequest).source();
+  int source = comm().receive(any_source, buffer, tag_request).source();
 
-  int layerI = responseLayer.size();
-  responseLayer.push_back(source);
-  if(responseMsgs.size() < responseLayer.size()) {
-    responseMsgs.resize(responseLayer.size());
+  int layer_i = response_layer.size();
+  response_layer.push_back(source);
+  if(response_msgs.size() < response_layer.size()) {
+    response_msgs.resize(response_layer.size());
   }
-  std::vector<int>& responseMsg = responseMsgs[layerI];
+  std::vector<int>& responseMsg = response_msgs[layer_i];
   responseMsg.clear();
-  bool nodePass = false;
-  std::set<int> neighborsPass;
-  test(source, buffer.size(), &buffer[0], nodePass, neighborsPass);
-  if(nodePass) {
+  bool node_pass = false;
+  std::set<int> neighbors_pass;
+  test(source, buffer.size(), &buffer[0], node_pass, neighbors_pass);
+  if(node_pass) {
     responseMsg.push_back(1);
-    inNeighbors->push_back(source);
+    in_neighbors->push_back(source);
     for(int i = 0; i < (int)neighbors.size(); i++) {
-      if(neighbors[i] != source && neighborsPass.count(neighbors[i]) > 0) {
+      if(neighbors[i] != source && neighbors_pass.count(neighbors[i]) > 0) {
         responseMsg.push_back(neighbors[i]);
-        neighborMsgs[i].push_back(source);
+        neighbor_msgs[i].push_back(source);
       }
     }
   }
@@ -124,51 +126,52 @@ void NeighborsExtender::recvRequest() {
   }
 }
 
-void NeighborsExtender::commResponses(int numRecvs) {
-  std::vector<Request> commReqs(responseLayer.size());
-  for(int i = 0; i < (int)responseLayer.size(); i++) {
-    comm().send(responseLayer[i], responseMsgs[i], commReqs[i], tagResponse);
+void NeighborsExtender::comm_responses(int n_recvs) {
+  std::vector<Request> comm_reqs(response_layer.size());
+  for(int i = 0; i < (int)response_layer.size(); i++) {
+    comm().send(response_layer[i], response_msgs[i], comm_reqs[i],
+        tag_response);
   }
-  for(; numRecvs > 0; numRecvs--) recvResponse();
-  for(int i = 0; i < (int)responseLayer.size(); i++) commReqs[i].wait();
-  responseLayer.clear();
+  for(; n_recvs > 0; n_recvs--) recv_response();
+  for(int i = 0; i < (int)response_layer.size(); i++) comm_reqs[i].wait();
+  response_layer.clear();
 }
 
-void NeighborsExtender::recvResponse() {
+void NeighborsExtender::recv_response() {
   std::vector<int> buffer;
-  int source = comm().receive(any_source, buffer, tagResponse).source();
+  int source = comm().receive(any_source, buffer, tag_response).source();
 
-  if(buffer[0]) outNeighbors->push_back(source);
+  if(buffer[0]) out_neighbors->push_back(source);
   for(int i = 1; i < (int)buffer.size(); i++) {
-    bool success = requestSet.insert(buffer[i]).second;
-    if(success) requestLayer.push_back(buffer[i]);
+    bool success = request_set.insert(buffer[i]).second;
+    if(success) request_layer.push_back(buffer[i]);
   }
 }
 
-int NeighborsExtender::commNeighbors() {
-  std::vector<Request> commReqs(neighbors.size());
+int NeighborsExtender::comm_neighbors() {
+  std::vector<Request> comm_reqs(neighbors.size());
   for(int i = 0; i < (int)neighbors.size(); i++) {
-    comm().send(neighbors[i], neighborMsgs[i], commReqs[i], tagNeighbor);
+    comm().send(neighbors[i], neighbor_msgs[i], comm_reqs[i], tag_neighbor);
   }
   int result = 0;
-  for(int i = 0; i < (int)neighbors.size(); i++) result += recvNeighbor();
-  for(int i = 0; i < (int)neighbors.size(); i++) commReqs[i].wait();
+  for(int i = 0; i < (int)neighbors.size(); i++) result += recv_neighbor();
+  for(int i = 0; i < (int)neighbors.size(); i++) comm_reqs[i].wait();
   return result;
 }
 
-int NeighborsExtender::recvNeighbor() {
+int NeighborsExtender::recv_neighbor() {
   std::vector<int> buffer;
-  comm().receive(any_source, buffer, tagNeighbor);
+  comm().receive(any_source, buffer, tag_neighbor);
 
   int result = 0;
   for(int i = 0; i < (int)buffer.size(); i++) {
-    if(responseSet.insert(buffer[i]).second) result++;
+    if(response_set.insert(buffer[i]).second) result++;
   }
   return result;
 }
 
-bool NeighborsExtender::allProcessorsDone() {
-  bool done = (requestLayer.empty() ? 1 : 0);
+bool NeighborsExtender::all_processors_done() {
+  bool done = (request_layer.empty() ? 1 : 0);
   comm().max(done);
   return done;
 }

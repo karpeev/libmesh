@@ -192,17 +192,17 @@ private:
   /**
    * Communication tag used for requesting particles from another processor.
    */
-  const Parallel::MessageTag tagRequest;
+  const Parallel::MessageTag tag_request;
 
   /**
    * Communication tag used for sending particles to another processor.
    */
-  const Parallel::MessageTag tagResponse;
+  const Parallel::MessageTag tag_response;
 
   /**
    * Communication tag used for redistributing particles.
    */
-  const Parallel::MessageTag tagRedistribute;
+  const Parallel::MessageTag tag_redistribute;
 };
 
 } // end namespace libMesh

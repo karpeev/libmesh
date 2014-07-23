@@ -97,7 +97,7 @@ private:
   /**
    * A pointer to the root node of the tree.
    */
-  PTNode* node;
+  PTNode* root;
 };
 
 } // namespace libMesh

@@ -83,10 +83,10 @@ Real select_pivot(const std::vector<Point*>& points, int axis) {
 class PointTree::PTNode {
 public:
   /**
-   * Constructor.  The \p splitCounts array is the number of splits
+   * Constructor.  The \p split_counts array is the number of splits
    * that have occurred along each axis in this node's ancestors.
    */
-  PTNode(const int* splitCounts);
+  PTNode(const int* split_counts);
   
   /**
    * Destructor.
@@ -153,7 +153,7 @@ private:
    * The number of splits that have occurred along each axis in
    * this node's ancestors.
    */
-  int splitCounts[LIBMESH_DIM];
+  int split_counts[LIBMESH_DIM];
   
   /**
    * The axis of this node's split (if this is not a leaf node).
@@ -168,12 +168,12 @@ private:
   /**
    * The first child of this node (NULL if this is a leaf node).
    */
-  PTNode* loChild;
+  PTNode* lo_child;
   
   /**
    * The second child of this node (NULL if this is a leaf node).
    */
-  PTNode* hiChild;
+  PTNode* hi_child;
   
   /**
    * The points contained in this node (if this is a leaf node).
@@ -181,15 +181,15 @@ private:
   std::vector<Point*> points;
 };
 
-PointTree::PTNode::PTNode(const int* splitCounts)
-  : loChild(NULL), hiChild(NULL)
+PointTree::PTNode::PTNode(const int* split_counts)
+  : lo_child(NULL), hi_child(NULL)
 {
-  for(int i = 0; i < LIBMESH_DIM; i++) this->splitCounts[i] = splitCounts[i];
+  for(int i = 0; i < LIBMESH_DIM; i++) this->split_counts[i] = split_counts[i];
 }
 
 PointTree::PTNode::~PTNode() {
-  if(loChild != NULL) delete loChild;
-  if(hiChild != NULL) delete hiChild;
+  if(lo_child != NULL) delete lo_child;
+  if(hi_child != NULL) delete hi_child;
 }
 
 void PointTree::PTNode::insert(Point* point) {
@@ -197,8 +197,8 @@ void PointTree::PTNode::insert(Point* point) {
     points.push_back(point);
   }
   else {
-    if((*point)(axis) < pivot) loChild->insert(point);
-    else hiChild->insert(point);
+    if((*point)(axis) < pivot) lo_child->insert(point);
+    else hi_child->insert(point);
   }
 }
 
@@ -213,8 +213,8 @@ void PointTree::PTNode::find(const BoundingBox& box,
     }
   }
   else {
-    if(box.min()(axis) < pivot) loChild->find(box, result);
-    if(box.max()(axis) >= pivot) hiChild->find(box, result);
+    if(box.min()(axis) < pivot) lo_child->find(box, result);
+    if(box.max()(axis) >= pivot) hi_child->find(box, result);
   }
 }
 
@@ -236,8 +236,8 @@ void PointTree::PTNode::print(int depth) const {
   else {
     libmesh_assert(points.size() == 0);
     libMesh::out << "axis " << axis << " pivot " << pivot << std::endl;
-    loChild->print(depth + 1);
-    hiChild->print(depth + 1);
+    lo_child->print(depth + 1);
+    hi_child->print(depth + 1);
   }
 }
 
@@ -248,11 +248,11 @@ void PointTree::PTNode::refine_leaf() {
   if(axis == LIBMESH_DIM) return;
   std::sort(points.begin(), points.end(), PointComp(axis));
   pivot = select_pivot(points, axis);
-  int newSplitCounts[LIBMESH_DIM];
-  for(int i = 0; i < LIBMESH_DIM; i++) newSplitCounts[i] = splitCounts[i];
-  newSplitCounts[axis]++;
-  loChild = new PTNode(newSplitCounts);
-  hiChild = new PTNode(newSplitCounts);
+  int new_split_counts[LIBMESH_DIM];
+  for(int i = 0; i < LIBMESH_DIM; i++) new_split_counts[i] = split_counts[i];
+  new_split_counts[axis]++;
+  lo_child = new PTNode(new_split_counts);
+  hi_child = new PTNode(new_split_counts);
   for(unsigned int i = 0; i < points.size(); i++) insert(points[i]);
   points.clear();
 }
@@ -260,20 +260,20 @@ void PointTree::PTNode::refine_leaf() {
 int PointTree::PTNode::select_axis() const {
   //determine which axes we are allowed to split along
   //(cannot split along an axes in which the split will have no effect)
-  bool allowedMap[LIBMESH_DIM];
-  for(int i = 0; i < LIBMESH_DIM; i++) allowedMap[i] = false;
+  bool allowed_map[LIBMESH_DIM];
+  for(int i = 0; i < LIBMESH_DIM; i++) allowed_map[i] = false;
   for(unsigned int i = 1; i < points.size(); i++) {
     for(unsigned int axis = 0; axis < LIBMESH_DIM; axis++) {
-      if(allowedMap[axis]) continue;
-      if((*points[i])(axis) != (*points[0])(axis)) allowedMap[axis] = true;
+      if(allowed_map[axis]) continue;
+      if((*points[i])(axis) != (*points[0])(axis)) allowed_map[axis] = true;
     }
   }
 
   //choose the allowed axis with the fewest splits so far
   int result = LIBMESH_DIM;
   for(int i = 0; i < LIBMESH_DIM; i++) {
-    if(!allowedMap[i]) continue;
-    if(result == LIBMESH_DIM || splitCounts[i] < splitCounts[result]) {
+    if(!allowed_map[i]) continue;
+    if(result == LIBMESH_DIM || split_counts[i] < split_counts[result]) {
       result = i;
     }
   }
@@ -281,21 +281,21 @@ int PointTree::PTNode::select_axis() const {
 }
 
 bool PointTree::PTNode::is_leaf() const {
-  return loChild == NULL;
+  return lo_child == NULL;
 }
 
 PointTree::PointTree() {
-  int splitCounts[LIBMESH_DIM];
-  for(int i = 0; i < LIBMESH_DIM; i++) splitCounts[i] = 0;
-  node = new PTNode(splitCounts);
+  int split_counts[LIBMESH_DIM];
+  for(int i = 0; i < LIBMESH_DIM; i++) split_counts[i] = 0;
+  root = new PTNode(split_counts);
 }
 
 PointTree::~PointTree() {
-  delete node;
+  delete root;
 }
 
 void PointTree::insert(Point* point) {
-  node->insert(point);
+  root->insert(point);
 }
 
 void PointTree::insert(const std::vector<Point*>& points) {
@@ -303,11 +303,11 @@ void PointTree::insert(const std::vector<Point*>& points) {
 }
 
 void PointTree::find(const BoundingBox& box, std::vector<Point*>& result) {
-  node->find(box, result);
+  root->find(box, result);
 }
 
 void PointTree::print() const {
-  node->print(0);
+  root->print(0);
 }
 
 PointTree::PointTree(const PointTree& other) {

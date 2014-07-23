@@ -53,7 +53,7 @@ public:
     }
   };
   
-  Real getValue() const {return value;}
+  Real get_value() const {return value;}
   
 private:
   Real value;
@@ -76,15 +76,15 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
 }
 
 void print_x_coords(std::ostream& os, const std::vector<Particle*> points) {
-  unsigned int maxPrinted = 15;
+  unsigned int max_printed = 15;
   std::vector<Real> coords;
   for(unsigned int i = 0; i < points.size(); i++) {
-    if(i >= maxPrinted) break;
+    if(i >= max_printed) break;
     coords.push_back((*points[i])(0));
   }
   os << coords;
-  if(points.size() > maxPrinted) {
-    os << " ( + " << (points.size() - maxPrinted) << " more...)";
+  if(points.size() > max_printed) {
+    os << " ( + " << (points.size() - max_printed) << " more...)";
   }
 }
 
@@ -100,7 +100,7 @@ int main(int argc, char** argv) {
         << " width halo_pad num_particles num_reps");
   }
   int width = std::atoi(argv[1]);
-  Real haloPad = std::atof(argv[2]);
+  Real halo_pad = std::atof(argv[2]);
   int num_particles = std::atoi(argv[3]);
   int num_reps = std::atoi(argv[4]);
   
@@ -136,7 +136,7 @@ int main(int argc, char** argv) {
     }
     inbox.clear();
     result.clear();
-    hm = new HaloManager(mesh, haloPad);
+    hm = new HaloManager(mesh, halo_pad);
     hm->set_serializer(serializer);
     hm->find_particles_in_halos(
         reinterpret_cast<std::vector<Point*>& >(particles),
@@ -146,7 +146,7 @@ int main(int argc, char** argv) {
   
   sout << "======== Processor " << mesh.processor_id() << " ========\n";
   sout << "Processor Box: " << processor_box << "\n";
-  sout << "Halo Pad: " << haloPad << "\n";
+  sout << "Halo Pad: " << halo_pad << "\n";
   sout << "Neighbors: " << hm->neighbor_processors() << "\n";
   sout << "Halo Neighbors: " << hm->box_halo_neighbor_processors() << "\n";
   sout << "Particles Inbox: ";
@@ -155,15 +155,15 @@ int main(int argc, char** argv) {
   sout << "Particle Groups:\n";
   for(unsigned int i = 0; i < result.size(); i++) {
     for(unsigned int j = 0; j < result[i].size(); j++) {
-      libmesh_assert(result[i][j]->getValue() == 10*(*result[i][j])(0));
+      libmesh_assert(result[i][j]->get_value() == 10*(*result[i][j])(0));
     }
     sout << "  " << (*particles[i])(0) << ": ";
     print_x_coords(sout, result[i]);
     sout << "\n";
   }
 
-  std::string textStr = sout.str();
-  std::vector<char> text(textStr.begin(), textStr.end());
+  std::string text_str = sout.str();
+  std::vector<char> text(text_str.begin(), text_str.end());
   text.push_back('\0');
   init.comm().gather(0, text);
   int ci = 0;

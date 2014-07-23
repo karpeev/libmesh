@@ -71,12 +71,12 @@ BoundingBox find_bounding_box(const std::vector<Point*> particles) {
  * @returns the distance between points \p a and \p b
  */
 Real distance(const Point* a, const Point* b) {
-  Real sqDist = 0.0;
+  Real sq_dist = 0.0;
   for(unsigned int d = 0; d < LIBMESH_DIM; d++) {
     Real diff = (*a)(d) - (*b)(d);
-    sqDist += diff*diff;
+    sq_dist += diff*diff;
   }
-  return std::sqrt(sqDist);
+  return std::sqrt(sq_dist);
 }
 
 /**
@@ -134,9 +134,9 @@ class HaloNeighborsExtender : public Parallel::NeighborsExtender {
       MeshBase::const_element_iterator it = mesh->not_local_elements_begin();
       for(; it != mesh->not_local_elements_end(); it++) {
         const Elem* elem = *it;
-        if(elem->is_semilocal(pid)) ghostElems.push_back(elem);
+        if(elem->is_semilocal(pid)) ghost_elems.push_back(elem);
       }
-      setNeighbors(neighbors);
+      set_neighbors(neighbors);
     }
     
     /**
@@ -145,25 +145,27 @@ class HaloNeighborsExtender : public Parallel::NeighborsExtender {
      * collective operation.
      */
     void resolve(const BoundingBox& halo, std::vector<int>& result) {
-      std::vector<int> inNeighbors;
+      std::vector<int> in_neighbors;
       NeighborsExtender::resolve(sizeof(BoundingBox),
-          (const char*)&halo, result, inNeighbors);
-      NeighborsExtender::intersect(result, inNeighbors);
+          (const char*)&halo, result, in_neighbors);
+      NeighborsExtender::intersect(result, in_neighbors);
       result.erase(std::find(result.begin(), result.end(), pid));
     }
     
   protected:
-    void test(int root, int testDataSize, const char* testData, bool& nodePass,
-        std::set<int>& neighborsPass)
+    void test(int root, int test_data_size, const char* test_data,
+        bool& node_pass, std::set<int>& neighbors_pass)
     {
       (void)root;
-      (void)testDataSize;
-      nodePass = true;
-      const BoundingBox& box = *(const BoundingBox*)testData;
-      for(int i = 0; i < (int)ghostElems.size(); i++) {
-        const Elem* elem = ghostElems[i];
-        BoundingBox elemBox = bounding_box(elem);
-        if(box.intersect(elemBox)) neighborsPass.insert(elem->processor_id());
+      (void)test_data_size;
+      node_pass = true;
+      const BoundingBox& box = *(const BoundingBox*)test_data;
+      for(int i = 0; i < (int)ghost_elems.size(); i++) {
+        const Elem* elem = ghost_elems[i];
+        BoundingBox elem_box = bounding_box(elem);
+        if(box.intersect(elem_box)) {
+          neighbors_pass.insert(elem->processor_id());
+        }
       }
     }
     
@@ -172,7 +174,7 @@ class HaloNeighborsExtender : public Parallel::NeighborsExtender {
     /**
      * Elements belonging to neighboring processors.
      */
-    std::vector<const Elem*> ghostElems;
+    std::vector<const Elem*> ghost_elems;
     
     /**
      * The processor ID of this processor.
@@ -184,8 +186,8 @@ class HaloNeighborsExtender : public Parallel::NeighborsExtender {
 
 HaloManager::HaloManager(const MeshBase& mesh, Real halo_pad)
     : halo_pad(halo_pad), serializer(NULL), mesh(mesh), comm(mesh.comm()),
-      tagRequest(mesh.comm().get_unique_tag(15382)),
-      tagResponse(mesh.comm().get_unique_tag(15383))
+      tag_request(mesh.comm().get_unique_tag(15382)),
+      tag_response(mesh.comm().get_unique_tag(15383))
 {
   START_LOG("constructor", "HaloManager");
 
@@ -279,12 +281,12 @@ void HaloManager::redistribute_particles(std::vector<Point*>& particles,
 {
   libmesh_assert(particles.size() == destinations.size());
   if(neighbors.empty()) return;
-  std::vector<Point*> newParticles;
+  std::vector<Point*> new_particles;
   std::map<int, std::vector<Point*> > outboxes;
   for(unsigned int i = 0; i < neighbors.size(); i++) outboxes[neighbors[i]];
   for(unsigned int i = 0; i < particles.size(); i++) {
     if(destinations[i] == mesh.processor_id()) {
-      newParticles.push_back(particles[i]);
+      new_particles.push_back(particles[i]);
     }
     else if(outboxes.count(destinations[i]) > 0) {
       outboxes[destinations[i]].push_back(particles[i]);
@@ -300,14 +302,14 @@ void HaloManager::redistribute_particles(std::vector<Point*>& particles,
   std::vector<Request> reqs(neighbors.size());
   for(unsigned int i = 0; i < neighbors.size(); i++) {
     write(outboxes[neighbors[i]], buffers[i], *serializer);
-    comm.send(neighbors[i], buffers[i], reqs[i], tagRedistribute);
+    comm.send(neighbors[i], buffers[i], reqs[i], tag_redistribute);
   }
   for(unsigned int c = 0; c < neighbors.size(); c++) {
     std::string buffer;
-    comm.receive(Parallel::any_source, buffer, tagRedistribute);
-    read(newParticles, buffer, *serializer);
+    comm.receive(Parallel::any_source, buffer, tag_redistribute);
+    read(new_particles, buffer, *serializer);
   }
-  particles.swap(newParticles);
+  particles.swap(new_particles);
   for(unsigned int i = 0; i < reqs.size(); i++) {
     reqs[i].wait();
   }
@@ -330,11 +332,12 @@ void HaloManager::comm_particles(BoundingBox box_halo, PointTree& tree,
     std::vector<Point*>& particle_inbox) const
 {
   //send requests, giving halo to other processors
-  std::vector<char> pointsHaloBuffer(sizeof(BoundingBox));
-  (*((BoundingBox*)&pointsHaloBuffer[0])) = box_halo;
-  Request dummyReq;
+  std::vector<char> points_halo_buffer(sizeof(BoundingBox));
+  (*((BoundingBox*)&points_halo_buffer[0])) = box_halo;
+  Request dummy_req;
   for(unsigned int i = 0; i < box_halo_neighbors.size(); i++) {
-    comm.send(box_halo_neighbors[i], pointsHaloBuffer, dummyReq, tagRequest);
+    comm.send(box_halo_neighbors[i], points_halo_buffer, dummy_req,
+        tag_request);
     //NOTE: we do not need to call wait on these requests,
     //      because we recieve responses from these processors
   }
@@ -342,25 +345,25 @@ void HaloManager::comm_particles(BoundingBox box_halo, PointTree& tree,
   //receive requests and send responses, giving particles to other processors
   std::vector<std::string> outboxes(box_halo_neighbors.size());
   std::vector<Request> reqs(box_halo_neighbors.size());
-  std::vector<char> haloBuffer(sizeof(BoundingBox));
+  std::vector<char> halo_buffer(sizeof(BoundingBox));
   for(unsigned int c = 0; c < box_halo_neighbors.size(); c++) {
     BoundingBox halo;
     int source = comm.receive(
-        Parallel::any_source, haloBuffer, tagRequest).source();
-    halo = *((BoundingBox*)&haloBuffer[0]);
+        Parallel::any_source, halo_buffer, tag_request).source();
+    halo = *((BoundingBox*)&halo_buffer[0]);
     std::vector<Point*> particles_buffer;
     if(halo.min()(0) != halo.max()(0)) {
       tree.find(halo, particles_buffer);
     }
     write(particles_buffer, outboxes[c], *serializer);
-    comm.send(source, outboxes[c], reqs[c], tagResponse);
-    haloBuffer.clear();
+    comm.send(source, outboxes[c], reqs[c], tag_response);
+    halo_buffer.clear();
   }
   
   //receive responses
   for(unsigned int c = 0; c < box_halo_neighbors.size(); c++) {
     std::string buffer;
-    comm.receive(Parallel::any_source, buffer, tagResponse);
+    comm.receive(Parallel::any_source, buffer, tag_response);
     read(particle_inbox, buffer, *serializer);
   }
   
@@ -373,14 +376,14 @@ void HaloManager::comm_particles(BoundingBox box_halo, PointTree& tree,
 void HaloManager::find_neighbor_processors(const MeshBase& mesh,
     std::vector<int>& result)
 {
-  std::set<int> neighborSet;
+  std::set<int> neighbor_set;
   processor_id_type pid = mesh.processor_id();
   MeshBase::const_element_iterator it = mesh.not_local_elements_begin();
   for(; it != mesh.not_local_elements_end(); it++) {
     const Elem* elem = *it;
-    if(elem->is_semilocal(pid)) neighborSet.insert(elem->processor_id());
+    if(elem->is_semilocal(pid)) neighbor_set.insert(elem->processor_id());
   }
-  std::copy(neighborSet.begin(), neighborSet.end(),
+  std::copy(neighbor_set.begin(), neighbor_set.end(),
             std::back_inserter(result));
 }
 

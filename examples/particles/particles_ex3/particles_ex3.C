@@ -54,7 +54,7 @@ public:
     }
   };
   
-  Real getValue() const {return value;}
+  Real get_value() const {return value;}
   
 private:
   Real value;
@@ -100,9 +100,9 @@ int main(int argc, char** argv) {
   ParallelMesh mesh(init.comm());
   mesh.read("tile.e");
   mesh.print_info();
-  Real haloPad = 1;
+  Real halo_pad = 1;
   Particle::PSerializer serializer;
-  HaloManager hm(mesh, haloPad);
+  HaloManager hm(mesh, halo_pad);
   hm.set_serializer(serializer);
   std::vector<Particle*> particles;
   processor_id_type pid = mesh.processor_id();
@@ -143,7 +143,7 @@ int main(int argc, char** argv) {
   BoundingBox processor_box
       = MeshTools::processor_bounding_box(mesh, mesh.processor_id());
   sout << "Processor Box: " << processor_box << "\n";
-  sout << "Halo Pad: " << haloPad << "\n";
+  sout << "Halo Pad: " << halo_pad << "\n";
   sout << "Neighbors: " << hm.neighbor_processors() << "\n";
   sout << "Halo Neighbors: " << hm.box_halo_neighbor_processors() << "\n";
   sout << "Particles Inbox: " << inbox;
@@ -151,7 +151,7 @@ int main(int argc, char** argv) {
   sout << "Particle Groups:\n";
   for(unsigned int i = 0; i < result.size(); i++) {
     for(unsigned int j = 0; j < result[i].size(); j++) {
-      libmesh_assert(result[i][j]->getValue() == 10*(*result[i][j])(0));
+      libmesh_assert(result[i][j]->get_value() == 10*(*result[i][j])(0));
     }
     sout << "  " << particles[i] << ": " << result[i];
     sout << "\n";
@@ -159,8 +159,8 @@ int main(int argc, char** argv) {
   sout << "Setup time: " << setup_time << " seconds\n";
   sout << "Halo finding time: " << comm_time << " seconds\n";
 
-  std::string textStr = sout.str();
-  std::vector<char> text(textStr.begin(), textStr.end());
+  std::string text_str = sout.str();
+  std::vector<char> text(text_str.begin(), text_str.end());
   text.push_back('\0');
   init.comm().gather(0, text);
   int ci = 0;

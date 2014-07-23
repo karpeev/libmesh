@@ -65,40 +65,40 @@ class NeighborsExtender : public ParallelObject {
      * HaloManager::find_neighbor_processors(...).  Will make an
      * independent copy of the given vector.
      */
-    void setNeighbors(const std::vector<int>& neighbors);
+    void set_neighbors(const std::vector<int>& neighbors);
     
     /**
-     * @returns the neighbors vector that was set using setNeighbors.
+     * @returns the neighbors vector that was set using set_neighbors.
      */
-    const std::vector<int>& getNeighbors();
+    const std::vector<int>& get_neighbors();
 
     /**
      * Determine the extended neighbors of this processor based on a graph
      * traversal in parallel.  This is a collective operation.  The
-     * \p testData block of memory of length \p testDataSize will be passed
+     * \p test_data block of memory of length \p test_data_size will be passed
      * to the testInit(...) function on other processors.  This method
      * will follow the nodes and edges allowed by testNode and testEdge
-     * to increase the connectivity of this processor.  The \p outNeighbors
+     * to increase the connectivity of this processor.  The \p out_neighbors
      * vector will be filled with the extended neighbors of this processor.
-     * The \p inNeighbors vector will be filled with all processors who
+     * The \p in_neighbors vector will be filled with all processors who
      * have this processor as an extended neighbor.
      */
-    void resolve(int testDataSize, const char* testData,
-        std::vector<int>& outNeighbors, std::vector<int>& inNeighbors);
+    void resolve(int test_data_size, const char* test_data,
+        std::vector<int>& out_neighbors, std::vector<int>& in_neighbors);
 
     /**
      * Tests this node and its edges to determine which nodes/edges
      * should be followed.  Given the \p root processor ID that is
-     * requesting the tests, as well as a \p testData block of memory
-     * of length \p testDataSize from that root processor that is important
-     * for the tests.  Should set \p nodePass to be true if this
+     * requesting the tests, as well as a \p test_data block of memory
+     * of length \p test_data_size from that root processor that is important
+     * for the tests.  Should set \p node_pass to be true if this
      * processor should be accepted as an extended neighbor of \p root.
-     * Should add neighboring processor IDs to \p neighborsPass for
+     * Should add neighboring processor IDs to \p neighbors_pass for
      * each edge that should be followed (this should be a subset of
-     * getNeighbors()).
+     * get_neighbors()).
      */
-    virtual void test(int root, int testDataSize, const char* testData,
-        bool& nodePass, std::set<int>& neighborsPass) = 0;
+    virtual void test(int root, int test_data_size, const char* test_data,
+        bool& node_pass, std::set<int>& neighbors_pass) = 0;
 
     /**
      * Computes the set intersection of the two vectors \p a and \p b,
@@ -111,48 +111,48 @@ class NeighborsExtender : public ParallelObject {
   
     /**
      * Send and receive request messages.  A request message will send
-     * the testData.  \p numRecvs is the number of request messages that
+     * the test_data.  \p n_recvs is the number of request messages that
      * will be received from other processors.
      */
-    void commRequests(int numRecvs);
+    void comm_requests(int n_recvs);
     
     /**
      * Receive a single request message.
      */
-    void recvRequest();
+    void recv_request();
   
     /**
      * Send and receive response messages.  A response message will send
      * whether the source processor should be included in the dest processor's
      * extended neighbors, along with the neighbors of the source processor
-     * that should be checked.  \p numRecvs is the number of response messages
+     * that should be checked.  \p n_recvs is the number of response messages
      * that will be received from other processors.
      */
-    void commResponses(int numRecvs);
+    void comm_responses(int n_recvs);
     
     /**
      * Receive a single response message.
      */
-    void recvResponse();
+    void recv_response();
     
     /**
      * Send and receive messages from neighbors.  These neighbor messages
      * contain the processor IDs that the source processor referred the
      * destination processor to.  This is needed  to determine how many
-     * requests will be received for the next commRequests call.
+     * requests will be received for the next comm_requests call.
      */
-    int commNeighbors();
+    int comm_neighbors();
     
     /**
      * Receive a single neighbor message.
      */
-    int recvNeighbor();
+    int recv_neighbor();
 
     /**
      * Performs an all-reduce operation to determine if all processors
      * are finished forming their extended neighbors.
      */
-    bool allProcessorsDone();
+    bool all_processors_done();
 
     /**
      * Overridden copy constructor that should never be used.
@@ -173,66 +173,66 @@ class NeighborsExtender : public ParallelObject {
      * Communication tag used for requesting extended connectivity results
      * from another processor.
      */
-    MessageTag tagRequest;
+    MessageTag tag_request;
 
     /**
      * Communication tag for sending extended connectivity results
      * to another processor.
      */
-    MessageTag tagResponse;
+    MessageTag tag_response;
 
     /**
      * Communication tag for communicating next request counts to
      * immediate neighbors of this processor.
      */
-    MessageTag tagNeighbor;
+    MessageTag tag_neighbor;
 
     /**
-     * The testData originating from this processor (argument of
+     * The test_data originating from this processor (argument of
      * resolve(...)), stored as a vector for sending to other processors.
      */
-    std::vector<char> testData;
+    std::vector<char> test_data;
 
     /**
      * The outgoing extended neighbors (argument of resolve(...)).
      */
-    std::vector<int>* outNeighbors;
+    std::vector<int>* out_neighbors;
 
     /**
      * The incoming extended neighbors (argument of resolve(...)).
      */
-    std::vector<int>* inNeighbors;
+    std::vector<int>* in_neighbors;
     
     /**
      * Processor IDs that requests were sent to, including
-     * contents of requestLayer.
+     * contents of request_layer.
      */
-    std::set<int> requestSet;
+    std::set<int> request_set;
     
     /**
      * Processor IDs that requests should be sent to next.
      */
-    std::vector<int> requestLayer;
+    std::vector<int> request_layer;
     
     /**
      * Processor IDs that responses were sent to or are about to be sent to.
      */
-    std::set<int> responseSet;
+    std::set<int> response_set;
     
     /**
      * Processor IDs that responses should be sent to next.
      */
-    std::vector<int> responseLayer;
+    std::vector<int> response_layer;
     
     /**
      * Buffers for response messages.
      */
-    std::vector<std::vector<int> > responseMsgs;
+    std::vector<std::vector<int> > response_msgs;
     
     /**
      * Buffers for neighbor messages.
      */
-    std::vector<std::vector<int> > neighborMsgs;
+    std::vector<std::vector<int> > neighbor_msgs;
 };
 
 } // namespace Parallel
