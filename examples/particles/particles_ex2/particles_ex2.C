@@ -31,7 +31,6 @@
 #include <ostream>
 #include <vector>
 #include <sstream>
-#include <sys/time.h>
 
 using namespace libMesh;
 using MeshTools::BoundingBox;
@@ -77,11 +76,16 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
 }
 
 void print_x_coords(std::ostream& os, const std::vector<Particle*> points) {
+  unsigned int maxPrinted = 15;
   std::vector<Real> coords;
   for(unsigned int i = 0; i < points.size(); i++) {
+    if(i >= maxPrinted) break;
     coords.push_back((*points[i])(0));
   }
   os << coords;
+  if(points.size() > maxPrinted) {
+    os << " ( + " << (points.size() - maxPrinted) << " more...)";
+  }
 }
 
 Real time_diff(timeval start, timeval end) {
@@ -89,8 +93,6 @@ Real time_diff(timeval start, timeval end) {
 }
 
 int main(int argc, char** argv) {
-  timeval time1, time2, time3;
-  gettimeofday(&time1, NULL);
   LibMeshInit init(argc, argv);
   
   if (argc != 5) {
@@ -108,8 +110,6 @@ int main(int argc, char** argv) {
   MeshTools::Generation::build_cube(mesh, width, 1, 1, 0, width, 0, 1, 0, 1);
   mesh.print_info();
   Particle::PSerializer serializer;
-  HaloManager hm(mesh, haloPad);
-  hm.set_serializer(serializer);
   std::vector<Particle*> particles;
 
   BoundingBox processor_box
@@ -127,28 +127,28 @@ int main(int argc, char** argv) {
 
   std::vector<Particle*> inbox;
   std::vector<std::vector<Particle*> > result;
-  gettimeofday(&time2, NULL);
+
+  HaloManager* hm = NULL;
   for(int c = 0; c < num_reps; c++) {
+    if(hm != NULL) delete hm;
     for(unsigned int i = 0; i < inbox.size(); i++) {
       delete inbox[i];
     }
     inbox.clear();
     result.clear();
-    hm.find_particles_in_halos(
+    hm = new HaloManager(mesh, haloPad);
+    hm->set_serializer(serializer);
+    hm->find_particles_in_halos(
         reinterpret_cast<std::vector<Point*>& >(particles),
         reinterpret_cast<std::vector<Point*>& >(inbox),
         reinterpret_cast<std::vector<std::vector<Point*> >& >(result));
   }
-  gettimeofday(&time3, NULL);
-  
-  Real setup_time = time_diff(time1, time2);
-  Real comm_time = time_diff(time2, time3)/num_reps;
   
   sout << "======== Processor " << mesh.processor_id() << " ========\n";
   sout << "Processor Box: " << processor_box << "\n";
   sout << "Halo Pad: " << haloPad << "\n";
-  sout << "Neighbors: " << hm.neighbor_processors() << "\n";
-  sout << "Halo Neighbors: " << hm.box_halo_neighbor_processors() << "\n";
+  sout << "Neighbors: " << hm->neighbor_processors() << "\n";
+  sout << "Halo Neighbors: " << hm->box_halo_neighbor_processors() << "\n";
   sout << "Particles Inbox: ";
   print_x_coords(sout, inbox);
   sout << "\n";
@@ -161,8 +161,6 @@ int main(int argc, char** argv) {
     print_x_coords(sout, result[i]);
     sout << "\n";
   }
-  sout << "Setup time: " << setup_time << " seconds\n";
-  sout << "Halo finding time: " << comm_time << " seconds\n";
 
   std::string textStr = sout.str();
   std::vector<char> text(textStr.begin(), textStr.end());
@@ -177,6 +175,7 @@ int main(int argc, char** argv) {
   for(unsigned int i = 0; i < inbox.size(); i++) {
     delete inbox[i];
   }
+  delete hm;
 
   return 0;
 }
