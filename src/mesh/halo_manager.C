@@ -37,6 +37,10 @@ using Parallel::MessageTag;
 
 namespace { // anonymous namespace for helper classes/functions
 
+bool is_valid(const BoundingBox& box) {
+  return box.min()(0) <= box.max()(0);
+}
+
 /**
  * @returns a box that bounds the given \p elem
  */
@@ -56,7 +60,8 @@ BoundingBox bounding_box(const Elem* elem) {
  * @returns a box that bounds all points in the \p particles vector
  */
 BoundingBox find_bounding_box(const std::vector<Point*> particles) {
-  if(particles.empty()) return BoundingBox(Point(0,0,0), Point(0,0,0));
+  //FIXME correctly handle case when particles vector is empty
+  if(particles.empty()) return BoundingBox();
   BoundingBox box(*(Point*)particles[0], *(Point*)particles[0]);
   for(unsigned int i = 0; i < particles.size(); i++) {
     for(unsigned int d = 0; d < LIBMESH_DIM; d++) {
@@ -352,9 +357,7 @@ void HaloManager::comm_particles(BoundingBox box_halo, PointTree& tree,
         Parallel::any_source, halo_buffer, tag_request).source();
     halo = *((BoundingBox*)&halo_buffer[0]);
     std::vector<Point*> particles_buffer;
-    if(halo.min()(0) != halo.max()(0)) {
-      tree.find(halo, particles_buffer);
-    }
+    if(is_valid(halo)) tree.find(halo, particles_buffer);
     write(particles_buffer, outboxes[c], *serializer);
     comm.send(source, outboxes[c], reqs[c], tag_response);
     halo_buffer.clear();
@@ -388,6 +391,7 @@ void HaloManager::find_neighbor_processors(const MeshBase& mesh,
 }
 
 void HaloManager::pad_box(BoundingBox& box) const {
+  if(!is_valid(box)) return;
   for(unsigned int d = 0; d < LIBMESH_DIM; d++) {
     box.min()(d) -= halo_pad;
     box.max()(d) += halo_pad;
