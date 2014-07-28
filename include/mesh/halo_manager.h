@@ -94,7 +94,8 @@ public:
       const std::vector<Point*>& halo_centers,
       const std::vector<Point*>& particles,
       std::vector<Point*>& particle_inbox,
-      std::vector<std::vector<Point*> >& result) const;
+      std::vector<std::vector<Point*> >& result,
+      bool naive_local_search=false) const;
   
   /**
    * Same as other find_particles_in_halos method, except
@@ -103,7 +104,8 @@ public:
   void find_particles_in_halos(
       const std::vector<Point*>& particles,
       std::vector<Point*>& particle_inbox,
-      std::vector<std::vector<Point*> >& result) const;
+      std::vector<std::vector<Point*> >& result,
+      bool naive_local_search=false) const;
   
   /**
    * Transfers particles between neighboring processors.

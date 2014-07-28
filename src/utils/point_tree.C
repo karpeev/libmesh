@@ -31,11 +31,6 @@ using MeshTools::BoundingBox;
 namespace { // anonymous namespace for helper classes/functions
 
 /**
- * The maximum capacity of a leaf PTNode before it should be refined
- */
-const unsigned int max_points_in_leaf = 16;
-
-/**
  * A comparator used for ordering points along a given axis.
  *
  * \author  Matthew D. Michelotti
@@ -86,7 +81,7 @@ public:
    * Constructor.  The \p split_counts array is the number of splits
    * that have occurred along each axis in this node's ancestors.
    */
-  PTNode(const int* split_counts);
+  PTNode(const int* split_counts, unsigned int max_points_in_leaf);
   
   /**
    * Destructor.
@@ -179,12 +174,22 @@ private:
    * The points contained in this node (if this is a leaf node).
    */
   std::vector<Point*> points;
+
+  /**
+   * The maximum capacity of a leaf PTNode before it should be refined
+   */
+  unsigned int max_points_in_leaf;
 };
 
-PointTree::PTNode::PTNode(const int* split_counts)
-  : lo_child(NULL), hi_child(NULL)
+PointTree::PTNode::PTNode(const int* split_counts,
+    unsigned int max_points_in_leaf)
+    : lo_child(NULL), hi_child(NULL)
 {
-  for(int i = 0; i < LIBMESH_DIM; i++) this->split_counts[i] = split_counts[i];
+  if(max_points_in_leaf <= 0) this->max_points_in_leaf = 16;
+  else this->max_points_in_leaf = max_points_in_leaf;
+  for(int i = 0; i < LIBMESH_DIM; i++) {
+    this->split_counts[i] = split_counts[i];
+  }
 }
 
 PointTree::PTNode::~PTNode() {
@@ -251,8 +256,8 @@ void PointTree::PTNode::refine_leaf() {
   int new_split_counts[LIBMESH_DIM];
   for(int i = 0; i < LIBMESH_DIM; i++) new_split_counts[i] = split_counts[i];
   new_split_counts[axis]++;
-  lo_child = new PTNode(new_split_counts);
-  hi_child = new PTNode(new_split_counts);
+  lo_child = new PTNode(new_split_counts, max_points_in_leaf);
+  hi_child = new PTNode(new_split_counts, max_points_in_leaf);
   for(unsigned int i = 0; i < points.size(); i++) insert(points[i]);
   points.clear();
 }
@@ -284,10 +289,10 @@ bool PointTree::PTNode::is_leaf() const {
   return lo_child == NULL;
 }
 
-PointTree::PointTree() {
+PointTree::PointTree(unsigned int max_points_in_leaf) {
   int split_counts[LIBMESH_DIM];
   for(int i = 0; i < LIBMESH_DIM; i++) split_counts[i] = 0;
-  root = new PTNode(split_counts);
+  root = new PTNode(split_counts, max_points_in_leaf);
 }
 
 PointTree::~PointTree() {

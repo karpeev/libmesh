@@ -124,15 +124,16 @@ Particle* make_particle(ParallelMesh& mesh, Real x, Real y, Real z) {
 int main(int argc, char** argv) {
   LibMeshInit init(argc, argv);
   
-  if (argc != 6) {
+  if (argc != 7) {
     libmesh_error_msg("Usage: " << argv[0]
-        << " dim width halo_pad particles_per_axis num_reps");
+        << " dim width halo_pad particles_per_axis num_reps naive_local_search");
   }
   int dim = std::atoi(argv[1]);
   int width = std::atoi(argv[2]);
   Real halo_pad = std::atof(argv[3]);
   int particles_per_axis = std::atoi(argv[4]);
   int num_reps = std::atoi(argv[5]);
+  bool naive_local_search = std::atoi(argv[6]);
 
   int height = dim >= 2 ? width : 1;
   int depth = dim >= 3 ? width : 1;
@@ -196,7 +197,8 @@ int main(int argc, char** argv) {
     hm->find_particles_in_halos(
         reinterpret_cast<std::vector<Point*>& >(particles),
         reinterpret_cast<std::vector<Point*>& >(inbox),
-        reinterpret_cast<std::vector<std::vector<Point*> >& >(result));
+        reinterpret_cast<std::vector<std::vector<Point*> >& >(result),
+        naive_local_search);
   }
   
   sout << "======== Processor " << mesh.processor_id() << " ========\n";

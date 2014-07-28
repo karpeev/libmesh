@@ -47,7 +47,7 @@ public:
   /**
    * Constructor.  Creates an empty tree.
    */
-  PointTree();
+  PointTree(unsigned int max_points_in_leaf);
 
   /**
    * Destructor.

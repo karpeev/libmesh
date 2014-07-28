@@ -225,7 +225,8 @@ void HaloManager::find_particles_in_halos(
     const std::vector<Point*>& halo_centers,
     const std::vector<Point*>& particles,
     std::vector<Point*>& particle_inbox,
-    std::vector<std::vector<Point*> >& result) const
+    std::vector<std::vector<Point*> >& result,
+    bool naive_local_search) const
 {
   START_LOG("find_particles_in_halos", "HaloManager");
 
@@ -235,7 +236,7 @@ void HaloManager::find_particles_in_halos(
   result.resize(halo_centers.size());
   
   //form tree and communicate particles between processors
-  PointTree tree;
+  PointTree tree(naive_local_search ? 0x30000000 : 0);
   tree.insert(particles);
   BoundingBox box_halo = find_bounding_box(halo_centers);
   pad_box(box_halo);
@@ -276,9 +277,10 @@ void HaloManager::find_particles_in_halos(
 void HaloManager::find_particles_in_halos(
     const std::vector<Point*>& particles,
     std::vector<Point*>& particle_inbox,
-    std::vector<std::vector<Point*> >& result) const
+    std::vector<std::vector<Point*> >& result,
+    bool naive_local_search) const
 {
-  find_particles_in_halos(particles, particles, particle_inbox, result);
+  find_particles_in_halos(particles, particles, particle_inbox, result, naive_local_search);
 }
       
 void HaloManager::redistribute_particles(std::vector<Point*>& particles,
@@ -336,6 +338,8 @@ void HaloManager::redistribute_particles(std::vector<Point*>& particles)
 void HaloManager::comm_particles(BoundingBox box_halo, PointTree& tree,
     std::vector<Point*>& particle_inbox) const
 {
+  START_LOG("comm_particles", "HaloManager");
+  
   //send requests, giving halo to other processors
   std::vector<char> points_halo_buffer(sizeof(BoundingBox));
   (*((BoundingBox*)&points_halo_buffer[0])) = box_halo;
@@ -374,6 +378,8 @@ void HaloManager::comm_particles(BoundingBox box_halo, PointTree& tree,
   for(unsigned int i = 0; i < reqs.size(); i++) {
     reqs[i].wait();
   }
+  
+  STOP_LOG("comm_particles", "HaloManager");
 }
 
 void HaloManager::find_neighbor_processors(const MeshBase& mesh,
