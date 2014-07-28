@@ -75,16 +75,30 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
   return os;
 }
 
-void print_x_coords(std::ostream& os, const std::vector<Particle*> points) {
-  unsigned int max_printed = 15;
-  std::vector<Real> coords;
-  for(unsigned int i = 0; i < points.size(); i++) {
-    if(i >= max_printed) break;
-    coords.push_back((*points[i])(0));
+void print_coords(std::ostream& os, Point* point, int dim) {
+  if(dim > 1) os << "(";
+  for(int d = 0; d < dim; d++) {
+    os << (*point)(d);
+    if(d + 1 < dim) os << ", ";
   }
-  os << coords;
-  if(points.size() > max_printed) {
-    os << " ( + " << (points.size() - max_printed) << " more...)";
+  if(dim > 1) os << ")";
+}
+
+void print_coords(std::ostream& os, const std::vector<Particle*> points,
+    int dim)
+{
+  unsigned int num_printed = 15;
+  if(num_printed > points.size()) num_printed = points.size();
+  
+  os << "[";
+  for(unsigned int i = 0; i < num_printed; i++) {
+    print_coords(os, points[i], dim);
+    if(i + 1 < num_printed) os << ", ";
+  }
+  os << "]";
+  
+  if(points.size() > num_printed) {
+    os << " ( + " << (points.size() - num_printed) << " more...)";
   }
 }
 
@@ -92,37 +106,78 @@ Real time_diff(timeval start, timeval end) {
   return (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec)*1e-6;
 }
 
+Particle* make_particle(ParallelMesh& mesh, Real x, Real y, Real z) {
+  Real testX = x;
+  Real testY = y;
+  Real testZ = z;
+  if(testX == (int)testX) testX += .5;
+  if(testY == (int)testY) testY += .5;
+  if(testZ == (int)testZ) testZ += .5;
+  Point testPoint(testX, testY, testZ);
+  const Elem* elem = mesh.point_locator()(testPoint);
+  if(elem == NULL) return NULL;
+  if(elem->processor_id() != mesh.processor_id()) return NULL;
+  Point point(x, y, z);
+  return new Particle(point, point(0)*10);
+}
+
 int main(int argc, char** argv) {
   LibMeshInit init(argc, argv);
   
-  if (argc != 5) {
+  if (argc != 6) {
     libmesh_error_msg("Usage: " << argv[0]
-        << " width halo_pad num_particles num_reps");
+        << " dim width halo_pad particles_per_axis num_reps");
   }
-  int width = std::atoi(argv[1]);
-  Real halo_pad = std::atof(argv[2]);
-  int num_particles = std::atoi(argv[3]);
-  int num_reps = std::atoi(argv[4]);
+  int dim = std::atoi(argv[1]);
+  int width = std::atoi(argv[2]);
+  Real halo_pad = std::atof(argv[3]);
+  int particles_per_axis = std::atoi(argv[4]);
+  int num_reps = std::atoi(argv[5]);
+
+  int height = dim >= 2 ? width : 1;
+  int depth = dim >= 3 ? width : 1;
+  
+  int x_count = particles_per_axis;
+  int y_count = dim >= 2 ? particles_per_axis : 1;
+  int z_count = dim >= 3 ? particles_per_axis : 1;
   
   std::ostringstream sout;
   ParallelMesh mesh(init.comm());
-  mesh.partitioner().reset(new CentroidPartitioner(CentroidPartitioner::X));
-  MeshTools::Generation::build_cube(mesh, width, 1, 1, 0, width, 0, 1, 0, 1);
+  if(dim == 1) {
+    mesh.partitioner().reset(new CentroidPartitioner(CentroidPartitioner::X));
+  }
+  MeshTools::Generation::build_cube(mesh, width, height, depth,
+      0, width, 0, height, 0, depth);
   mesh.print_info();
   Particle::PSerializer serializer;
   std::vector<Particle*> particles;
 
   BoundingBox processor_box
       = MeshTools::processor_bounding_box(mesh, mesh.processor_id());
-  double minX = processor_box.min()(0);
-  double maxX = processor_box.max()(0);
-  double interval = width/(double)num_particles;
-  int minI = (int)ceil(minX/interval - .5);
-  int maxI = (int)ceil(maxX/interval - .5);
-  if(maxX == width) maxI = num_particles;
-  for(int i = minI; i < maxI; i++) {
-    Point point((i + .5)*interval, .5, .5);
-    particles.push_back(new Particle(point, point(0)*10));
+  if(dim == 1) {
+    double minX = processor_box.min()(0);
+    double maxX = processor_box.max()(0);
+    double interval = width/(double)particles_per_axis;
+    int minI = (int)ceil(minX/interval - .5);
+    int maxI = (int)ceil(maxX/interval - .5);
+    if(maxX == width) maxI = particles_per_axis;
+    for(int i = minI; i < maxI; i++) {
+      Point point((i + .5)*interval, .5, .5);
+      particles.push_back(new Particle(point, point(0)*10));
+    }
+  }
+  else {
+    for(int i = 0; i < x_count; i++) {
+      for(int j = 0; j < y_count; j++) {
+        for(int k = 0; k < z_count; k++) {
+          Particle* particle = make_particle(mesh,
+              width*(i + .5)/x_count,
+              height*(j + .5)/y_count,
+              depth*(k + .5)/z_count);
+          if(particle != NULL) particles.push_back(particle);
+        }
+      }
+    }
   }
 
   std::vector<Particle*> inbox;
@@ -150,15 +205,17 @@ int main(int argc, char** argv) {
   sout << "Neighbors: " << hm->neighbor_processors() << "\n";
   sout << "Halo Neighbors: " << hm->box_halo_neighbor_processors() << "\n";
   sout << "Particles Inbox: ";
-  print_x_coords(sout, inbox);
+  print_coords(sout, inbox, dim);
   sout << "\n";
   sout << "Particle Groups:\n";
   for(unsigned int i = 0; i < result.size(); i++) {
     for(unsigned int j = 0; j < result[i].size(); j++) {
       libmesh_assert(result[i][j]->get_value() == 10*(*result[i][j])(0));
     }
-    sout << "  " << (*particles[i])(0) << ": ";
-    print_x_coords(sout, result[i]);
+    sout << "  ";
+    print_coords(sout, particles[i], dim);
+    sout << ": ";
+    print_coords(sout, result[i], dim);
     sout << "\n";
   }
 
