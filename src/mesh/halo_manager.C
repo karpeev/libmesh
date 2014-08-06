@@ -60,7 +60,6 @@ BoundingBox bounding_box(const Elem* elem) {
  * @returns a box that bounds all points in the \p particles vector
  */
 BoundingBox find_bounding_box(const std::vector<Point*> particles) {
-  //FIXME correctly handle case when particles vector is empty
   if(particles.empty()) return BoundingBox();
   BoundingBox box(*(Point*)particles[0], *(Point*)particles[0]);
   for(unsigned int i = 0; i < particles.size(); i++) {
@@ -70,18 +69,6 @@ BoundingBox find_bounding_box(const std::vector<Point*> particles) {
     }
   }
   return box;
-}
-
-/**
- * @returns the distance between points \p a and \p b
- */
-Real distance(const Point* a, const Point* b) {
-  Real sq_dist = 0.0;
-  for(unsigned int d = 0; d < LIBMESH_DIM; d++) {
-    Real diff = (*a)(d) - (*b)(d);
-    sq_dist += diff*diff;
-  }
-  return std::sqrt(sq_dist);
 }
 
 /**
@@ -189,22 +176,46 @@ class HaloNeighborsExtender : public Parallel::NeighborsExtender {
 
 } // end anonymous namespace
 
-HaloManager::HaloManager(const MeshBase& mesh, Real halo_pad)
-    : halo_pad(halo_pad), serializer(NULL), mesh(mesh), comm(mesh.comm()),
-      tag_request(mesh.comm().get_unique_tag(15382)),
+HaloManager::Opts::opts()
+    : form_halo_neighbors(true),
+      a2a_form_halo_neighbors(false),
+      a2a_send_particles(false),
+      use_kd_tree(true),
+      send_all_particles(false)
+{
+}
+
+HaloManager::HaloManager(const MeshBase& mesh, Real halo_pad, Opts opts)
+    : opts(opts), halo_pad(halo_pad), serializer(NULL), mesh(mesh),
+      comm(mesh.comm()), tag_request(mesh.comm().get_unique_tag(15382)),
       tag_response(mesh.comm().get_unique_tag(15383))
 {
   START_LOG("constructor", "HaloManager");
 
+  if(opts.a2a_form_halo_neighbors && !opts.form_halo_neighbors) {
+    libMesh::err << "Error! invalid HaloManager options" << std::endl;
+    libmesh_error();
+  }
+  if(!opts.form_halo_neighbors && !opts.a2a_send_particles) {
+    libMesh::err << "Error! invalid HaloManager options" << std::endl;
+    libmesh_error();
+  }
   find_neighbor_processors(mesh, neighbors);
   
-  BoundingBox halo
-      = MeshTools::processor_bounding_box(mesh, mesh.processor_id());
-  pad_box(halo);
-  HaloNeighborsExtender extender(&mesh, neighbors);
-  //TODO If we are using a SerialMesh, perhaps do not communicate with
-  //     other processors to find box_halo_neighbors?
-  extender.resolve(halo, box_halo_neighbors);
+  if(opts.form_halo_neighbors) {
+    //TODO If we are using a SerialMesh, perhaps do not communicate with
+    //     other processors to find box_halo_neighbors?
+    BoundingBox halo
+        = MeshTools::processor_bounding_box(mesh, mesh.processor_id());
+    pad_box(halo);
+    if(opts.a2a_form_halo_neighbors) {
+      a2a_form_halo_neighbors(halo); //FIXME implement a2a_form_halo_neighbors
+    }
+    else {
+      HaloNeighborsExtender extender(&mesh, neighbors);
+      extender.resolve(halo, box_halo_neighbors);
+    }
+  }
   
   STOP_LOG("constructor", "HaloManager");
 }
@@ -219,6 +230,10 @@ const std::vector<int>& HaloManager::neighbor_processors() const {
 
 const std::vector<int>& HaloManager::box_halo_neighbor_processors() const {
   return box_halo_neighbors;
+}
+
+const Real get_halo_pad() const {
+  return halo_pad;
 }
 
 void HaloManager::find_particles_in_halos(
@@ -394,6 +409,14 @@ void HaloManager::find_neighbor_processors(const MeshBase& mesh,
   }
   std::copy(neighbor_set.begin(), neighbor_set.end(),
             std::back_inserter(result));
+}
+
+void HaloManager::a2a_form_halo_neighbors(const MeshTools::BoundingBox& halo)
+{
+  //TODO implement a2a_form_halo_neighbors
+  libMesh::err << "ERROR! a2a_form_halo_neighbors not yet implemented"
+      << std::endl;
+  libmesh_error();
 }
 
 void HaloManager::pad_box(BoundingBox& box) const {

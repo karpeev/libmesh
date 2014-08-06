@@ -30,6 +30,15 @@ using MeshTools::BoundingBox;
 
 namespace { // anonymous namespace for helper classes/functions
 
+Real sq_dist(const Point& a, const Point& b) {
+  Real result = 0.0;
+  for(unsigned int d = 0; d < LIBMESH_DIM; d++) {
+    Real diff = a(d) - b(d);
+    result += diff*diff;
+  }
+  return result;
+}
+
 /**
  * A comparator used for ordering points along a given axis.
  *
@@ -43,6 +52,43 @@ public:
   }
 private:
   int axis;
+};
+
+class BallPredicate {
+public:
+  BallPredicate(const Point& center, Real radius) {
+    this->center = center;
+    this->sq_rad = radius*radius;
+  }
+
+  bool test(const Point& point) {
+    return sq_dist(point, center) <= sq_rad;
+  }
+
+private:
+  Point center;
+  Real sq_rad;
+};
+
+class TruePredicate {
+public:
+  bool test(const Point& point) {return true;}
+};
+
+class Tot {
+public:
+  BallPredicate(const Point& center, Real radius) {
+    this->center = center;
+    this->radius = radius;
+  }
+
+  void test(const Point& point) {
+    return sq_dist(point, center) <= radius;
+  }
+
+private:
+  Point center;
+  Real radius;
 };
 
 /**
@@ -98,7 +144,9 @@ public:
    * Efficiently finds all points in the tree that are contained within
    * the given \p box.  These points are placed in the \p result vector.
    */
-  void find(const BoundingBox& box, std::vector<Point*>& result);
+  template<class T>
+  void find(const BoundingBox& box, T& predicate,
+      std::vector<Point*>& result);
   
   /**
    * Prints the contents of the subtree in a hierarchical manner.
@@ -207,14 +255,17 @@ void PointTree::PTNode::insert(Point* point) {
   }
 }
 
-void PointTree::PTNode::find(const BoundingBox& box,
+template<class T>
+void PointTree::PTNode::find(const BoundingBox& box, T& predicate,
     std::vector<Point*>& result)
 {
   refine_leaf();
   if(is_leaf()) {
     typedef std::vector<Point*>::iterator iter_t;
     for(iter_t it = points.begin(); it != points.end(); it++) {
-      if(box.contains_point(**it)) result.push_back(*it);
+      if(box.contains_point(**it) && predicate.test(**it)) {
+        result.push_back(*it);
+      }
     }
   }
   else {
@@ -301,14 +352,35 @@ PointTree::~PointTree() {
 
 void PointTree::insert(Point* point) {
   root->insert(point);
+  for(unsigned int d = 0; d < LIBMESH_DIM; d++) {
+    bounding_box.min()(d) = std::min(bounding_box.min()(d), (*point)(d));
+    bounding_box.max()(d) = std::max(bounding_box.max()(d), (*point)(d));
+  }
 }
 
 void PointTree::insert(const std::vector<Point*>& points) {
   for(unsigned int i = 0; i < points.size(); i++) insert(points[i]);
 }
 
-void PointTree::find(const BoundingBox& box, std::vector<Point*>& result) {
-  root->find(box, result);
+void PointTree::find_box(const BoundingBox& box, std::vector<Point*>& result) {
+  TruePredicate predicate;
+  root->find(box, predicate, result);
+}
+
+void PointTree::find_ball(const Point& center, Real radius,
+      std::vector<Point*>& result)
+{
+  BoundingBox box;
+  for(unsigned int d = 0; d < LIBMESH_DIM; d++) {
+    box.min()(d) = center(d) - radius;
+    box.max()(d) = center(d) + radius;
+  }
+  BallPredicate predicate(center, radius);
+  root->find(box, predicate, result);
+}
+
+const MeshTools::BoundingBox& PointTree::get_bounding_box() {
+  return bounding_box;
 }
 
 void PointTree::print() const {

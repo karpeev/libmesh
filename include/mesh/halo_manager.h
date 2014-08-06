@@ -54,11 +54,21 @@ class HaloManager {
 
 public:
 
+  class Opts {
+  public:
+    Opts();
+    bool form_halo_neighbors;
+    bool a2a_form_halo_neighbors;
+    bool a2a_send_particles;
+    bool use_kd_tree;
+    bool send_all_particles;
+  };
+
   /**
    * Constructor.  Uses \p mesh to determine connectivity between
    * processors.  \p halo_pad is the radius of the halos.
    */
-  HaloManager(const MeshBase& mesh, Real halo_pad);
+  HaloManager(const MeshBase& mesh, Real halo_pad, Opts opts=Opts());
   
   /**
    * Set the \p serializer used to read/write particles
@@ -79,6 +89,14 @@ public:
    */
   const std::vector<int>& box_halo_neighbor_processors() const;
 
+  const Real get_halo_pad() const;
+
+  void comm_particles(PointTree& tree,
+      MeshTools::BoundingBox box=MeshTools::BoundingBox());
+
+  void comm_particles(std::vector<Point*>& particles,
+      MeshTools::BoundingBox box=MeshTools::BoundingBox());
+
   /**
    * For each point in the \p halo_centers vector, finds all other points
    * in the \p particles vector that are a distance of at most halo_pad
@@ -93,9 +111,7 @@ public:
   void find_particles_in_halos(
       const std::vector<Point*>& halo_centers,
       const std::vector<Point*>& particles,
-      std::vector<Point*>& particle_inbox,
-      std::vector<std::vector<Point*> >& result,
-      bool naive_local_search=false) const;
+      std::vector<std::vector<Point*> >& result) const;
   
   /**
    * Same as other find_particles_in_halos method, except
@@ -103,9 +119,7 @@ public:
    */
   void find_particles_in_halos(
       const std::vector<Point*>& particles,
-      std::vector<Point*>& particle_inbox,
-      std::vector<std::vector<Point*> >& result,
-      bool naive_local_search=false) const;
+      std::vector<std::vector<Point*> >& result) const;
   
   /**
    * Transfers particles between neighboring processors.
@@ -141,6 +155,8 @@ public:
 
 private:
 
+  void a2a_form_halo_neighbors(const MeshTools::BoundingBox& halo);
+
   /**
    * Receives points (from other processors) that are within
    * the given \p box_halo.  The received particles are placed
@@ -151,13 +167,15 @@ private:
    * the \p particle_serializer is used to read and write particles
    * to a buffer for communication between processors.
    */
-  void comm_particles(MeshTools::BoundingBox box_halo, PointTree& tree,
-      std::vector<Point*>& particle_inbox) const;
+  //void comm_particles(MeshTools::BoundingBox box_halo, PointTree& tree,
+  //    std::vector<Point*>& particle_inbox) const;
 
   /**
    * Extends the thickness of the /p box by halo_pad in each dimension.
    */
   void pad_box(MeshTools::BoundingBox& box) const;
+
+  Opts opts;
 
   /**
    * Vector of processor IDs that are immediately neighboring this processor.

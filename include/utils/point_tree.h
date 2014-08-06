@@ -47,7 +47,7 @@ public:
   /**
    * Constructor.  Creates an empty tree.
    */
-  PointTree(unsigned int max_points_in_leaf);
+  PointTree(unsigned int max_points_in_leaf=0);
 
   /**
    * Destructor.
@@ -71,8 +71,13 @@ public:
    * Efficiently finds all points in the tree that are contained within
    * the given \p box.  These points are placed in the \p result vector.
    */
-  void find(const MeshTools::BoundingBox& box,
+  void find_box(const MeshTools::BoundingBox& box,
       std::vector<Point*>& result);
+
+  void find_ball(const Point& center, Real radius,
+      std::vector<Point*>& result);
+
+  const MeshTools::BoundingBox& get_bounding_box()
 
   /**
    * Prints the contents of the tree in a hierarchical manner.
@@ -98,6 +103,8 @@ private:
    * A pointer to the root node of the tree.
    */
   PTNode* root;
+
+  MeshTools::BoundingBox bounding_box;
 };
 
 } // namespace libMesh
