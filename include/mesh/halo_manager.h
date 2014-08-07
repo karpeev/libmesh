@@ -57,11 +57,8 @@ public:
   class Opts {
   public:
     Opts();
-    bool form_halo_neighbors;
-    bool a2a_form_halo_neighbors;
-    bool a2a_send_particles;
-    bool use_kd_tree;
-    bool send_all_particles;
+    bool use_all_gather;
+    bool use_point_tree;
   };
 
   /**
@@ -89,13 +86,11 @@ public:
    */
   const std::vector<int>& box_halo_neighbor_processors() const;
 
-  const Real get_halo_pad() const;
+  Real get_halo_pad() const;
 
-  void comm_particles(PointTree& tree,
-      MeshTools::BoundingBox box=MeshTools::BoundingBox());
+  void comm_particles(PointTree& tree) const;
 
-  void comm_particles(std::vector<Point*>& particles,
-      MeshTools::BoundingBox box=MeshTools::BoundingBox());
+  void comm_particles(std::vector<Point*>& particles) const;
 
   /**
    * For each point in the \p halo_centers vector, finds all other points
@@ -155,8 +150,6 @@ public:
 
 private:
 
-  void a2a_form_halo_neighbors(const MeshTools::BoundingBox& halo);
-
   /**
    * Receives points (from other processors) that are within
    * the given \p box_halo.  The received particles are placed
@@ -174,6 +167,11 @@ private:
    * Extends the thickness of the /p box by halo_pad in each dimension.
    */
   void pad_box(MeshTools::BoundingBox& box) const;
+  
+  void comm_particles_w_all_gather(std::vector<Point*>& particles) const;
+  
+  void comm_particles_w_sends(PointTree& tree, std::vector<Point*> inbox)
+      const;
 
   Opts opts;
 

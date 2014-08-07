@@ -25,6 +25,9 @@
 #include "libmesh/point.h"
 #include "libmesh/parallel.h"
 #include "libmesh/libmesh_logging.h"
+#ifdef LIBMESH_HAVE_MPI
+#include "mpi.h"
+#endif
 
 // C++ Includes   -----------------------------------
 #include <algorithm>
@@ -36,6 +39,42 @@ using Parallel::Request;
 using Parallel::MessageTag;
 
 namespace { // anonymous namespace for helper classes/functions
+
+//TODO move allgather to parallel.h?
+void allgather(const Parallel::Communicator& comm, std::string& send_buf,
+    std::vector<std::string>& recv_bufs)
+{
+#ifdef LIBMESH_HAVE_MPI
+  START_LOG("allgather()", "Parallel");
+  
+  std::vector<int> recv_lengths(comm.size(), 0);
+  int send_length = send_buf.size();
+  comm.allgather(send_length, recv_lengths);
+  unsigned int net_length = 0;
+  std::vector<int> displacements(comm.size(), 0);
+  for(unsigned int i = 0; i < comm.size(); i++) {
+    displacements[i] = net_length;
+    net_length += recv_lengths[i];
+  }
+  recv_bufs.clear();
+  recv_bufs.resize(comm.size());
+  if(net_length > 0) {
+    std::string recv_buf(net_length, 0);
+    int ierr = MPI_Allgatherv(send_buf.empty() ? NULL : &send_buf[0],
+        send_length, MPI_BYTE, &recv_buf[0], &recv_lengths[0],
+        &displacements[0], MPI_BYTE, comm.get());
+    (void)ierr;
+    libmesh_assert(ierr == MPI_SUCCESS);
+    for(unsigned int i = 0; i < comm.size(); i++) {
+      recv_bufs[i].assign(recv_buf, displacements[i], recv_lengths[i]);
+    }
+  }
+  
+  STOP_LOG("allgather()", "Parallel");
+#else
+  libmesh_not_implemented();
+#endif
+}
 
 bool is_valid(const BoundingBox& box) {
   return box.min()(0) <= box.max()(0);
@@ -176,12 +215,9 @@ class HaloNeighborsExtender : public Parallel::NeighborsExtender {
 
 } // end anonymous namespace
 
-HaloManager::Opts::opts()
-    : form_halo_neighbors(true),
-      a2a_form_halo_neighbors(false),
-      a2a_send_particles(false),
-      use_kd_tree(true),
-      send_all_particles(false)
+HaloManager::Opts::Opts()
+    : use_all_gather(false),
+      use_point_tree(true)
 {
 }
 
@@ -192,29 +228,16 @@ HaloManager::HaloManager(const MeshBase& mesh, Real halo_pad, Opts opts)
 {
   START_LOG("constructor", "HaloManager");
 
-  if(opts.a2a_form_halo_neighbors && !opts.form_halo_neighbors) {
-    libMesh::err << "Error! invalid HaloManager options" << std::endl;
-    libmesh_error();
-  }
-  if(!opts.form_halo_neighbors && !opts.a2a_send_particles) {
-    libMesh::err << "Error! invalid HaloManager options" << std::endl;
-    libmesh_error();
-  }
   find_neighbor_processors(mesh, neighbors);
   
-  if(opts.form_halo_neighbors) {
-    //TODO If we are using a SerialMesh, perhaps do not communicate with
-    //     other processors to find box_halo_neighbors?
+  if(opts.use_all_gather) {
     BoundingBox halo
         = MeshTools::processor_bounding_box(mesh, mesh.processor_id());
     pad_box(halo);
-    if(opts.a2a_form_halo_neighbors) {
-      a2a_form_halo_neighbors(halo); //FIXME implement a2a_form_halo_neighbors
-    }
-    else {
-      HaloNeighborsExtender extender(&mesh, neighbors);
-      extender.resolve(halo, box_halo_neighbors);
-    }
+    //TODO If we are using a SerialMesh, perhaps do not communicate with
+    //     other processors to find box_halo_neighbors?
+    HaloNeighborsExtender extender(&mesh, neighbors);
+    extender.resolve(halo, box_halo_neighbors);
   }
   
   STOP_LOG("constructor", "HaloManager");
@@ -232,72 +255,71 @@ const std::vector<int>& HaloManager::box_halo_neighbor_processors() const {
   return box_halo_neighbors;
 }
 
-const Real get_halo_pad() const {
+Real HaloManager::get_halo_pad() const {
   return halo_pad;
+}
+
+void HaloManager::comm_particles(PointTree& tree) const {
+  START_LOG("comm_particles", "HaloManager");
+  
+  if(opts.use_all_gather) {
+    std::vector<Point*> particles;
+    tree.to_vector(particles);
+    unsigned int i = particles.size();
+    comm_particles_w_all_gather(particles);
+    for(; i < particles.size(); i++) tree.insert(particles[i]);
+  }
+  else {
+    std::vector<Point*> inbox;
+    comm_particles_w_sends(tree, inbox);
+    tree.insert(inbox);
+  }
+  
+  STOP_LOG("comm_particles", "HaloManager");
+}
+
+void HaloManager::comm_particles(std::vector<Point*>& particles) const {
+  START_LOG("comm_particles", "HaloManager");
+  
+  if(opts.use_all_gather) {
+    comm_particles_w_all_gather(particles);
+  }
+  else {
+    PointTree tree(opts.use_point_tree ? 0 : 0x30000000);
+    tree.insert(particles);
+    comm_particles_w_sends(tree, particles);
+  }
+  
+  STOP_LOG("comm_particles", "HaloManager");
 }
 
 void HaloManager::find_particles_in_halos(
     const std::vector<Point*>& halo_centers,
     const std::vector<Point*>& particles,
-    std::vector<Point*>& particle_inbox,
-    std::vector<std::vector<Point*> >& result,
-    bool naive_local_search) const
+    std::vector<std::vector<Point*> >& result) const
 {
   START_LOG("find_particles_in_halos", "HaloManager");
 
-  //clear result vectors
-  particle_inbox.clear();
+  PointTree tree(opts.use_point_tree ? 0 : 0x30000000);
+  tree.insert(particles);
+  comm_particles(tree);
   result.clear();
   result.resize(halo_centers.size());
-  
-  //form tree and communicate particles between processors
-  PointTree tree(naive_local_search ? 0x30000000 : 0);
-  tree.insert(particles);
-  BoundingBox box_halo = find_bounding_box(halo_centers);
-  pad_box(box_halo);
-  comm_particles(box_halo, tree, particle_inbox);
-  tree.insert(particle_inbox);
-  std::set<Point*> inbox_set(particle_inbox.begin(), particle_inbox.end());
-  
-  //find particles in each particle's halo, using tree for efficiency
-  std::set<Point*> inbox_used;
-  std::vector<Point*> buffer;
   for(unsigned int i = 0; i < halo_centers.size(); i++) {
-    BoundingBox box;
-    box.min() = *halo_centers[i];
-    box.max() = *halo_centers[i];
-    pad_box(box);
-    tree.find(box, buffer);
-    for(unsigned int j = 0; j < buffer.size(); j++) {
-      Point* point = buffer[j];
-      if(point == halo_centers[i]) continue;
-      if(distance(point, halo_centers[i]) >= halo_pad) continue;
-      result[i].push_back(point);
-      if(inbox_set.count(point)) inbox_used.insert(point);
-    }
-    buffer.clear();
+    tree.find_ball(halo_centers[i], halo_pad, result[i], false);
   }
   
-  //only return the used particles in the particle_inbox
-  for(unsigned int i = 0; i < particle_inbox.size(); i++) {
-    if(inbox_used.count(particle_inbox[i]) == 0) delete particle_inbox[i];
-  }
-  particle_inbox.clear();
-  std::copy(inbox_used.begin(), inbox_used.end(),
-      std::back_inserter(particle_inbox));
-      
   STOP_LOG("find_particles_in_halos", "HaloManager");
 }
 
 void HaloManager::find_particles_in_halos(
     const std::vector<Point*>& particles,
-    std::vector<Point*>& particle_inbox,
-    std::vector<std::vector<Point*> >& result,
-    bool naive_local_search) const
+    std::vector<std::vector<Point*> >& result) const
 {
-  find_particles_in_halos(particles, particles, particle_inbox, result, naive_local_search);
+  find_particles_in_halos(particles, particles, result);
 }
-      
+
+//FIXME delete unused particles?
 void HaloManager::redistribute_particles(std::vector<Point*>& particles,
     const std::vector<int>& destinations)
 {
@@ -350,14 +372,49 @@ void HaloManager::redistribute_particles(std::vector<Point*>& particles)
   redistribute_particles(particles, destinations);
 }
 
-void HaloManager::comm_particles(BoundingBox box_halo, PointTree& tree,
-    std::vector<Point*>& particle_inbox) const
+void HaloManager::find_neighbor_processors(const MeshBase& mesh,
+    std::vector<int>& result)
 {
-  START_LOG("comm_particles", "HaloManager");
-  
+  std::set<int> neighbor_set;
+  processor_id_type pid = mesh.processor_id();
+  MeshBase::const_element_iterator it = mesh.not_local_elements_begin();
+  for(; it != mesh.not_local_elements_end(); it++) {
+    const Elem* elem = *it;
+    if(elem->is_semilocal(pid)) neighbor_set.insert(elem->processor_id());
+  }
+  std::copy(neighbor_set.begin(), neighbor_set.end(),
+            std::back_inserter(result));
+}
+
+void HaloManager::pad_box(BoundingBox& box) const {
+  if(!is_valid(box)) return;
+  for(unsigned int d = 0; d < LIBMESH_DIM; d++) {
+    box.min()(d) -= halo_pad;
+    box.max()(d) += halo_pad;
+  }
+}
+
+void HaloManager::comm_particles_w_all_gather(std::vector<Point*>& particles)
+    const
+{
+  std::string send_buffer;
+  write(particles, send_buffer, *serializer);
+  std::vector<std::string> recv_buffers;
+  allgather(comm, send_buffer, recv_buffers);
+  for(unsigned int i = 0; i < recv_buffers.size(); i++) {
+    if(i == mesh.processor_id()) continue;
+    read(particles, recv_buffers[i], *serializer);
+  }
+}
+
+void HaloManager::comm_particles_w_sends(PointTree& tree,
+    std::vector<Point*> inbox) const
+{
   //send requests, giving halo to other processors
+  MeshTools::BoundingBox halo_box = tree.get_bounding_box();
+  pad_box(halo_box);
   std::vector<char> points_halo_buffer(sizeof(BoundingBox));
-  (*((BoundingBox*)&points_halo_buffer[0])) = box_halo;
+  (*((BoundingBox*)&points_halo_buffer[0])) = halo_box;
   Request dummy_req;
   for(unsigned int i = 0; i < box_halo_neighbors.size(); i++) {
     comm.send(box_halo_neighbors[i], points_halo_buffer, dummy_req,
@@ -376,7 +433,7 @@ void HaloManager::comm_particles(BoundingBox box_halo, PointTree& tree,
         Parallel::any_source, halo_buffer, tag_request).source();
     halo = *((BoundingBox*)&halo_buffer[0]);
     std::vector<Point*> particles_buffer;
-    if(is_valid(halo)) tree.find(halo, particles_buffer);
+    if(is_valid(halo)) tree.find_box(halo, particles_buffer);
     write(particles_buffer, outboxes[c], *serializer);
     comm.send(source, outboxes[c], reqs[c], tag_response);
     halo_buffer.clear();
@@ -386,44 +443,12 @@ void HaloManager::comm_particles(BoundingBox box_halo, PointTree& tree,
   for(unsigned int c = 0; c < box_halo_neighbors.size(); c++) {
     std::string buffer;
     comm.receive(Parallel::any_source, buffer, tag_response);
-    read(particle_inbox, buffer, *serializer);
+    read(inbox, buffer, *serializer);
   }
   
   //wait for all response sends to finish
   for(unsigned int i = 0; i < reqs.size(); i++) {
     reqs[i].wait();
-  }
-  
-  STOP_LOG("comm_particles", "HaloManager");
-}
-
-void HaloManager::find_neighbor_processors(const MeshBase& mesh,
-    std::vector<int>& result)
-{
-  std::set<int> neighbor_set;
-  processor_id_type pid = mesh.processor_id();
-  MeshBase::const_element_iterator it = mesh.not_local_elements_begin();
-  for(; it != mesh.not_local_elements_end(); it++) {
-    const Elem* elem = *it;
-    if(elem->is_semilocal(pid)) neighbor_set.insert(elem->processor_id());
-  }
-  std::copy(neighbor_set.begin(), neighbor_set.end(),
-            std::back_inserter(result));
-}
-
-void HaloManager::a2a_form_halo_neighbors(const MeshTools::BoundingBox& halo)
-{
-  //TODO implement a2a_form_halo_neighbors
-  libMesh::err << "ERROR! a2a_form_halo_neighbors not yet implemented"
-      << std::endl;
-  libmesh_error();
-}
-
-void HaloManager::pad_box(BoundingBox& box) const {
-  if(!is_valid(box)) return;
-  for(unsigned int d = 0; d < LIBMESH_DIM; d++) {
-    box.min()(d) -= halo_pad;
-    box.max()(d) += halo_pad;
   }
 }
 

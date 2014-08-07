@@ -19,19 +19,15 @@
 #ifndef LIBMESH_POINT_TREE_H
 #define LIBMESH_POINT_TREE_H
 
+// Local Includes -----------------------------------
+#include "libmesh/libmesh_common.h"
+#include "libmesh/mesh_tools.h"
+
 // C++ Includes   -----------------------------------
 #include <vector>
 
 namespace libMesh
 {
-
-// forward declarations
-
-class Point;
-
-namespace MeshTools {
-  class BoundingBox;
-}
 
 /**
  * This is the \p PointTree class.  This class is used to lookup points
@@ -74,10 +70,12 @@ public:
   void find_box(const MeshTools::BoundingBox& box,
       std::vector<Point*>& result);
 
-  void find_ball(const Point& center, Real radius,
-      std::vector<Point*>& result);
+  void find_ball(Point* center, Real radius,
+      std::vector<Point*>& result, bool include_center=true);
+      
+  void to_vector(std::vector<Point*>& result);
 
-  const MeshTools::BoundingBox& get_bounding_box()
+  const MeshTools::BoundingBox& get_bounding_box();
 
   /**
    * Prints the contents of the tree in a hierarchical manner.
