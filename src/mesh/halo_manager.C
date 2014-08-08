@@ -319,7 +319,6 @@ void HaloManager::find_particles_in_halos(
   find_particles_in_halos(particles, particles, result);
 }
 
-//FIXME delete unused particles?
 void HaloManager::redistribute_particles(std::vector<Point*>& particles,
     const std::vector<int>& destinations)
 {
@@ -345,7 +344,11 @@ void HaloManager::redistribute_particles(std::vector<Point*>& particles,
   std::vector<std::string> buffers(neighbors.size());
   std::vector<Request> reqs(neighbors.size());
   for(unsigned int i = 0; i < neighbors.size(); i++) {
-    write(outboxes[neighbors[i]], buffers[i], *serializer);
+    std::vector<Point*>& outbox = outboxes[neighbors[i]];
+    write(outbox, buffers[i], *serializer);
+    for(unsigned int j = 0; j < outbox.size(); j++) {
+      serializer->free(outbox[j]);
+    }
     comm.send(neighbors[i], buffers[i], reqs[i], tag_redistribute);
   }
   for(unsigned int c = 0; c < neighbors.size(); c++) {
@@ -366,6 +369,7 @@ void HaloManager::redistribute_particles(std::vector<Point*>& particles)
     const Elem* elem = mesh.point_locator()(*particles[i]);
     if(elem == NULL) {
       libMesh::err << "No element at point " << *particles[i] << std::endl;
+      libmesh_error();
     }
     destinations[i] = elem->processor_id();
   }

@@ -52,6 +52,9 @@ public:
     void write(std::ostream& stream, Point* const & buffer) {
       stream.write((char*)buffer, sizeof(Particle));
     }
+    void free(Point*& value) {
+      delete value;
+    }
     void delete_received_particles() {
       for(unsigned int i = 0; i < received_particles.size(); i++) {
         delete received_particles[i];

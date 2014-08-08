@@ -51,6 +51,8 @@ public:
    */
   virtual void write(std::ostream& stream, const T& buffer) = 0;
 
+  virtual void free(T& value) = 0;
+
 };
 
 } // namespace libMesh
