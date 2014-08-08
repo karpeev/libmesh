@@ -70,11 +70,25 @@ public:
   void find_box(const MeshTools::BoundingBox& box,
       std::vector<Point*>& result);
 
+  /**
+   * Efficiently finds all points in the tree that are contained within
+   * a ball with the given \p center and \p radius.  These points are
+   * placed in the \p result vector.  If the \p center point is found
+   * in the tree, then it will be added to the \p result if and only if
+   * \p include_center is true.
+   */
   void find_ball(Point* center, Real radius,
       std::vector<Point*>& result, bool include_center=true);
-      
+
+  /**
+   * Places all points into the \p result vector.
+   */
   void to_vector(std::vector<Point*>& result);
 
+  /**
+   * @returns the smallest axis-aligned bounding box that contains all
+   * of the points in this tree.
+   */
   const MeshTools::BoundingBox& get_bounding_box();
 
   /**
@@ -102,6 +116,9 @@ private:
    */
   PTNode* root;
 
+  /**
+   * The smallest box that contains all points in this tree.
+   */
   MeshTools::BoundingBox bounding_box;
 };
 

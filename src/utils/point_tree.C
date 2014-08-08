@@ -28,6 +28,9 @@ using MeshTools::BoundingBox;
 
 namespace { // anonymous namespace for helper classes/functions
 
+/**
+ * @returns the square of the distance between points \p a and \p b
+ */
 Real sq_dist(const Point& a, const Point& b) {
   Real result = 0.0;
   for(unsigned int d = 0; d < LIBMESH_DIM; d++) {
@@ -44,34 +47,80 @@ Real sq_dist(const Point& a, const Point& b) {
  */
 class PointComp {
 public:
+  /**
+   * Constructor.  Specifies \p axis to compare along.
+   */
   PointComp(int axis) : axis(axis) {}
+
+  /**
+   * @returns true if \p a is less than \p b along the given axis
+   */
   bool operator()(const Point* a, const Point* b) {
     return (*a)(axis) < (*b)(axis);
   }
+
 private:
+  /**
+   * Axis to compare along.
+   */
   int axis;
 };
 
+/**
+ * A predicate for testing whether a point lies within a ball.
+ *
+ * \author  Matthew D. Michelotti
+ */
 class BallPredicate {
 public:
+  /**
+   * Constructor.  Specifies the \p center and \p radius of the test ball.
+   * The \p include_center flag should be true if the \p center point should
+   * pass the test.
+   */
   BallPredicate(Point* center, Real radius, bool include_center)
       : center(center), sq_rad(radius*radius), include_center(include_center)
   {
   }
 
+  /**
+   * @returns true if the given point lies within the ball.  If
+   * include_center is false and the given point is the same as the
+   * center, will return false.
+   */
   bool test(const Point* point) {
     if(!include_center && point == center) return false;
     return sq_dist(*point, *center) <= sq_rad;
   }
 
 private:
+  /**
+   * Center of the test ball.
+   */
   Point* center;
+
+  /**
+   * Square of the radius of the test ball
+   */
   Real sq_rad;
+
+  /**
+   * True if the center point should pass the test.
+   */
   bool include_center;
 };
 
+
+/**
+ * A predicate that always evaluates to true.
+ *
+ * \author  Matthew D. Michelotti
+ */
 class TruePredicate {
 public:
+  /**
+   * @returns true.
+   */
   bool test(const Point* point) {
     (void)point;
     return true;
@@ -134,7 +183,10 @@ public:
   template<class T>
   void find(const BoundingBox& box, T& predicate,
       std::vector<Point*>& result);
-      
+  
+  /**
+   * Adds all points in this subtree to the \p result vector.
+   */
   void to_vector(std::vector<Point*>& result);
   
   /**

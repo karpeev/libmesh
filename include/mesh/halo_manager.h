@@ -54,16 +54,42 @@ class HaloManager {
 
 public:
 
+  /**
+   * A list of options for constructing a HaloManager.
+   *
+   * \author  Matthew D. Michelotti
+   */
   class Opts {
   public:
+    /**
+     * Constructor.
+     */
     Opts();
+
+    /**
+     * If true, will use an MPI allgather operation to redundantly store
+     * all particles on each processor when comm_particles is called.
+     * If false, will build up a set of nearby processors at the start
+     * (the box_halo_neighbor_processors) and only send particles between
+     * these processors, and only those particles that overlap the halo
+     * of the bounding box of the receiving processor.  Default value
+     * is false.
+     */
     bool use_all_gather;
+
+    /**
+     * If true, will perform local search of which particles are in which
+     * halos using a PointTree.  If false, will perform this local search
+     * using the inefficient naive approach of comparting each particle
+     * to each other particle directly.  Default value is true.
+     */
     bool use_point_tree;
   };
 
   /**
    * Constructor.  Uses \p mesh to determine connectivity between
    * processors.  \p halo_pad is the radius of the halos.
+   * \p opts specifies options for constructing the HaloManager.
    */
   HaloManager(const MeshBase& mesh, Real halo_pad, Opts opts=Opts());
   
@@ -82,26 +108,40 @@ public:
   /**
    * @returns the processor IDs for processors whose mesh is at
    * most distance halo_pad from this processor's mesh.
-   * May include extra processor IDs.
+   * May include extra processor IDs.  If the HaloManager was
+   * constructed using the use_all_gather option, this will
+   * just return an empty array.
    */
   const std::vector<int>& box_halo_neighbor_processors() const;
 
+  /**
+   * @returns the halo_pad, i.e. the radius of the halos
+   */
   Real get_halo_pad() const;
 
+  /**
+   * Given a \p tree containing all local particles, will receive
+   * particles from other processors that lie within the halo of the
+   * bounding box of all the local particles (or all non-local particles
+   * if the use_all_gather option was used).  These particles will
+   * be added to the tree.  This method is not responsible for deleting
+   * points allocated by the given serializer: the serializer should
+   * track these.
+   */
   void comm_particles(PointTree& tree) const;
 
+  /**
+   * Same as other comm_particles method, except parameter \p particles
+   * is a vector instead of a tree.
+   */
   void comm_particles(std::vector<Point*>& particles) const;
 
   /**
    * For each point in the \p halo_centers vector, finds all other points
    * in the \p particles vector that are a distance of at most halo_pad
    * from the given point, and stores those values in \p result at the same
-   * index.  The \p particle_inbox vector will be filled with points that
-   * were received from nearby processors and were newly allocated.
-   * HaloManager is not responsible for deleting these points.
-   * In case the particle class used is a subclass of Point,
-   * the \p serializer is used to read and write particles
-   * to a buffer for communication between processors.
+   * index.  This method is not responsible for deleting points allocated
+   * by the given serializer: the serializer should track these.
    */
   void find_particles_in_halos(
       const std::vector<Point*>& halo_centers,
@@ -123,11 +163,9 @@ public:
    * processor IDs for each particle (same size as particles vector).
    * Each of these IDs must correspond either to a neighbor
    * processor or this processor.  The outgoing particles will
-   * be removed from the \p particles vector, and incoming particles
+   * be removed from the \p particles vector and deleted using
+   * the serializer's free method, and incoming particles
    * will be added to the \p particles vector.
-   * In case the particle class used is a subclass of Point,
-   * the \p serializer is used to read and write particles
-   * to a buffer for communication between processors.
    */
   void redistribute_particles(std::vector<Point*>& particles,
       const std::vector<int>& destinations);
@@ -151,28 +189,27 @@ public:
 private:
 
   /**
-   * Receives points (from other processors) that are within
-   * the given \p box_halo.  The received particles are placed
-   * into the \p inbox vector.  The \p tree should contain
-   * the same points as in the \p particles vector, and is used
-   * for quick lookup of points in box halos to send to other processors.
-   * In case the particle class used is a subclass of Point,
-   * the \p particle_serializer is used to read and write particles
-   * to a buffer for communication between processors.
-   */
-  //void comm_particles(MeshTools::BoundingBox box_halo, PointTree& tree,
-  //    std::vector<Point*>& particle_inbox) const;
-
-  /**
    * Extends the thickness of the /p box by halo_pad in each dimension.
    */
   void pad_box(MeshTools::BoundingBox& box) const;
   
+  /**
+   * Implementation of comm_particles method assuming use_all_gather
+   * option is true.
+   */
   void comm_particles_w_all_gather(std::vector<Point*>& particles) const;
   
+  /**
+   * Implementation of comm_particles method assuming use_all_gather
+   * option is false, where received particles are placed in the \p inbox
+   * vector instead of the \p tree.
+   */
   void comm_particles_w_sends(PointTree& tree, std::vector<Point*>& inbox)
       const;
 
+  /**
+   * The options specified at construction.
+   */
   Opts opts;
 
   /**

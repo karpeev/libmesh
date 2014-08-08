@@ -51,6 +51,10 @@ public:
    */
   virtual void write(std::ostream& stream, const T& buffer) = 0;
 
+  /**
+   * Frees the local memory associate with the given \p value.
+   * If T is a pointer, this may just use the delete operator.
+   */
   virtual void free(T& value) = 0;
 
 };

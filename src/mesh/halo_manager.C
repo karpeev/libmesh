@@ -41,6 +41,13 @@ using Parallel::MessageTag;
 namespace { // anonymous namespace for helper classes/functions
 
 //TODO move allgather to parallel.h?
+/**
+ * Performs an MPI allgather.  The Communicator class does not have a
+ * method for the type of allgather performed here.  The \p send_buf
+ * is a byte array of data to send to all other processors, and the
+ * \p recv_bufs is a vector of buffers that will contain the
+ * byte arrays received from all other processors.
+ */
 void allgather(const Parallel::Communicator& comm, std::string& send_buf,
     std::vector<std::string>& recv_bufs)
 {
@@ -76,6 +83,9 @@ void allgather(const Parallel::Communicator& comm, std::string& send_buf,
 #endif
 }
 
+/**
+ * @returns true if \p box is a valid bounding box.
+ */
 bool is_valid(const BoundingBox& box) {
   return box.min()(0) <= box.max()(0);
 }
@@ -141,6 +151,10 @@ void read(std::vector<Point*>& points, const std::string& bytes,
   }
 }
 
+//TODO consider improving HaloNeighborsExtender to use a tighter
+//     halo approximation than just a bounding box, which will reduce
+//     the number of processors we need to communicate with at each
+//     time step.
 /**
  * This is the \p HaloNeighborsExtender class.  It is used to form a set
  * of extended neighbors corresponding to which processors are touching this

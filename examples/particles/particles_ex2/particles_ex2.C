@@ -181,6 +181,22 @@ void make_mesh_and_particles(int dim, int width, int particles_per_axis,
   }
 }
 
+//NOTE: options are as follows:
+//  dim: The dimensionality for laying out the particles (1, 2, or 3)
+//  width: The width of the mesh.  Mesh is made up of unit cube elements.
+//      The height and depth will either be 1 or be equal to the width,
+//      depending on dim.
+//  halo_pad: The radius of the particle halos.
+//  particles_per_axis: Number of particles location along each of the
+//      dim axes.
+//  num_reps: Number of times the HaloManager constructor and
+//      find_praticles_in_halos method is called.  This can be increased from
+//      1 to get better timing results.
+//  use_point_tree: 1 if we should use PointTree for locally finding particles
+//      in halos, 0 if we should do local search naively.
+//  use_all_gather: 1 if we should use MPI allgather to redundantly store
+//      all particles on all processors, 0 if we should only communicate with
+//      nearby processors to find particles.
 int main(int argc, char** argv) {
   LibMeshInit init(argc, argv);
   
