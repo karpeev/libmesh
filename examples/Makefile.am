@@ -4,6 +4,7 @@ SUBDIRS = \
 	introduction/introduction_ex3 \
 	introduction/introduction_ex4 \
 	introduction/introduction_ex5 \
+        multigrid/multigrid_ex1 \
 	adaptivity/adaptivity_ex1 \
 	adaptivity/adaptivity_ex2 \
 	adaptivity/adaptivity_ex3 \

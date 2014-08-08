@@ -277,6 +277,7 @@ if (test "x$enableexamples" = "xyes"); then
                 examples/introduction/introduction_ex3/Makefile
                 examples/introduction/introduction_ex4/Makefile
                 examples/introduction/introduction_ex5/Makefile
+                examples/multigrid/multigrid_ex1/Makefile
                 examples/adaptivity/adaptivity_ex1/Makefile
                 examples/adaptivity/adaptivity_ex2/Makefile
                 examples/adaptivity/adaptivity_ex3/Makefile
