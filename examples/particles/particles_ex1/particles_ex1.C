@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
   }
   std::cout << std::endl;
   std::vector<Point*> result;
-  tree.find(halo, result);
+  tree.find_box(halo, result);
   std::cout << "Halo Nodes: " << std::endl;
   for(unsigned int i = 0; i < result.size(); i++) {
     std::cout << "  " << *result[i] << std::endl;

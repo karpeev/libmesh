@@ -31,7 +31,6 @@
 #include <ostream>
 #include <vector>
 #include <sstream>
-#include <sys/time.h>
 
 using namespace libMesh;
 using MeshTools::BoundingBox;
@@ -45,13 +44,25 @@ public:
 
   class PSerializer : public Serializer<Point*> {
   public:
-    void read(std::istream& stream, Point*& buffer) const {
+    void read(std::istream& stream, Point*& buffer) {
       buffer = new Particle();
       stream.read((char*)buffer, sizeof(Particle));
+      received_particles.push_back((Particle*)buffer);
     }
-    void write(std::ostream& stream, Point* const & buffer) const {
+    void write(std::ostream& stream, Point* const & buffer) {
       stream.write((char*)buffer, sizeof(Particle));
     }
+    void delete_received_particles() {
+      for(unsigned int i = 0; i < received_particles.size(); i++) {
+        delete received_particles[i];
+      }
+      received_particles.clear();
+    }
+    std::vector<Particle*>& get_received_particles() {
+      return received_particles;
+    }
+  private:
+    std::vector<Particle*> received_particles;
   };
   
   Real get_value() const {return value;}
@@ -76,36 +87,55 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
   return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const Particle* particle) {
-  os << "(";
-  for(unsigned int i = 0; i < LIBMESH_DIM; i++) {
-    os << (*particle)(i);
-    if(i < LIBMESH_DIM - 1) os << ",";
+void print_coords(std::ostream& os, Point* point, int dim) {
+  if(dim > 1) os << "(";
+  for(int d = 0; d < dim; d++) {
+    os << (*point)(d);
+    if(d + 1 < dim) os << ", ";
   }
-  os << ")";
-  return os;
+  if(dim > 1) os << ")";
+}
+
+void print_coords(std::ostream& os, const std::vector<Particle*> points,
+    int dim)
+{
+  unsigned int num_printed = 15;
+  if(num_printed > points.size()) num_printed = points.size();
+  
+  os << "[";
+  for(unsigned int i = 0; i < num_printed; i++) {
+    print_coords(os, points[i], dim);
+    if(i + 1 < num_printed) os << ", ";
+  }
+  os << "]";
+  
+  if(points.size() > num_printed) {
+    os << " ( + " << (points.size() - num_printed) << " more...)";
+  }
 }
 
 Real time_diff(timeval start, timeval end) {
   return (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec)*1e-6;
 }
 
-int main(int argc, char** argv) {
-  int num_reps = 100;
-  timeval time1, time2, time3;
-  gettimeofday(&time1, NULL);
-  LibMeshInit init(argc, argv);
-  
-  std::ostringstream sout;
-  ParallelMesh mesh(init.comm());
-  mesh.read("tile.e");
-  mesh.print_info();
-  Real halo_pad = 1;
-  Particle::PSerializer serializer;
-  HaloManager hm(mesh, halo_pad);
-  hm.set_serializer(serializer);
-  std::vector<Particle*> particles;
-  processor_id_type pid = mesh.processor_id();
+Particle* make_particle(ParallelMesh& mesh, Real x, Real y, Real z) {
+  Real testX = x;
+  Real testY = y;
+  Real testZ = z;
+  if(testX == (int)testX) testX += .5;
+  if(testY == (int)testY) testY += .5;
+  if(testZ == (int)testZ) testZ += .5;
+  Point testPoint(testX, testY, testZ);
+  const Elem* elem = mesh.point_locator()(testPoint);
+  if(elem == NULL) return NULL;
+  if(elem->processor_id() != mesh.processor_id()) return NULL;
+  Point point(x, y, z);
+  return new Particle(point, point(0)*10);
+}
+
+void make_particles_on_faces(ParallelMesh& mesh,
+    std::vector<Particle*>& particles)
+{
   typedef MeshBase::element_iterator ElemIter_t;
   typedef Elem::side_iterator SideIter_t;
   for(ElemIter_t elem_it = mesh.local_elements_begin();
@@ -115,49 +145,68 @@ int main(int argc, char** argv) {
     for(SideIter_t it = elem->boundary_sides_begin();
         it != elem->boundary_sides_end(); it++)
     {
-      if((*it)->processor_id() != pid) continue;
+      if((*it)->processor_id() != mesh.processor_id()) continue;
       Point centroid = (*it)->centroid();
       particles.push_back(new Particle(centroid, centroid(0)*10));
     }
   }
-  std::vector<Particle*> inbox;
+}
+
+int main(int argc, char** argv) {
+  LibMeshInit init(argc, argv);
+  
+  if (argc != 5) {
+    libmesh_error_msg("Usage: " << argv[0]
+        << " halo_pad num_reps use_point_tree use_all_gather");
+  }
+  HaloManager::Opts opts;
+  Real halo_pad = std::atof(argv[1]);
+  int num_reps = std::atoi(argv[2]);
+  opts.use_point_tree = std::atoi(argv[3]);
+  opts.use_all_gather = std::atoi(argv[4]);
+  
+  ParallelMesh mesh(init.comm());
+  mesh.read("tile.e");
+  std::vector<Particle*> particles;
+  make_particles_on_faces(mesh, particles);
+  mesh.print_info();
+
+  Particle::PSerializer serializer;
+  std::ostringstream sout;
   std::vector<std::vector<Particle*> > result;
-  gettimeofday(&time2, NULL);
+  HaloManager* hm = NULL;
   for(int c = 0; c < num_reps; c++) {
-    for(unsigned int i = 0; i < inbox.size(); i++) {
-      delete inbox[i];
-    }
-    inbox.clear();
+    if(hm != NULL) delete hm;
+    serializer.delete_received_particles();
     result.clear();
-    hm.find_particles_in_halos(
+    hm = new HaloManager(mesh, halo_pad, opts);
+    hm->set_serializer(serializer);
+    hm->find_particles_in_halos(
         reinterpret_cast<std::vector<Point*>& >(particles),
-        reinterpret_cast<std::vector<Point*>& >(inbox),
         reinterpret_cast<std::vector<std::vector<Point*> >& >(result));
   }
-  gettimeofday(&time3, NULL);
   
-  Real setup_time = time_diff(time1, time2);
-  Real comm_time = time_diff(time2, time3)/num_reps;
-  
-  sout << "======== Processor " << mesh.processor_id() << " ========\n";
   BoundingBox processor_box
       = MeshTools::processor_bounding_box(mesh, mesh.processor_id());
+  sout << "======== Processor " << mesh.processor_id() << " ========\n";
   sout << "Processor Box: " << processor_box << "\n";
   sout << "Halo Pad: " << halo_pad << "\n";
-  sout << "Neighbors: " << hm.neighbor_processors() << "\n";
-  sout << "Halo Neighbors: " << hm.box_halo_neighbor_processors() << "\n";
-  sout << "Particles Inbox: " << inbox;
+  sout << "Neighbors: " << hm->neighbor_processors() << "\n";
+  sout << "Halo Neighbors: " << hm->box_halo_neighbor_processors() << "\n";
+  sout << "Particle Inbox: ";
+  print_coords(sout, serializer.get_received_particles(), 3);
   sout << "\n";
   sout << "Particle Groups:\n";
   for(unsigned int i = 0; i < result.size(); i++) {
     for(unsigned int j = 0; j < result[i].size(); j++) {
       libmesh_assert(result[i][j]->get_value() == 10*(*result[i][j])(0));
     }
-    sout << "  " << particles[i] << ": " << result[i];
+    sout << "  ";
+    print_coords(sout, particles[i], 3);
+    sout << ": ";
+    print_coords(sout, result[i], 3);
     sout << "\n";
   }
-  sout << "Setup time: " << setup_time << " seconds\n";
-  sout << "Halo finding time: " << comm_time << " seconds\n";
 
   std::string text_str = sout.str();
   std::vector<char> text(text_str.begin(), text_str.end());
@@ -169,9 +218,8 @@ int main(int argc, char** argv) {
     while(text[ci++] != '\0');
   }
 
-  for(unsigned int i = 0; i < inbox.size(); i++) {
-    delete inbox[i];
-  }
+  serializer.delete_received_particles();
+  delete hm;
 
   return 0;
 }
