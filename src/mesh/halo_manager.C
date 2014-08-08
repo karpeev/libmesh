@@ -114,7 +114,7 @@ BoundingBox find_bounding_box(const std::vector<Point*> particles) {
  * Writes the \p points vector to the \p bytes buffer using \p serializer.
  */
 void write(const std::vector<Point*>& points, std::string& bytes,
-    const Serializer<Point*>& serializer)
+    Serializer<Point*>& serializer)
 {
   std::ostringstream stream;
   unsigned int size = points.size();
@@ -129,7 +129,7 @@ void write(const std::vector<Point*>& points, std::string& bytes,
  * Reads the \p points vector from the \p bytes buffer using \p serializer.
  */
 void read(std::vector<Point*>& points, const std::string& bytes,
-    const Serializer<Point*>& serializer)
+    Serializer<Point*>& serializer)
 {
   std::istringstream stream(bytes);
   unsigned int size;
@@ -230,7 +230,7 @@ HaloManager::HaloManager(const MeshBase& mesh, Real halo_pad, Opts opts)
 
   find_neighbor_processors(mesh, neighbors);
   
-  if(opts.use_all_gather) {
+  if(!opts.use_all_gather) {
     BoundingBox halo
         = MeshTools::processor_bounding_box(mesh, mesh.processor_id());
     pad_box(halo);
@@ -243,7 +243,7 @@ HaloManager::HaloManager(const MeshBase& mesh, Real halo_pad, Opts opts)
   STOP_LOG("constructor", "HaloManager");
 }
 
-void HaloManager::set_serializer(const Serializer<Point*>& serializer) {
+void HaloManager::set_serializer(Serializer<Point*>& serializer) {
   this->serializer = &serializer;
 }
 
@@ -408,7 +408,7 @@ void HaloManager::comm_particles_w_all_gather(std::vector<Point*>& particles)
 }
 
 void HaloManager::comm_particles_w_sends(PointTree& tree,
-    std::vector<Point*> inbox) const
+    std::vector<Point*>& inbox) const
 {
   //send requests, giving halo to other processors
   MeshTools::BoundingBox halo_box = tree.get_bounding_box();

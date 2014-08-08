@@ -42,14 +42,14 @@ public:
    * NOTE: implementations of this method should probably use the
    * istream::read method instead of the >> operator.
    */
-  virtual void read(std::istream& stream, T& buffer) const = 0;
+  virtual void read(std::istream& stream, T& buffer) = 0;
 
   /**
    * Writes the object \p buffer to \p stream.
    * NOTE: implementations of this method should probably use the
    * ostream::write method instead of the << operator.
    */
-  virtual void write(std::ostream& stream, const T& buffer) const = 0;
+  virtual void write(std::ostream& stream, const T& buffer) = 0;
 
 };
 

@@ -71,7 +71,7 @@ public:
    * Set the \p serializer used to read/write particles
    * from/to a buffer for communication between processors.
    */
-  void set_serializer(const Serializer<Point*>& serializer);
+  void set_serializer(Serializer<Point*>& serializer);
 
   /**
    * @returns the processor IDs that are immediately neighboring
@@ -170,7 +170,7 @@ private:
   
   void comm_particles_w_all_gather(std::vector<Point*>& particles) const;
   
-  void comm_particles_w_sends(PointTree& tree, std::vector<Point*> inbox)
+  void comm_particles_w_sends(PointTree& tree, std::vector<Point*>& inbox)
       const;
 
   Opts opts;
@@ -195,7 +195,7 @@ private:
    * The serializer used to read/write particles
    * from/to a buffer for communication between processors.
    */
-  const Serializer<Point*>* serializer;
+  Serializer<Point*>* serializer;
   
   /**
    * The mesh used for looking up elements.

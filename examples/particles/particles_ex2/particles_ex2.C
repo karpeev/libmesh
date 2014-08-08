@@ -44,13 +44,25 @@ public:
 
   class PSerializer : public Serializer<Point*> {
   public:
-    void read(std::istream& stream, Point*& buffer) const {
+    void read(std::istream& stream, Point*& buffer) {
       buffer = new Particle();
       stream.read((char*)buffer, sizeof(Particle));
+      received_particles.push_back((Particle*)buffer);
     }
-    void write(std::ostream& stream, Point* const & buffer) const {
+    void write(std::ostream& stream, Point* const & buffer) {
       stream.write((char*)buffer, sizeof(Particle));
     }
+    void delete_received_particles() {
+      for(unsigned int i = 0; i < received_particles.size(); i++) {
+        delete received_particles[i];
+      }
+      received_particles.clear();
+    }
+    std::vector<Particle*>& get_received_particles() {
+      return received_particles;
+    }
+  private:
+    std::vector<Particle*> received_particles;
   };
   
   Real get_value() const {return value;}
@@ -121,37 +133,21 @@ Particle* make_particle(ParallelMesh& mesh, Real x, Real y, Real z) {
   return new Particle(point, point(0)*10);
 }
 
-int main(int argc, char** argv) {
-  LibMeshInit init(argc, argv);
-  
-  if (argc != 7) {
-    libmesh_error_msg("Usage: " << argv[0]
-        << " dim width halo_pad particles_per_axis num_reps naive_local_search");
-  }
-  int dim = std::atoi(argv[1]);
-  int width = std::atoi(argv[2]);
-  Real halo_pad = std::atof(argv[3]);
-  int particles_per_axis = std::atoi(argv[4]);
-  int num_reps = std::atoi(argv[5]);
-  bool naive_local_search = std::atoi(argv[6]);
-
+void make_mesh_and_particles(int dim, int width, int particles_per_axis,
+    ParallelMesh& mesh, std::vector<Particle*>& particles)
+{
   int height = dim >= 2 ? width : 1;
   int depth = dim >= 3 ? width : 1;
   
   int x_count = particles_per_axis;
   int y_count = dim >= 2 ? particles_per_axis : 1;
   int z_count = dim >= 3 ? particles_per_axis : 1;
-  
-  std::ostringstream sout;
-  ParallelMesh mesh(init.comm());
+
   if(dim == 1) {
     mesh.partitioner().reset(new CentroidPartitioner(CentroidPartitioner::X));
   }
   MeshTools::Generation::build_cube(mesh, width, height, depth,
       0, width, 0, height, 0, depth);
-  mesh.print_info();
-  Particle::PSerializer serializer;
-  std::vector<Particle*> particles;
 
   BoundingBox processor_box
       = MeshTools::processor_bounding_box(mesh, mesh.processor_id());
@@ -180,34 +176,53 @@ int main(int argc, char** argv) {
       }
     }
   }
+}
 
-  std::vector<Particle*> inbox;
+int main(int argc, char** argv) {
+  LibMeshInit init(argc, argv);
+  
+  if (argc != 8) {
+    libmesh_error_msg("Usage: " << argv[0]
+        << " dim width halo_pad particles_per_axis num_reps use_point_tree use_all_gather");
+  }
+  HaloManager::Opts opts;
+  int dim = std::atoi(argv[1]);
+  int width = std::atoi(argv[2]);
+  Real halo_pad = std::atof(argv[3]);
+  int particles_per_axis = std::atoi(argv[4]);
+  int num_reps = std::atoi(argv[5]);
+  opts.use_point_tree = std::atoi(argv[6]);
+  opts.use_all_gather = std::atoi(argv[7]);
+  
+  ParallelMesh mesh(init.comm());
+  std::vector<Particle*> particles;
+  make_mesh_and_particles(dim, width, particles_per_axis, mesh, particles);
+  mesh.print_info();
+
+  Particle::PSerializer serializer;
+  std::ostringstream sout;
   std::vector<std::vector<Particle*> > result;
-
   HaloManager* hm = NULL;
   for(int c = 0; c < num_reps; c++) {
     if(hm != NULL) delete hm;
-    for(unsigned int i = 0; i < inbox.size(); i++) {
-      delete inbox[i];
-    }
-    inbox.clear();
+    serializer.delete_received_particles();
     result.clear();
-    hm = new HaloManager(mesh, halo_pad);
+    hm = new HaloManager(mesh, halo_pad, opts);
     hm->set_serializer(serializer);
     hm->find_particles_in_halos(
         reinterpret_cast<std::vector<Point*>& >(particles),
-        reinterpret_cast<std::vector<Point*>& >(inbox),
-        reinterpret_cast<std::vector<std::vector<Point*> >& >(result),
-        naive_local_search);
+        reinterpret_cast<std::vector<std::vector<Point*> >& >(result));
   }
   
+  BoundingBox processor_box
+      = MeshTools::processor_bounding_box(mesh, mesh.processor_id());
   sout << "======== Processor " << mesh.processor_id() << " ========\n";
   sout << "Processor Box: " << processor_box << "\n";
   sout << "Halo Pad: " << halo_pad << "\n";
   sout << "Neighbors: " << hm->neighbor_processors() << "\n";
   sout << "Halo Neighbors: " << hm->box_halo_neighbor_processors() << "\n";
-  sout << "Particles Inbox: ";
-  print_coords(sout, inbox, dim);
+  sout << "Particle Inbox: ";
+  print_coords(sout, serializer.get_received_particles(), dim);
   sout << "\n";
   sout << "Particle Groups:\n";
   for(unsigned int i = 0; i < result.size(); i++) {
@@ -231,9 +246,7 @@ int main(int argc, char** argv) {
     while(text[ci++] != '\0');
   }
 
-  for(unsigned int i = 0; i < inbox.size(); i++) {
-    delete inbox[i];
-  }
+  serializer.delete_received_particles();
   delete hm;
 
   return 0;
