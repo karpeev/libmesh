@@ -372,6 +372,12 @@ e(1);
   system_2.add_variable("u_C", static_cast<Order>(approx_order),Utility::string_to_enum<FEFamily>(approx_type));
   equation_systems_2.get_system("Helmholtz").attach_assemble_function (assemble_helmholtz);
 
+  PetscVector<Number> solution_fine(equation_systems.comm());
+  solution_fine.init(*system.solution);
+  solution_fine = *system.solution;
+
+  system_2.project_solution_on_reinit();
+  system.project_solution_on_reinit();
 
   equation_systems_2.init();
 e(2);
@@ -379,12 +385,16 @@ e(2);
   PetscVector<Number> **level_vector = new PetscVector<Number>* [n_levels_coarsen];
   PetscMatrix<Number> **level_interp = new PetscMatrix<Number>* [n_levels_coarsen];
   PetscMatrix<Number> **level_A      = new PetscMatrix<Number>* [n_levels_coarsen];
+  MGElemIDConverter       *id_converter = new MGElemIDConverter [n_levels_coarsen];
+
+  PetscMatrix<Number> **level_restrct = new PetscMatrix<Number>* [n_levels_coarsen];
 
   for (unsigned int i = 0; i < n_levels_coarsen; i++)
 {
   level_vector[i] = new PetscVector<Number>(system_2.comm());
   level_interp[i] = new PetscMatrix<Number>(system_2.comm());
   level_A[i]      = new PetscMatrix<Number>(system_2.comm());
+  level_restrct[i] = new PetscMatrix<Number>(system_2.comm());
 
   unsigned int n_processors = level_A[i]->n_processors();
 
@@ -404,25 +414,20 @@ e(3);
   system_2.assemble();
   level_A[0]->swap(*petsc_mat);
 
+  *level_vector[0] = solution_fine;
+
+  *system.solution = *level_vector[0];
+
+  #ifdef LIBMESH_HAVE_EXODUS_API
+    ExodusII_IO (mesh).write_equation_systems ("solution_0.e",
+                                         equation_systems);
+  #endif // #ifdef LIBMESH_HAVE_EXODUS_API
+
+
  std::cout << level_vector[0]->size() << " size_of_level\n";
  std::cout << system.rhs->size() << " size of rhs\n"; 
  std::cout << level_A[0]->m() << " size_of_mat_m\n";
  std::cout << system.matrix->m() << " size of matrix\n";
-
-  *system_2.solution = *system.solution;
-
-for (unsigned int j = system_2.solution->first_local_index(); j < system_2.solution->last_local_index(); j++)
-  system_2.solution->set(j, system_2.solution->processor_id());
-
-
-for (unsigned int j = system.solution->first_local_index(); j < system.solution->last_local_index(); j++)
-  system.solution->set(j, system.solution->processor_id());
-
-  #ifdef LIBMESH_HAVE_EXODUS_API
-    ExodusII_IO (mesh).write_equation_systems ("equation_systems_processor.e",
-                                         equation_systems);
-  #endif // #ifdef LIBMESH_HAVE_EXODUS_API
-
   
   #ifdef LIBMESH_HAVE_EXODUS_API
   std::stringstream stringstr;
@@ -434,16 +439,15 @@ for (unsigned int j = system.solution->first_local_index(); j < system.solution-
                                          equation_systems_2);
   #endif // #ifdef LIBMESH_HAVE_EXODUS_API
 
-  *system_2.solution = *level_vector[0]; // for value testing
 e(4);
 
   // nnz on, nz off
 
-  
+ 
   MeshRefinement mesh_refinement_2(mesh_2);
   mesh_refinement_2.coarsen_by_parents();
   mesh_refinement_2.clean_refinement_flags();
-  flag_elements_FAC(mesh_2);
+  flag_elements_FAC(mesh_2, id_converter[0]);
   mesh_refinement_2.coarsen_elements();
   equation_systems_2.reinit();                  // performed coarsening for first round
 
@@ -463,7 +467,7 @@ EquationSystems equation_systems_3 (mesh_3);
   equation_systems_3.get_system("Helmholtz").attach_assemble_function (assemble_helmholtz);
 
   equation_systems_3.init();
-
+  system_3.project_solution_on_reinit();
 
 
 e(6);
@@ -474,23 +478,15 @@ e(6);
  level_vector[1]->swap(*petsc_vec);
  level_A[1]->swap(*petsc_mat);
 
+ 
+
+
  assemble_helmholtz_matrix(equation_systems_2, "Helmholtz", level_A[1]);
 
   std::cout << level_vector[1]->size() << " size_of_level\n";
   std::cout << system_2.rhs->size() << " size of rhs\n";
   std::cout << level_A[1]->m() << " size_of_mat_m\n";
   std::cout << system_2.matrix->m() << " size of matrix\n";
-
-
-/*   WORK_ZONE
- level_vector[1]->init(*system_2.solution);
- *level_vector[1] = *system_2.solution;
- *system_3.solution = *system_2.solution;
-*/
-
-
-for (unsigned int j = system_2.solution->first_local_index(); j < system_2.solution->last_local_index(); j++)
-  system_2.solution->set(j, system_2.solution->processor_id());
 
   #ifdef LIBMESH_HAVE_EXODUS_API
   stringstr.clear();
@@ -502,17 +498,11 @@ for (unsigned int j = system_2.solution->first_local_index(); j < system_2.solut
   #endif // #ifdef LIBMESH_HAVE_EXODUS_API
 
   *system_2.solution = *level_vector[1];
-
   MeshRefinement mesh_refinement_3(mesh_3);
   mesh_refinement_3.coarsen_by_parents();
-  flag_elements_FAC(mesh_3);
+  flag_elements_FAC(mesh_3, id_converter[1]);
   mesh_refinement_3.coarsen_elements();
   equation_systems_3.reinit();
-
-/*
- level_vector[2]->init(*system_3.solution);
- *level_vector[2] = *system_3.solution;
-*/
 
  petsc_vec = (PetscVector<Number>*) system_3.rhs;
  petsc_mat = (PetscMatrix<Number>*) system_3.matrix;
@@ -529,7 +519,19 @@ for (unsigned int j = system_2.solution->first_local_index(); j < system_2.solut
 
 
 e(7);
- build_interpolation(equation_systems, equation_systems_2, "Helmholtz", *level_interp[0], *level_vector[0], *level_vector[1]);
+ build_interpolation(equation_systems, equation_systems_2, "Helmholtz", *level_interp[0], *level_vector[0], *level_vector[1], id_converter[0]);
+ level_interp[0]->get_transpose(*level_restrct[0]);
+ std::cout << level_interp[0]->m() << ", " << level_interp[0]->n() << " :: ";
+ std::cout << level_restrct[0]->m() << ", " << level_restrct[0]->n() << "\n";
+ level_restrct[0]->vector_mult(*level_vector[1], *level_vector[0]);
+std::cout << system.solution->size() << " size of solution\n";
+ *system_2.solution = *level_vector[1];
+
+  #ifdef LIBMESH_HAVE_EXODUS_API
+    ExodusII_IO (mesh_2).write_equation_systems ("solution_1.e",
+                                         equation_systems_2);
+  #endif // #ifdef LIBMESH_HAVE_EXODUS_API
+
 
 /*  #ifdef LIBMESH_HAVE_EXODUS_API
     ExodusII_IO (mesh_2).write_equation_systems ("lshaped_2.e",   // Print the coarsened
@@ -543,26 +545,31 @@ e(7+i);
 
   // assemble_helmholtz(equation_systems_3, "Helmholtz", level_A[i]);
 
-  build_interpolation(equation_systems_2, equation_systems_3, "Helmholtz", *level_interp[i-1], *level_vector[i-1], *level_vector[i]);
-
-  for (unsigned int j = system_3.solution->first_local_index(); j < system_3.solution->last_local_index(); j++)
-  system_3.solution->set(j, system_3.solution->processor_id());
-
-  #ifdef LIBMESH_HAVE_EXODUS_API
-  stringstr.clear();
-  stringstr << i; 
-  title_number = stringstr.str();
-  title = "lshaped_processor_";
-    ExodusII_IO (mesh_3).write_equation_systems (title+title_number+title_end,
-                                         equation_systems_3);
-  #endif // #ifdef LIBMESH_HAVE_EXODUS_API
+  build_interpolation(equation_systems_2, equation_systems_3, "Helmholtz", *level_interp[i-1], *level_vector[i-1], *level_vector[i], id_converter[i-1]);
 
   *system_3.solution = *level_vector[i];
+ level_interp[i-1]->get_transpose(*level_restrct[i-1]);
+e(101);
+ level_restrct[i-1]->vector_mult(*level_vector[i], *level_vector[i-1]);
+ *system_3.solution = *level_vector[i];
+
+std::string solution_word = "solution_";
+std::string dot_e_word = ".e";
+
+  
+  stringstr << i;
+  std::string title_number = stringstr.str();
+
+  #ifdef LIBMESH_HAVE_EXODUS_API
+    ExodusII_IO (mesh_3).write_equation_systems (solution_word + title_number + dot_e_word,
+                                         equation_systems_3);
+  #endif // #ifdef LIBMESH_HAVE_EXODUS_API
+e(102);
 
   if (i != n_levels_coarsen-1)
   {
-    flag_elements_FAC(mesh_3);
-    flag_elements_FAC(mesh_2);
+    flag_elements_FAC(mesh_3, id_converter[i]);
+    flag_elements_FAC(mesh_2, id_converter[0]);
     mesh_refinement_2.coarsen_elements();
     mesh_refinement_3.coarsen_elements();
     equation_systems_2.reinit();
@@ -587,28 +594,43 @@ e(7+i);
 
  }
 
- 
- mesh_refinement_3.uniformly_refine();
- equation_systems_3.reinit();
+e(1000);
+if (uniform_refine) { // here if uniformly refine, we compare project_vector to interp operator
+std::ostringstream str_unif;
+str_unif << system_2.processor_id();
+std::string unif_name = "uniform_test_project_vector_";
 
-// system_3.solution->print();
+std::ofstream fout_2(unif_name + str_unif.str());
 
-level_interp[n_levels_coarsen-2]->vector_mult(*level_vector[n_levels_coarsen-2], *level_vector[n_levels_coarsen-1]);
-std::cout << "Interp Version:\n";
-// level_vector[n_levels_coarsen-2]->print();
+ PetscVector<Number> solution_unif(system_3.comm());
+ solution_unif.init(*system_3.solution);
+ solution_unif = *system_3.solution;
 
+  MeshRefinement mesh_refinement_4(mesh_3);
+  mesh_refinement_4.coarsen_by_parents();
+  mesh_refinement_4.uniformly_refine();
+  equation_systems_3.reinit();
 
-// Interpolation.vector_mult(level_fine,level_coarse);
+  system_3.solution->print(fout_2);
+  fout_2.close();
 
+  level_interp[n_levels_coarsen-2]->vector_mult(*system_3.solution,solution_unif);
+  std::string unif_name_2 = "uniform_test_interp_matrix_";
+  std::ofstream fout_3(unif_name_2+str_unif.str());
+  system_3.solution->print(fout_3);
+  fout_3.close();
 
+  }
+e(1001);
 for (unsigned int i = 0; i < n_levels_coarsen; i++)
 {
  delete level_A[i];
  delete level_vector[i];
  delete level_interp[i];
+ delete level_restrct[i];
 }
- delete [] level_A; delete [] level_vector; delete [] level_interp;
-
+ delete [] level_A; delete [] level_vector; delete [] level_interp; delete [] level_restrct;
+e(1002);
 
 /*  #ifdef LIBMESH_HAVE_EXODUS_API
     ExodusII_IO (mesh).write_equation_systems ("lshaped_interpolated_fine.e",
@@ -616,20 +638,6 @@ for (unsigned int i = 0; i < n_levels_coarsen; i++)
   #endif // #ifdef LIBMESH_HAVE_EXODUS_API
 */
 
-/*
-  MeshRefinement mesh_refinement_4(mesh);
-  mesh_refinement_4.coarsen_by_parents();
-  mesh_refinement_4.uniformly_refine();
-  equation_systems.reinit();
-*/
-
-for (unsigned int j = system.solution->first_local_index(); j < system.solution->last_local_index(); j++)
-  system.solution->set(j, system.solution->processor_id());
-
-    #ifdef LIBMESH_HAVE_EXODUS_API
-    ExodusII_IO (mesh).write_equation_systems ("equation_systems_processor_unif_refine.e",
-                                         equation_systems);
-  #endif // #ifdef LIBMESH_HAVE_EXODUS_API
 
   return 0;
 }

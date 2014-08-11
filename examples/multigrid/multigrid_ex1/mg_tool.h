@@ -27,22 +27,29 @@
 
 const unsigned int max_neighbor_size = 8;
 
-struct neighbors {
-const Elem* neighbors_ [max_neighbor_size];
-unsigned int n_neighbors;
-unsigned int var;
-};
 
 // this function is just for debugging
 
 void w(unsigned int i) { std::cout << "PrintMGTool: " << i << std::endl << std::flush; }
 
+class MGElemIDConverter {
 
-void build_interpolation(EquationSystems & es_fine, EquationSystems & es_coarse, std::string system_name, PetscMatrix<Number>& Interpolation, PetscVector<Number> & fine_level, PetscVector<Number> & coarse_level)
+private:
+std::vector<unsigned int> id_on_fine;
+std::vector<const Elem*>  elem_fine;
+unsigned int n; // current position
+
+public:
+void resize(unsigned int);
+bool add_elem(const Elem*);
+unsigned int c_to_f(unsigned int);
+};
+
+void build_interpolation(EquationSystems & es_fine, EquationSystems & es_coarse, std::string system_name, PetscMatrix<Number>& Interpolation, PetscVector<Number> & fine_level, PetscVector<Number> & coarse_level, MGElemIDConverter& id_converter)
 {
 
 
-const double zero_threshold_mg_tool = 0;
+const double zero_threshold_mg_tool = 1e-8;
 
 /* std::string quick_out = "processor_output_";
 std::stringstream stringstr;
@@ -71,27 +78,6 @@ w(1);
   const DofMap& dof_map_coarse = system_coarse.get_dof_map();
 
 
-  std::vector< neighbors > dof_elem;
-  dof_elem.resize(fine_level.local_size());
-
-  for (unsigned int i = 0; i < fine_level.local_size(); i++)
-  {
-  for (unsigned int j = 0; j < max_neighbor_size; j++)
-  dof_elem[i].neighbors_[j] = NULL;
-  dof_elem[i].n_neighbors = 0;
-  dof_elem[i].var = 0;
-  }
-  const unsigned int max_nodes_per_elem = 8;
-
-  const unsigned int max_dofs_elem = max_neighbor_size*max_nodes_per_elem;
-  unsigned int interacting_dofs_nz = 0;
-  unsigned int interacting_dofs_nnz = 0;
-
-  std::vector<unsigned int> interacting_dofs;
-  
-
-  interacting_dofs.resize(max_dofs_elem);
-  unsigned int n_interacting_dofs = 0;
 
   std::vector<unsigned int> nz;
   std::vector<unsigned int> nnz;
@@ -107,12 +93,7 @@ w(1);
       for (ConstElemRange::const_iterator elem_it=range.begin(); elem_it != range.end(); ++elem_it)
         {
           const Elem* elem = *elem_it;
-          const Elem* elem_full = es_fine.get_mesh().elem(elem->id());      
-
-          // check if this element is interesting
-
-
-
+          const Elem* elem_full = es_fine.get_mesh().elem(id_converter.c_to_f(elem->id()));      
           // Per-subdomain variables don't need to be projected on
           // elements where they're not active
           if (!variable.active_on_subdomain(elem->subdomain_id()))
@@ -155,19 +136,15 @@ w(1);
             // find out how many coarse_n_dofs are run on this same processor
             const unsigned int fine_position = fine_dof_indices[j] - dof_map_fine.first_dof();
             if (is_not_coarse_node) {
-           /* for (unsigned int k = 0; k < coarse_n_dofs; k++)
+            unsigned int new_dofs_nnz = 0;
+            unsigned int new_dofs_nz = elem_full->n_nodes();
+            for (unsigned int k = 0; k < coarse_n_dofs; k++)
               if (dof_map_coarse.first_dof() <= coarse_dof_indices[k] && coarse_dof_indices[k] <= dof_map_coarse.last_dof())
                 { new_dofs_nnz++; new_dofs_nz--; } 
 
 
-                  nnz[ fine_position ] += new_dofs_nnz;
-                   nz[ fine_position ] += new_dofs_nz;
-           */
-
-              // here we record the elements corresponding to each dof that is not coarse
-
-              dof_elem[fine_position].neighbors_[dof_elem[fine_position].n_neighbors++] = elem_full;
-              dof_elem[fine_position].var = var; 
+                  nnz[ fine_position ] = new_dofs_nnz;
+                   nz[ fine_position ] = new_dofs_nz;
 
                }
                else
@@ -216,43 +193,6 @@ w(1);
 
 w(10);
 
-  for (unsigned int i = 0; i < nnz.size(); i++)
-  {
-    n_interacting_dofs = 0;
-    interacting_dofs_nz = 0;
-    interacting_dofs_nnz = 0;
-
-    for (unsigned int j = 0; j < dof_elem[i].n_neighbors; j++) // note that no coarse nodes will be counted here
-    {
-     const Elem * elem = dof_elem[i].neighbors_[j];
-     const Elem * elem_coarse = es_coarse.get_mesh().elem(elem->id());
-         dof_map_fine.dof_indices (elem, coarse_dof_indices_2, dof_elem[i].var);
-         dof_map_coarse.dof_indices (elem_coarse, coarse_dof_indices, dof_elem[i].var);
-
-         for (unsigned int k = 0; k < coarse_dof_indices_2.size(); k++)
-         {
-            bool should_continue = 1;
-            for (unsigned int l = 0; l < n_interacting_dofs; l++)
-               if (interacting_dofs[l] == coarse_dof_indices_2[k])
-                 should_continue = 0;
-            if (should_continue)
-            {
-              if (coarse_dof_indices[k] <= dof_map_coarse.last_dof() && coarse_dof_indices[k] >= dof_map_coarse.first_dof())
-                interacting_dofs_nnz++;
-              else
-                interacting_dofs_nz++;
-
-              interacting_dofs[n_interacting_dofs++] = coarse_dof_indices_2[k];
-            }
-         }
-    }
-   // now I've built the array of indices
-  nz[i] += interacting_dofs_nz;
-  nnz[i] += interacting_dofs_nnz;
-
-  }
-
-
 for (unsigned int i = 0; i < nnz.size(); i++)
 {
 if (nz[i] > coarse_level.size() - coarse_level.local_size() )
@@ -292,7 +232,7 @@ w(3);
       for (ConstElemRange::const_iterator elem_it=range.begin(); elem_it != range.end(); ++elem_it)
         {
           const Elem* elem = *elem_it;
-          const Elem* elem_full = es_fine.get_mesh().elem(elem->id());
+          const Elem* elem_full = es_fine.get_mesh().elem(id_converter.c_to_f(elem->id()));
 
           // Per-subdomain variables don't need to be projected on
           // elements where they're not active
@@ -371,22 +311,56 @@ Interpolation.close();
  
 // end of function
 
+unsigned int MGElemIDConverter::c_to_f(unsigned int  id)
+{
+if (id < id_on_fine.size())
+return id_on_fine[id];
+else {
+std::cout << "Warning: MGElemIDConverter::c_to_f(unsigned int) recieved too large an id: " << id << ", ";
+std::cout << "while max is " << id_on_fine.size() << std::endl; }
 
+return 0; // if nothing showed up, default to 0
+}
 
+void MGElemIDConverter::resize(unsigned int new_size)
+{
+id_on_fine.resize(new_size);
+elem_fine.resize(new_size);
 
-void flag_elements_FAC(MeshBase & _mesh)
+n = 0;
+}
+
+bool MGElemIDConverter::add_elem(const Elem* new_elem) // returns 1 if taken, 0 if not taken
+{
+for (unsigned int i = 0; i < n; i++)
+if (elem_fine[i] == new_elem)
+return 0;
+
+if (n >= id_on_fine.size())
+return 0;
+
+id_on_fine[n] = new_elem->id();
+elem_fine[n] = new_elem;
+n++;
+
+return 1;
+}
+
+void flag_elements_FAC(MeshBase & _mesh, MGElemIDConverter & id_converter)
 {
 
 
 // first find maximum level
 
-  MeshBase::element_iterator e_it = _mesh.active_elements_begin();
-  const MeshBase::element_iterator e_end = _mesh.active_elements_end();
+  MeshBase::element_iterator e_it = _mesh.elements_begin();
+  const MeshBase::element_iterator e_end = _mesh.elements_end();
 
   unsigned int max_level = 0;
+  unsigned int total_elem = 0;
 
-  for (; e_it != e_end; ++e_it)
+  for (; e_it != e_end; ++e_it) // find maximum level
   {
+  total_elem++;
   unsigned int level_count = 0;
   Elem* elem = *e_it;
   Elem* tp = elem;
@@ -403,8 +377,11 @@ void flag_elements_FAC(MeshBase & _mesh)
    max_level = level_count;
   }
   e_it = _mesh.active_elements_begin();
+  const MeshBase::element_iterator e_end_2 = _mesh.active_elements_end();
 
-  for (; e_it != e_end; ++e_it)
+  id_converter.resize(total_elem);
+
+  for (; e_it != e_end_2; ++e_it)  // refine just the maximum level
   {
   Elem* elem = *e_it;
 
@@ -421,11 +398,16 @@ void flag_elements_FAC(MeshBase & _mesh)
 
   if (parent && level_count == max_level)
   elem->set_refinement_flag(Elem::COARSEN);
-
-  if (elem->parent())
-  elem->parent()->set_refinement_flag(Elem::COARSEN_INACTIVE);
-
   }
+
+e_it = _mesh.elements_begin();
+
+for (; e_it != e_end; ++e_it)
+{
+Elem* elem = *e_it;
+if (elem->refinement_flag() != Elem::COARSEN)
+id_converter.add_elem(elem);
+}
 
 }
 
