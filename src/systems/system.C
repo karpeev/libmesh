@@ -426,6 +426,33 @@ void System::update ()
   solution->localize (*current_local_solution, send_list);
 }
 
+AutoPtr<NumericVector<Number> > System::get_local_vector (const NumericVector<Number>& vec) const
+{
+  // Verify that vec is laid out according to this system.
+  if (vec.size() != this->n_dofs() || vec.local_size() != this->n_local_dofs())
+    {
+      libmesh_error_msg("get_local_vector: vector does not conform to system");
+    }
+  ParallelType type = vec.type();
+  if (type == SERIAL)
+    {
+      AutoPtr<NumericVector<Number> > buf = vec.clone();
+      return buf;
+    }
+  libmesh_assert(vec.closed());
+  // Build the vector to localize to
+  AutoPtr<NumericVector<Number> > buf = NumericVector<Number>::build(vec.comm());
+#ifdef LIBMESH_ENABLE_GHOSTED
+  buf->init (this->n_dofs(), this->n_local_dofs(),
+	     _dof_map->get_send_list(), false,
+	     GHOSTED);
+#else
+  buf->init (this->n_dofs(), false, SERIAL);
+#endif
+  vec.localize(*buf, _dof_map->get_send_list());
+  return buf;
+}
+
 
 
 void System::re_update ()
@@ -706,6 +733,7 @@ NumericVector<Number> & System::add_vector (const std::string& vec_name,
 
   return *buf;
 }
+
 
 void System::remove_vector (const std::string& vec_name)
 {

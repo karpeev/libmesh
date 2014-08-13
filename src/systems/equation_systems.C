@@ -872,6 +872,205 @@ void EquationSystems::build_solution_vector (std::vector<Number>& soln,
 }
 
 
+void EquationSystems::build_systems_vector (std::vector<Number>& vec,
+					   const std::map<std::string,const NumericVector<Number>*>* system_vectors) const
+{
+  // FIXME: unify with build_solution_vector()
+  START_LOG("build_systems_vector()", "EquationSystems");
+
+  // This function must be run on all processors at once
+  parallel_object_only();
+
+  libmesh_assert (this->n_systems());
+
+  const unsigned int dim = _mesh.mesh_dimension();
+  const dof_id_type nn   = _mesh.n_nodes();
+
+  // We'd better have a contiguous node numbering
+  libmesh_assert_equal_to (nn, _mesh.max_node_id());
+
+  // allocate storage to hold
+  // (number_of_nodes)*(number_of_variables) entries.
+  // We have to differentiate between between scalar and vector
+  // variables. We intercept vector variables and treat each
+  // component as a scalar variable (consistently with build_solution_names).
+
+  unsigned int nv = 0;
+
+  //Could this be replaced by a/some convenience methods?[PB]
+  {
+    unsigned int n_scalar_vars = 0;
+    unsigned int n_vector_vars = 0;
+    const_system_iterator       pos = _systems.begin();
+    const const_system_iterator end = _systems.end();
+
+    for (; pos != end; ++pos)
+      {
+        // Check current system is listed in system_vector_names, and skip pos if not
+        if (system_vectors->find(pos->first) == system_vectors->end())
+	  {
+            continue;
+          }
+
+        for (unsigned int vn=0; vn<pos->second->n_vars(); vn++)
+          {
+            if( FEInterface::field_type(pos->second->variable_type(vn)) ==
+                TYPE_VECTOR )
+              n_vector_vars++;
+            else
+              n_scalar_vars++;
+          }
+      }
+    // Here, we're assuming the number of vector components is the same
+    // as the mesh dimension. Will break for mixed dimension meshes.
+    nv = n_scalar_vars + dim*n_vector_vars;
+  }
+
+  // Get the number of elements that share each node.  We will
+  // compute the average value at each node.  This is particularly
+  // useful for plotting discontinuous data.
+  MeshBase::element_iterator       e_it  = _mesh.active_local_elements_begin();
+  const MeshBase::element_iterator e_end = _mesh.active_local_elements_end();
+
+  // Get the number of local nodes
+  dof_id_type n_local_nodes = std::distance(_mesh.local_nodes_begin(), _mesh.local_nodes_end());
+
+  // Create a NumericVector to hold the parallel vector
+  AutoPtr<NumericVector<Number> > parallel_vector_ptr = NumericVector<Number>::build(_communicator);
+  NumericVector<Number> &parallel_vector = *parallel_vector_ptr;
+  parallel_vector.init(nn*nv, n_local_nodes*nv, false, PARALLEL);
+
+  // Create a NumericVector to hold the "repeat_count" for each node - this is essentially
+  // the number of elements contributing to that node's value
+  AutoPtr<NumericVector<Number> > repeat_count_ptr = NumericVector<Number>::build(_communicator);
+  NumericVector<Number> &repeat_count = *repeat_count_ptr;
+  repeat_count.init(nn*nv, n_local_nodes*nv, false, PARALLEL);
+
+  repeat_count.close();
+
+  unsigned int var_num=0;
+
+  // For each system in this EquationSystems object,
+  // update the global solution and if we are on processor 0,
+  // loop over the elements and build the nodal solution
+  // from the element solution.  Then insert this nodal solution
+  // into the vector passed to build_vector.
+  const_system_iterator       pos = _systems.begin();
+  const const_system_iterator end = _systems.end();
+
+  for (; pos != end; ++pos)
+    {
+      // Check current system is listed in system_vectors, and skip pos if not
+      std::map<std::string,const NumericVector<Number>*>::const_iterator system_vectors_it = system_vectors->find(pos->first);
+      if(system_vectors_it == system_vectors->end())
+        {
+          continue;
+        }
+
+      const System& system  = *(pos->second);
+      const unsigned int nv_sys = system.n_vars();
+      const unsigned int sys_num = system.number();
+
+      //Could this be replaced by a/some convenience methods?[PB]
+      unsigned int n_scalar_vars = 0;
+      unsigned int n_vector_vars = 0;
+      for (unsigned int vn=0; vn<pos->second->n_vars(); vn++)
+        {
+          if( FEInterface::field_type(pos->second->variable_type(vn)) ==
+              TYPE_VECTOR )
+            n_vector_vars++;
+          else
+            n_scalar_vars++;
+        }
+
+      // FIXME: Here, we're assuming the number of vector components is the same
+      // as the mesh dimension. Will break for mixed dimension meshes.
+      unsigned int nv_sys_split = n_scalar_vars + dim*n_vector_vars;
+
+      // Obtain a local version of the named system vector -- it will contain complete elements,
+      // because it will be ghosted, if necessary.
+      AutoPtr<NumericVector<Number> > local_vector = system.get_local_vector(*system_vectors_it->second);
+
+      std::vector<Number>      elem_vec;    // The finite element vector
+      std::vector<Number>      nodal_vec;   // The FE vector interpolated to the nodes
+      std::vector<dof_id_type> dof_indices; // The DOF indices for the finite element
+
+      for (unsigned int var=0; var<nv_sys; var++)
+        {
+          const FEType& fe_type           = system.variable_type(var);
+          const Variable &var_description = system.variable(var);
+          const DofMap &dof_map           = system.get_dof_map();
+
+          unsigned int n_vec_dim = FEInterface::n_vec_dim( pos->second->get_mesh(), fe_type );
+
+          MeshBase::element_iterator       it       = _mesh.active_local_elements_begin();
+          const MeshBase::element_iterator end_elem = _mesh.active_local_elements_end();
+
+          for ( ; it != end_elem; ++it)
+            {
+              const Elem* elem = *it;
+
+              if (var_description.active_on_subdomain((*it)->subdomain_id()))
+                {
+                  dof_map.dof_indices (elem, dof_indices, var);
+
+                  elem_vec.resize(dof_indices.size());
+
+                  for (unsigned int i=0; i<dof_indices.size(); i++)
+                    elem_vec[i] = (*local_vector)(dof_indices[i]);
+
+                  FEInterface::nodal_soln (dim,
+                                           fe_type,
+                                           elem,
+                                           elem_vec,
+                                           nodal_vec);
+
+#ifdef LIBMESH_ENABLE_INFINITE_ELEMENTS
+                  // infinite elements should be skipped...
+                  if (!elem->infinite())
+#endif
+                    {
+                      libmesh_assert_equal_to (nodal_vec.size(), n_vec_dim*elem->n_nodes());
+
+                      for (unsigned int n=0; n<elem->n_nodes(); n++)
+                        {
+                          for( unsigned int d=0; d < n_vec_dim; d++ )
+                            {
+                              // For vector-valued elements, all components are in nodal_vec. For each
+                              // node, the components are stored in order, i.e. node_0 -> s0_x, s0_y, s0_z
+                              parallel_vector.add(nv*(elem->node(n)) + (var+d + var_num), nodal_vec[n_vec_dim*n+d]);
+
+                              // Increment the repeat count for this position
+                              repeat_count.add(nv*(elem->node(n)) + (var+d + var_num), 1);
+                            }
+                        }
+                    }
+                }
+              else // If this variable doesn't exist on this subdomain we have to still increment repeat_count so that we won't divide by 0 later:
+                for (unsigned int n=0; n<elem->n_nodes(); n++)
+                  // Only do this if this variable has NO DoFs at this node... it might have some from an ajoining element...
+                  if(!elem->get_node(n)->n_dofs(sys_num, var))
+                    for( unsigned int d=0; d < n_vec_dim; d++ )
+                      repeat_count.add(nv*(elem->node(n)) + (var+d + var_num), 1);
+
+            } // end loop over elements
+        } // end loop on variables in this system
+
+      var_num += nv_sys_split;
+    } // end loop over systems
+
+  parallel_vector.close();
+  repeat_count.close();
+
+  // Divide to get the average value at the nodes
+  parallel_vector /= repeat_count;
+
+  parallel_vector.localize_to_one(vec);
+
+  STOP_LOG("build_systems_vector()", "EquationSystems");
+}
+
+
 void EquationSystems::get_solution (std::vector<Number>& soln,
                                     std::vector<std::string> & names ) const
 {

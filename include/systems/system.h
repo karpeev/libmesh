@@ -769,6 +769,13 @@ public:
   NumericVector<Number> & add_vector (const std::string& vec_name,
                                       const bool projections=true,
                                       const ParallelType type = PARALLEL);
+  /**
+   * Constructs a local version of a vector added under \p vec_name to this system.
+   * A PARALLEL or GHOSTED vector has a GHOSTED local version, while the local version
+   * of a SERIAL vector is SERIAL.
+   */
+  AutoPtr<NumericVector<Number> > get_local_vector (const NumericVector<Number>& vec) const;
+
 
   /**
    * Removes the additional vector \p vec_name from this system

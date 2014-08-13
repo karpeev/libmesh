@@ -26,6 +26,8 @@
 #include "libmesh/libmesh_logging.h"
 #include "libmesh/mesh_base.h"
 #include "libmesh/mesh_serializer.h"
+#include "libmesh/numeric_vector.h"
+
 
 // C++ includes
 #include <cstddef>
@@ -86,10 +88,26 @@ public:
   /**
    * This method implements writing a mesh with data to a specified file
    * where the data is taken from the \p EquationSystems object.
+   * Optionally, only the data from the specified systems' solution vectors
+   * is used.
    */
   virtual void write_equation_systems (const std::string&,
                                        const EquationSystems&,
                                        const std::set<std::string>* system_names=NULL);
+  /**
+   * This method implements writing a mesh with data to a specified file
+   * where the data is taken from the \p EquationSystems object.
+   * Only the data from the system-vector pairs specified in
+   * \p system_vectors is used.
+   * The vectors in system_vectors are assumed to be laid out as prescribed by the
+   * system's dof_map, for example, obtaining them with \p add_vector().
+   * Only the variable names specified in call to \p set_output_variables()
+   * are used.
+   */
+  virtual void write_equation_systems (const std::string&,
+                                       const EquationSystems&,
+                                       const std::map<std::string,const NumericVector<Number>* >* system_vectors);
+
 
   /**
    * This method implements writing a mesh with nodal data to a
@@ -144,12 +162,26 @@ private:
    * A helper function which allows us to fill temporary
    * name and solution vectors with an EquationSystems object.
    * Only generate names and solution data corresponding to
-   * systems specified in system_names.
+   * systems specified in \p system_names.
    */
   void _build_variable_names_and_solution_vector(const EquationSystems& es,
                                                  std::vector<Number>& soln,
                                                  std::vector<std::string>& names,
                                                  const std::set<std::string>* system_names=NULL);
+ /**
+   * A helper function which allows us to fill temporary
+   * name and solution vectors with an EquationSystems object.
+   * Only generate names and solution data corresponding to
+   * system-vector paris specified in \p system_vectors.
+   * The vectors in system_vectors are assumed to be laid out as prescribed by the
+   * system's dof_map, for example, obtaining them with \p add_vector().
+   * Only the variables specified in the call to \p set_output_variables()
+   * are used.
+   */
+  void _build_variable_names_and_systems_vector(const EquationSystems& es,
+                                        std::vector<Number>& soln,
+                                        std::vector<std::string>& names,
+                                        const std::map<std::string,const NumericVector<Number>* >* system_vectors);
 };
 
 

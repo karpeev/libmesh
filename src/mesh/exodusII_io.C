@@ -898,7 +898,7 @@ void ExodusII_IO::write_nodal_data_common(std::string fname,
 
 
 
-ExodusII_IO::~ExodusII_IO ()
+exodusii_IO::~ExodusII_IO ()
 {
   libmesh_error_msg("ERROR, ExodusII API is not defined.");
 }

@@ -268,7 +268,7 @@ public:
 
   /**
    * Fill the input vector \p soln with the solution values for the
-   * system named \p name.  Note that the input
+   * system named \p system_name.  Note that the input
    * vector \p soln will only be assembled on processor 0, so this
    * method is only applicable to outputting plot files from processor 0.
    */
@@ -285,6 +285,15 @@ public:
    */
   void build_solution_vector (std::vector<Number>& soln,
                               const std::set<std::string>* system_names=NULL) const;
+  /**
+   * Fill the input vector \p vec with values from the systems and vectors
+   * specified in system_vectors.  The entries will be in variable-major
+   * format (corresponding to the names from \p build_variable_names()).
+   * The vectors in system_vectors are assumed to be laid out as prescribed by the
+   * system's dof_map, for example, obtaining them with \p add_vector().
+   */
+  void build_systems_vector (std::vector<Number>& vec,
+                     const std::map<std::string,const NumericVector<Number>*>* system_vectors) const;
 
   /**
    * Retrieve the solution data for CONSTANT MONOMIALs.  If \p names
