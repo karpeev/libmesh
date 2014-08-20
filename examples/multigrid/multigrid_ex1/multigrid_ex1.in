@@ -1,8 +1,10 @@
+mesh_build = 0
 
 nz_c = 100  # space allocated for the A-matrices
 nnz_c = 100 # space allocated for the A-matrices
 
-n_levels_coarsen = 5 # error if not >= 3, this is how many MG levels I will make
+n_uniform_refinements = 3
+n_levels_coarsen = 9 # error if not >= 3, this is how many MG levels I will make
 
 x_range = 2
 y_range = 2
@@ -21,10 +23,10 @@ gamma_R = -2.0
 gamma_I = 0.5
 
 # Maximum number of refinement steps
-max_r_steps = 6
+max_r_steps = 10
 
 # Maximum h refinement level for an element.
-max_r_level = 6
+max_r_level = 10
 
 # Percentage of elements to refine at each step
 refine_percentage = 0.7
@@ -81,4 +83,3 @@ singularity = true
 # Output intermediate solves?
 output_intermediate = false
 
-mesh_build = 0
