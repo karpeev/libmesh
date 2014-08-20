@@ -22,6 +22,7 @@
 #include "libmesh/wrapped_function.h"
 
 #include <fstream>
+#define MG_TOOL_PRINT_STATEMENTS_ACTIVE 0
 
 // here this structure holds the element neighbors of dofs
 
@@ -30,7 +31,11 @@ const unsigned int max_neighbor_size = 8;
 
 // this function is just for debugging
 
-void w(unsigned int i) { std::cout << "PrintMGTool: " << i << std::endl << std::flush; }
+void w(unsigned int i) { 
+
+if (MG_TOOL_PRINT_STATEMENTS_ACTIVE)
+std::cout << "PrintMGTool: " << i << std::endl << std::flush; 
+}
 
 class MGElemIDConverter {
 
@@ -45,9 +50,34 @@ bool add_elem(const Elem*);
 unsigned int c_to_f(unsigned int);
 };
 
+unsigned int MGCountLevelsFAC(MeshBase & mesh)
+{
+ ConstElemRange range
+  (mesh.active_local_elements_begin(),
+  mesh.active_local_elements_end());
+unsigned int count = 1;
+unsigned int max_levels = 1;
+      // Iterate over the elements in the range
+      for (ConstElemRange::const_iterator elem_it=range.begin(); elem_it != range.end(); ++elem_it)
+        {
+          count = 1;
+          const Elem* elem = *elem_it;
+          const Elem* parent = elem;
+          while (parent->parent())
+          {
+            parent = parent->parent();
+            count++;
+          }
+          if (max_levels < count)
+            max_levels = count;
+        }
+
+return max_levels;
+}
+
+
 void build_interpolation(EquationSystems & es_fine, EquationSystems & es_coarse, std::string system_name, PetscMatrix<Number>& Interpolation, PetscVector<Number> & fine_level, PetscVector<Number> & coarse_level, MGElemIDConverter& id_converter)
 {
-
 
 const double zero_threshold_mg_tool = 1e-8;
 
@@ -88,6 +118,7 @@ w(1);
   for (unsigned int var=0; var<n_variables; var++)
     {
       const Variable& variable = dof_map_coarse.variable(var);
+
 
       // Iterate over the elements in the range
       for (ConstElemRange::const_iterator elem_it=range.begin(); elem_it != range.end(); ++elem_it)
