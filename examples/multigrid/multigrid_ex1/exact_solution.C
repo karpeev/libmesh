@@ -27,7 +27,7 @@
 using namespace libMesh;
 
 
-
+const double frequency_k = 10.0;
 
 
 /**
@@ -47,11 +47,11 @@ Real exact_solution (const Real x,
   static const Real pi = acos(-1.);
 
      Real theta = atan2(y,x);
+//   return sin(x*pi*frequency_k)*sin(frequency_k*pi*y)*sin(frequency_k*pi*z)*exp(-x*x-y*y);
 
-  
         if (theta < 0)
           theta += 2. * pi;
-        return pow(x*x + y*y + z*z, 1./3.)*sin(2./3.*theta);
+        return pow(x*x + y*y + z*z, 1./3.)*sin(2./3.*theta)*sin(x*pi)*sin(y*pi)*sin(z*pi);
 
 }
 
@@ -64,13 +64,11 @@ Real exact_solution_I (const Real x,
 {
   static const Real pi = acos(-1.);
 
-
-
+//   return sin(x*pi*frequency_k*2)*sin(y*pi*frequency_k)*sin(frequency_k*z*pi)*exp(-x*x-y*y);
      Real theta = atan2(y,x);
 
         if (theta < 0)
           theta += 2. * pi;
-        return pow(x*x+2*y*y+3*z*z,1/3)*sin(2./3.*theta);
-
+        return sin(x*pi)*sin(y*pi)*sin(z*pi)*pow(x*x+2*y*y+3*z*z,1/3)*sin(2./3.*theta);
 }
 
