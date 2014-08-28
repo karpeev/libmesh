@@ -1,6 +1,6 @@
 mesh_build = 0
 
-n_uniform_refinements = 2
+n_uniform_refinements = 0
 n_levels_coarsen = 3 # error if not >= 3, this is how many MG levels I will make
 
 x_range = 2

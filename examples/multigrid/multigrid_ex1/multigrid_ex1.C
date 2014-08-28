@@ -1,4 +1,3 @@
-// #include "limbesh/system_projection.h"
 #include <libmesh/mesh_data.h>
 #include <petscdm.h>
 #include <petscdmda.h>
@@ -64,9 +63,10 @@
 #include "libmesh/string_to_enum.h"
 #include "mg_tool.h"
 
-const bool multigrid_ex1_print_statements_active = 1;
+PetscBool multigrid_ex1_print_statements_active = PETSC_TRUE;
 
 using namespace libMesh;
+using std::vector;
 
 void assemble_helmholtz(EquationSystems& es,
                       const std::string& system_name);
@@ -83,7 +83,12 @@ void assemble_helmholtz(EquationSystems& es,
 
 void e(unsigned int i) { 
 if (multigrid_ex1_print_statements_active)
-std::cout << "PrintStatement: " << i << '\n' << std::flush; 
+PetscPrintf(PETSC_COMM_SELF, "PrintStatement: %D \n", i);
+}
+
+void e(unsigned int i, unsigned int j) {
+if (multigrid_ex1_print_statements_active)
+PetscPrintf(PETSC_COMM_SELF, "PrintStatement: %D (%D)\n", i, j);
 }
 
 
@@ -103,7 +108,7 @@ Number exact_solution(const Point& p, const Parameters&,const std::string&,const
 Number exact_solution_I(const Point& p, const Parameters&,const std::string&,const std::string&);
 
 bool singularity = true;
-bool print_matrix = false;
+PetscBool print_matrix = PETSC_FALSE;
 
 Real gamma_R = 0.0;
 Real gamma_I =  0.0;
@@ -135,7 +140,6 @@ int main (int argc, char** argv)
     const int extra_error_quadrature  = input_file("extra_error_quadrature", 0);
     const int max_linear_iterations   = input_file("max_linear_iterations", 5000);
     const bool output_intermediate    = input_file("output_intermediate", false);
-    print_matrix                      = input_file("print_matrix", false);
     const unsigned int x_range        = input_file("x_range", 2);
     const unsigned int y_range        = input_file("y_range", 2);
     const unsigned int z_range        = input_file("z_range", 2);
@@ -146,6 +150,8 @@ int main (int argc, char** argv)
 
     PetscBool use_gmg = PETSC_FALSE;
     PetscBool mesh_build = PETSC_FALSE;
+    PetscOptionsGetBool(NULL, "-use_debug", &multigrid_ex1_print_statements_active, NULL);
+    PetscOptionsGetBool(NULL, "-print_matrix", &print_matrix, NULL);
     PetscOptionsGetBool(NULL, "-mesh_build", &mesh_build, NULL);
     PetscOptionsGetBool(NULL, "-use_penalty", &use_penalty, NULL);
     PetscOptionsGetBool(NULL, "-use_gmg", &use_gmg, NULL);
@@ -459,11 +465,13 @@ PrintStatus("gathering first data . . .");
   petsc_vec = (PetscVector<Number>*) system.rhs;
   petsc_mat = (PetscMatrix<Number>*) system.matrix;
 
-  MatAssemblyBegin( ((PetscMatrix<Number>*)system.matrix)->mat(), MAT_FINAL_ASSEMBLY);
-  MatAssemblyEnd(((PetscMatrix<Number>*)system.matrix)->mat(), MAT_FINAL_ASSEMBLY);
+//  MatAssemblyBegin( ((PetscMatrix<Number>*)system.matrix)->mat(), MAT_FINAL_ASSEMBLY);
+//  MatAssemblyEnd(((PetscMatrix<Number>*)system.matrix)->mat(), MAT_FINAL_ASSEMBLY);
 
-  VecAssemblyBegin(((PetscVector<Number>*) system.rhs)->vec());
-  VecAssemblyEnd(((PetscVector<Number>*) system.rhs)->vec());
+//  VecAssemblyBegin(((PetscVector<Number>*) system.rhs)->vec());
+//   VecAssemblyEnd(((PetscVector<Number>*) system.rhs)->vec());
+
+PetscPrintf(PETSC_COMM_SELF, "AND CONTINUING ONTO SWAPPING!\n");
   level_A[0]->swap(*petsc_mat);
   level_vector[0]->swap(*petsc_vec);
 // MatView(( (PetscMatrix<Number>*) system.matrix)->mat(), PETSC_VIEWER_STDOUT_WORLD);
@@ -542,8 +550,6 @@ EquationSystems equation_systems_3 (mesh_3);
 e(6);
 
 PrintStatus("gathering second data . . .");
-
-PetscBool prev_penalty = use_penalty;
 
 
  system_2.assemble();
@@ -752,8 +758,10 @@ e(1006);
 for (unsigned int i = 1; i < nlevels; i++)
 {
 e(1007);
-MatAssemblyBegin(level_interp[nlevels-1-i]->mat(), MAT_FINAL_ASSEMBLY);
-MatAssemblyEnd(level_interp[nlevels-1-i]->mat(), MAT_FINAL_ASSEMBLY);
+
+//MatAssemblyBegin(level_interp[nlevels-1-i]->mat(), MAT_FINAL_ASSEMBLY);
+//MatAssemblyEnd(level_interp[nlevels-1-i]->mat(), MAT_FINAL_ASSEMBLY);
+
 PCMGSetInterpolation(pc,i,level_interp[nlevels-1-i]->mat());
   PCMGSetResidual(pc, i-1, NULL, level_A[nlevels-i]->mat());
 // std::cout << "i: " << i << " (m,n): " << level_A[nlevels-i]->m() << ", " << level_A[nlevels-i]->n() << std::endl;
@@ -773,6 +781,9 @@ Vec sol;
 VecDuplicate(level_vector[0]->vec(), &sol);
 e(1013);
 // VecView(level_vector[0]->vec(),PETSC_VIEWER_STDOUT_WORLD);
+
+if (use_gmg && print_matrix)
+MatView(level_A[nlevels-1]->mat(), PETSC_VIEWER_STDOUT_WORLD);
 
 // Mat A;
 // KSPGetOperators(ksp,&A, NULL);
@@ -879,8 +890,8 @@ std::cout << "used penalty\n";
   std::vector<dof_id_type> dof_indices_C;
 
 
-  MeshBase::const_element_iterator       el     = mesh.active_elements_begin();
-  const MeshBase::const_element_iterator end_el = mesh.active_elements_end();
+  MeshBase::const_element_iterator       el     = mesh.active_local_elements_begin();
+  const MeshBase::const_element_iterator end_el = mesh.active_local_elements_end();
 
   for ( ; el != end_el ; ++el)
     {
@@ -912,12 +923,6 @@ std::cout << "used penalty\n";
       for (unsigned int qp=0; qp<qrule.n_points(); qp++)
         {
 
-/*          for (unsigned int i=0; i<phi.size(); i++)
-            for (unsigned int j=0; j<phi.size(); j++)
-              {
-                Ke(i,j) += JxW[qp]*(dphi[i][qp]*dphi[j][qp] + gamma_R*phi[i][qp]*phi[j][qp]);
-              }
-*/
 
 	for (unsigned int i = 0; i < n_u_R_dofs; i++)
 	  for (unsigned int j = 0; j < n_u_R_dofs; j++)
@@ -967,61 +972,132 @@ std::cout << "used penalty\n";
           }
         }
 
-      {
-	if (use_penalty)
-        for (unsigned int side=0; side<elem->n_sides(); side++)
-	{ 
-
-            if (elem->neighbor(side)==NULL)
-            {
-              const std::vector<std::vector<Real> >&  phi_face = fe_face->get_phi();
-
-              const std::vector<Real>& JxW_face = fe_face->get_JxW();
-
-              const std::vector<Point >& qface_point = fe_face->get_xyz();
-
-              fe_face->reinit(elem, side);
-
-              for (unsigned int qp=0; qp<qface.n_points(); qp++)
-                {
-
-		  const Real xf = qface_point[qp](0);
-                  const Real yf = qface_point[qp](1);
-                  const Real zf = qface_point[qp](2);
-
-                  const Real penalty = 1.e10;
-
-                  const Real value = exact_solution(xf, yf, zf);
-        for (unsigned int i = 0; i < phi_face.size(); i++)
-          for (unsigned int j = 0; j < phi_face.size(); j++)
-            KRR(i,j) += penalty*JxW_face[qp]*phi_face[i][qp]*phi_face[j][qp];
-
-        for (unsigned int i = 0; i < phi_face.size(); i++)
-          for (unsigned int j = 0; j < phi_face.size(); j++)
-            KCC(i,j) += penalty*JxW_face[qp]*phi_face[i][qp]*phi_face[j][qp];
-
-        for (unsigned int i = 0; i < phi_face.size(); i++)
-          FR(i) += penalty*JxW_face[qp]*value*phi_face[i][qp];
-
-       const Real valueI = exact_solution_I(xf,yf,zf);
-
-        for (unsigned int i = 0; i < phi_face.size(); i++)
-          FC(i) += penalty*JxW_face[qp]*valueI*phi_face[i][qp];
-                }
-            }
-	}
-      }
-
       dof_map.constrain_element_matrix_and_vector (Ke, Fe, dof_indices);
 
       system.matrix->add_matrix (Ke, dof_indices);
       system.rhs->add_vector    (Fe, dof_indices);
+      }
 
-if (print_matrix) {
-Ke.print(std::cout);
-std::cout << "\n ================================================================ \n";
-		    }
+system.matrix->close();
+system.rhs->close();
+PetscPrintf(PETSC_COMM_WORLD, "First Part Done\n");
+
+
+if (use_penalty)
+{
+  unsigned int processor_id = system.processor_id();
+
+  unsigned int n_variables = system.n_vars();
+  vector<PetscBool> bddy_dof_done;
+  bddy_dof_done.resize(system.rhs->local_size()); // this tells if this dof has been inserted.
+					   // note that we use this per variable.
+PetscPrintf(PETSC_COMM_SELF, "system.rhs->local_size()=%D\n", system.rhs->local_size());
+
+
+
+
+
+  for (unsigned int var=0; var<n_variables; var++)
+  {
+   el     = mesh.active_local_elements_begin();
+   for (unsigned int i = 0; i < bddy_dof_done.size(); i++)
+    bddy_dof_done[i] = PETSC_FALSE;
+
+   for ( ; el != end_el ; ++el)
+    {
+      const Elem* elem = *el;
+
+      // This tells what nodes of the element are on the boundary
+
+      vector<PetscBool> node_on_side;
+      PetscBool element_on_boundary = PETSC_FALSE;
+      PetscInt node_on_side_count = 0;
+
+        for (unsigned int side=0; side<elem->n_sides(); side++)
+            if (elem->neighbor(side)==NULL)
+            {
+               if (!element_on_boundary) // initialize data if we hav e link to bdry
+		{
+		      node_on_side.resize(elem->n_nodes());
+		      for (unsigned int i = 0; i < node_on_side.size(); i++)
+		        node_on_side[i] = PETSC_FALSE;
+		      element_on_boundary = PETSC_TRUE;
+		}
+              for (unsigned int node = 0; node < elem->n_nodes(); node++)
+              {
+		PetscBool check_on_processor = PETSC_FALSE;
+		PetscBool check_if_row_done = PETSC_FALSE;
+
+		unsigned int dof = elem->get_node(node)->dof_number(0,var,0);
+
+		if (dof <= dof_map.last_dof() && dof >= dof_map.first_dof())
+		  check_on_processor = PETSC_TRUE;
+		if (check_on_processor)
+		{
+		  if (bddy_dof_done[dof - dof_map.first_dof()])
+		    check_if_row_done = PETSC_TRUE;
+		  else
+		  { bddy_dof_done[dof - dof_map.first_dof()] = PETSC_TRUE;}
+		}
+
+               if (elem->is_node_on_side(node, side) && check_on_processor && !check_if_row_done)
+			if (node_on_side[node] == PETSC_FALSE) // avoid double-counting
+                        { node_on_side[node] = PETSC_TRUE; node_on_side_count++;}
+              }
+            }
+
+       // now node_on_side knows what nodes are of interest, so we start our looping
+          if (element_on_boundary)
+	  {
+              vector<unsigned int> rows;
+              vector<Real> 	   rhs;
+
+              rows.resize(node_on_side_count);
+              rhs.resize(node_on_side_count);
+
+              unsigned int row_index = 0;
+
+              for (unsigned int i = 0; i < node_on_side.size(); i++)
+               if (node_on_side[i])
+               { 
+                 Node * p;
+                 p = elem->get_node(i);
+
+		 rows[row_index] = p->dof_number(0, var, 0);
+		if (var == 0)
+		 rhs[row_index]= exact_solution((*p)(0), (*p)(1), (*p)(2));
+		if (var == 1)
+		 rhs[row_index]= exact_solution_I((*p)(0), (*p)(1), (*p)(2));
+		 row_index++;
+/*		 if (rows[row_index - 1] >= dof_map.first_dof() && rows[row_index-1] <= dof_map.last_dof())
+PetscPrintf(PETSC_COMM_SELF,"on processor.\n");
+else
+PetscPrintf(PETSC_COMM_SELF,"off processor.\n");
+*/
+	       }
+
+              if (row_index > 0)
+	      {
+// PetscPrintf(PETSC_COMM_SELF, "Row Index = %D, sizes: RHS=%D, ROW=%D, NOSC=%D, PROC=%D\n", row_index, rhs.size(), rows.size(), node_on_side_count,processor_id);
+
+// for (unsigned int i = 0; i < rows.size(); i++)
+// PetscPrintf(PETSC_COMM_SELF, "V: %D (%D):\n", rows[i], processor_id);
+// PetscPrintf(PETSC_COMM_SELF, "V-FINISHED (%D).\n", processor_id);
+e(100, processor_id);
+              system.matrix->zero_rows(rows, 1.);
+              system.rhs->insert(rhs, rows);
+e(101, processor_id);
+	      }
+	  }
     }
+}
+e(102, processor_id);
+system.matrix->close();
+system.rhs->close();
+e(103, processor_id);
+}
+
+PetscPrintf(PETSC_COMM_SELF, "matrix assembled.\n");
 }
 
 
@@ -1035,150 +1111,5 @@ Number exact_solution_I(const Point& p, const Parameters&, const std::string&, c
 return exact_solution_I(p(0),p(1),p(2));
 }
 
-/*
-void assemble_helmholtz_matrix(EquationSystems& es,
-                      const std::string& system_name, PetscMatrix<Number>* matrix)
-{
-        
-        libmesh_assert_equal_to (system_name, "Helmholtz");
-        
-        const MeshBase& mesh = es.get_mesh();
-        
-        const unsigned int dim = mesh.mesh_dimension();
-        
-        LinearImplicitSystem& system = es.get_system<LinearImplicitSystem> ("Helmholtz");
-        
-        const unsigned int u_R_var = system.variable_number("u_R");
-        const unsigned int u_C_var = system.variable_number("u_C");
-        
-        
-        const DofMap& dof_map = system.get_dof_map();
-        
-        FEType fe_type = dof_map.variable_type(0);
-        
-        AutoPtr<FEBase> fe (FEBase::build(dim, fe_type));
-        
-        QGauss qrule (dim, FIFTH);
-        
-        fe->attach_quadrature_rule (&qrule);
-        
-        AutoPtr<FEBase> fe_face (FEBase::build(dim, fe_type));
-        
-        QGauss qface(dim-1, FIFTH);
-        
-        fe_face->attach_quadrature_rule (&qface);
-        
-        const std::vector<Real>& JxW = fe->get_JxW();
-        
-        const std::vector<std::vector<Real> >& phi = fe->get_phi();
-        
-        const std::vector<std::vector<RealGradient> >& dphi = fe->get_dphi();
-        
-        DenseMatrix<Number> Ke;
-        
-        DenseSubMatrix<Number>
-        KRR(Ke), KRC(Ke), KCR(Ke),KCC(Ke);
-    
-        
-        
-        std::vector<dof_id_type> dof_indices;
-        std::vector<dof_id_type> dof_indices_R;
-        std::vector<dof_id_type> dof_indices_C;
-        
-        
-        MeshBase::const_element_iterator       el     = mesh.active_local_elements_begin();
-        const MeshBase::const_element_iterator end_el = mesh.active_local_elements_end();
-        
-        for ( ; el != end_el ; ++el)
-        {
-            const Elem* elem = *el;
-            
-            dof_map.dof_indices (elem, dof_indices);
-            dof_map.dof_indices (elem, dof_indices_R, u_R_var);
-            dof_map.dof_indices (elem, dof_indices_C, u_C_var);
-            
-            const unsigned int n_dofs = dof_indices.size();
-            const unsigned int n_u_R_dofs = dof_indices_R.size();
-            const unsigned int n_u_C_dofs = dof_indices_C.size();
-            
-            fe->reinit (elem);
-            
-            Ke.resize (n_dofs,
-                       n_dofs);
-            
 
-            
-            KRR.reposition(u_R_var*n_u_R_dofs, u_R_var*n_u_R_dofs, n_u_R_dofs, n_u_R_dofs);
-            KRC.reposition(u_R_var*n_u_R_dofs, u_C_var*n_u_R_dofs, n_u_R_dofs, n_u_C_dofs);
-            KCR.reposition(u_C_var*n_u_C_dofs, u_R_var*n_u_C_dofs, n_u_C_dofs, n_u_R_dofs);
-            KCC.reposition(u_C_var*n_u_C_dofs, u_C_var*n_u_C_dofs, n_u_C_dofs, n_u_C_dofs);
-            
- 
-            for (unsigned int qp=0; qp<qrule.n_points(); qp++)
-            {
-                
-                
-                for (unsigned int i = 0; i < n_u_R_dofs; i++)
-                    for (unsigned int j = 0; j < n_u_R_dofs; j++)
-                        KRR(i,j) += JxW[qp]*(dphi[i][qp]*dphi[j][qp] + gamma_R*phi[i][qp]*phi[j][qp]);
-                
-                for (unsigned int i = 0; i < n_u_R_dofs; i++)
-                    for (unsigned int j = 0; j < n_u_C_dofs; j++)
-                        KRC(i,j) +=  -JxW[qp]*gamma_I*phi[i][qp]*phi[j][qp];
-                
-                for (unsigned int i = 0; i < n_u_C_dofs; i++)
-                    for (unsigned int j = 0; j < n_u_R_dofs; j++)
-                        KCR(i,j) += JxW[qp]* gamma_I*phi[i][qp]*phi[j][qp];
-                
-                for (unsigned int i = 0; i < n_u_R_dofs; i++)
-                    for (unsigned int j = 0; j < n_u_R_dofs; j++)
-                        KCC(i,j) += JxW[qp]*(dphi[i][qp]*dphi[j][qp] + gamma_R*phi[i][qp]*phi[j][qp]);
-                
-
-            }
-            
-            {
-                
-                for (unsigned int side=0; side<elem->n_sides(); side++)
-                    if (elem->neighbor(side) == NULL)
-                    {
-                        const std::vector<std::vector<Real> >&  phi_face = fe_face->get_phi();
-                        
-                        const std::vector<Real>& JxW_face = fe_face->get_JxW();
-                        
-                        
-                        fe_face->reinit(elem, side);
-                        
-                        
-                        for (unsigned int qp=0; qp<qface.n_points(); qp++)
-                        {
-                            
-                            const Real penalty = 1.e10;
-                            
-                             
-                            for (unsigned int i = 0; i < phi_face.size(); i++)
-                                for (unsigned int j = 0; j < phi_face.size(); j++)
-                                    KRR(i,j) += penalty*JxW_face[qp]*phi_face[i][qp]*phi_face[j][qp];
-                            
-                            for (unsigned int i = 0; i < phi_face.size(); i++)
-                                for (unsigned int j = 0; j < phi_face.size(); j++)
-                                    KCC(i,j) += penalty*JxW_face[qp]*phi_face[i][qp]*phi_face[j][qp];
-                            
-                      
-                            
-                        }
-                    }
-            }
-            
-            dof_map.constrain_element_matrix (Ke, dof_indices);
-            
-            matrix->add_matrix (Ke, dof_indices);
-            
-            if (print_matrix) {
-                Ke.print(std::cout);
-                std::cout << "\n ================================================================ \n";
-		    }
-        }
-    }
-*/
 
