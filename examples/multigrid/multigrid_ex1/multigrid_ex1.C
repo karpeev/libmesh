@@ -150,6 +150,8 @@ int main (int argc, char** argv)
 
     PetscBool use_gmg = PETSC_FALSE;
     PetscBool mesh_build = PETSC_FALSE;
+    PetscBool use_galerkin = PETSC_FALSE;
+    PetscOptionsGetBool(NULL, "-use_galerkin", &use_galerkin, NULL);
     PetscOptionsGetBool(NULL, "-use_debug", &multigrid_ex1_print_statements_active, NULL);
     PetscOptionsGetBool(NULL, "-print_matrix", &print_matrix, NULL);
     PetscOptionsGetBool(NULL, "-mesh_build", &mesh_build, NULL);
@@ -157,6 +159,8 @@ int main (int argc, char** argv)
     PetscOptionsGetBool(NULL, "-use_gmg", &use_gmg, NULL);
     PetscBool print_interp = PETSC_FALSE;
     PetscOptionsGetBool(NULL, "-write_interp", &print_interp,NULL);
+    PetscBool use_null_space = PETSC_FALSE;
+    PetscOptionsGetBool(NULL, "-use_null_space", &use_null_space, NULL);
 
 //                               ADAPTIVELY REFINE AND SOLVE
 // ===================================================================================
@@ -591,11 +595,6 @@ system_3.assemble();
 
 
   level_A[2]->swap(*petsc_mat);
- MatAssemblyBegin(level_A[2]->mat(),MAT_FINAL_ASSEMBLY);
- MatAssemblyEnd(level_A[2]->mat(),MAT_FINAL_ASSEMBLY);
-
-
-
 
 /*
  std::cout << level_vector[2]->size() << " size_of_level\n";
@@ -739,10 +738,21 @@ PetscInt nlevels = n_levels_coarsen;
 PC pc;
 KSP ksp;
 KSPCreate(PETSC_COMM_WORLD,&ksp);
-MatAssemblyBegin(level_A[0]->mat(),MAT_FINAL_ASSEMBLY);
-MatAssemblyEnd(level_A[0]->mat(),MAT_FINAL_ASSEMBLY);
 e(1);
 // MatView(level_A[0]->mat(), PETSC_VIEWER_STDOUT_WORLD);
+
+MatNullSpace sp;
+
+if (use_null_space)
+{
+PetscBool check_valid = PETSC_FALSE;
+MatNullSpaceCreate(PetscObjectComm((PetscObject) level_A[0]->mat()), PETSC_TRUE, 0, NULL, &sp);
+MatSetNullSpace(level_A[0]->mat(), sp);
+MatNullSpaceTest(sp, level_A[0]->mat(), &check_valid);
+std::cout << "Null Space Test: " << check_valid << "\n";
+}
+
+
 
 KSPSetOperators(ksp, level_A[0]->mat(),level_A[0]->mat());
 KSPGetPC(ksp,&pc);
@@ -753,17 +763,31 @@ PCMGSetLevels(pc,nlevels,NULL);
 PCMGSetType(pc,PC_MG_MULTIPLICATIVE);
 e(1006);
 
+
+ if (!use_galerkin)
  PCMGSetResidual(pc, nlevels - 1, NULL, level_A[0]->mat());
 
 for (unsigned int i = 1; i < nlevels; i++)
 {
 e(1007);
-
+PetscPrintf(PETSC_COMM_WORLD, "Setting a residual . . .\n");
 //MatAssemblyBegin(level_interp[nlevels-1-i]->mat(), MAT_FINAL_ASSEMBLY);
 //MatAssemblyEnd(level_interp[nlevels-1-i]->mat(), MAT_FINAL_ASSEMBLY);
 
 PCMGSetInterpolation(pc,i,level_interp[nlevels-1-i]->mat());
+
+if (use_null_space)
+{
+PetscBool check_valid = PETSC_FALSE;
+MatNullSpaceCreate(PetscObjectComm((PetscObject) level_A[nlevels-i]->mat()), PETSC_TRUE, 0, NULL, &sp);
+MatSetNullSpace(level_A[nlevels-i]->mat(), sp);
+MatNullSpaceTest(sp, level_A[nlevels-i]->mat(), &check_valid);
+std::cout << "Null Space Test: " << check_valid << "\n";
+}
+
+  if (!use_galerkin)
   PCMGSetResidual(pc, i-1, NULL, level_A[nlevels-i]->mat());
+
 // std::cout << "i: " << i << " (m,n): " << level_A[nlevels-i]->m() << ", " << level_A[nlevels-i]->n() << std::endl;
 // PetscBool check_if_assembled;
 // MatAssembled(level_A[nlevels-i]->mat(), &check_if_assembled);
@@ -780,7 +804,6 @@ e(1010);
 Vec sol;
 VecDuplicate(level_vector[0]->vec(), &sol);
 e(1013);
-// VecView(level_vector[0]->vec(),PETSC_VIEWER_STDOUT_WORLD);
 
 if (use_gmg && print_matrix)
 MatView(level_A[nlevels-1]->mat(), PETSC_VIEWER_STDOUT_WORLD);
@@ -801,6 +824,15 @@ PetscPrintf(PETSC_COMM_WORLD, "KSP Solving . . .\n");
 // PetscRandomSetType(rctx,PETSCRAND);
 // VecSetRandom(level_vector[0]->vec(), rctx);
 ierr = KSPSolve(ksp,level_vector[0]->vec(),sol);CHKERRQ(ierr);
+
+VecSet(sol, 1.);
+PetscVector<Number> sol_check(sol,system.comm());
+system.solution->init(sol_check);
+level_A[0]->vector_mult(*system.solution, sol_check);
+
+            ExodusII_IO (mesh).write_equation_systems ("ksp_solution.e",
+                                                 equation_systems);
+
 
 e(1014);
 PetscInt its = 0;
@@ -1002,7 +1034,7 @@ PetscPrintf(PETSC_COMM_SELF, "system.rhs->local_size()=%D\n", system.rhs->local_
    el     = mesh.active_local_elements_begin();
    for (unsigned int i = 0; i < bddy_dof_done.size(); i++)
     bddy_dof_done[i] = PETSC_FALSE;
-
+ unsigned int node_count = 0;
    for ( ; el != end_el ; ++el)
     {
       const Elem* elem = *el;
@@ -1010,19 +1042,10 @@ PetscPrintf(PETSC_COMM_SELF, "system.rhs->local_size()=%D\n", system.rhs->local_
       // This tells what nodes of the element are on the boundary
 
       vector<PetscBool> node_on_side;
-      PetscBool element_on_boundary = PETSC_FALSE;
-      PetscInt node_on_side_count = 0;
 
         for (unsigned int side=0; side<elem->n_sides(); side++)
             if (elem->neighbor(side)==NULL)
             {
-               if (!element_on_boundary) // initialize data if we hav e link to bdry
-		{
-		      node_on_side.resize(elem->n_nodes());
-		      for (unsigned int i = 0; i < node_on_side.size(); i++)
-		        node_on_side[i] = PETSC_FALSE;
-		      element_on_boundary = PETSC_TRUE;
-		}
               for (unsigned int node = 0; node < elem->n_nodes(); node++)
               {
 		PetscBool check_on_processor = PETSC_FALSE;
@@ -1032,64 +1055,34 @@ PetscPrintf(PETSC_COMM_SELF, "system.rhs->local_size()=%D\n", system.rhs->local_
 
 		if (dof <= dof_map.last_dof() && dof >= dof_map.first_dof())
 		  check_on_processor = PETSC_TRUE;
-		if (check_on_processor)
-		{
-		  if (bddy_dof_done[dof - dof_map.first_dof()])
-		    check_if_row_done = PETSC_TRUE;
-		  else
-		  { bddy_dof_done[dof - dof_map.first_dof()] = PETSC_TRUE;}
-		}
 
-               if (elem->is_node_on_side(node, side) && check_on_processor && !check_if_row_done)
-			if (node_on_side[node] == PETSC_FALSE) // avoid double-counting
-                        { node_on_side[node] = PETSC_TRUE; node_on_side_count++;}
+               if (elem->is_node_on_side(node, side) && check_on_processor)
+			if (bddy_dof_done[dof - dof_map.first_dof()] == PETSC_FALSE) // avoid double-counting
+                        { bddy_dof_done[dof-dof_map.first_dof()] = PETSC_TRUE; node_count++;}
               }
             }
 
        // now node_on_side knows what nodes are of interest, so we start our looping
-          if (element_on_boundary)
-	  {
-              vector<unsigned int> rows;
-              vector<Real> 	   rhs;
 
-              rows.resize(node_on_side_count);
-              rhs.resize(node_on_side_count);
-
-              unsigned int row_index = 0;
-
-              for (unsigned int i = 0; i < node_on_side.size(); i++)
-               if (node_on_side[i])
-               { 
-                 Node * p;
-                 p = elem->get_node(i);
-
-		 rows[row_index] = p->dof_number(0, var, 0);
-		if (var == 0)
-		 rhs[row_index]= exact_solution((*p)(0), (*p)(1), (*p)(2));
-		if (var == 1)
-		 rhs[row_index]= exact_solution_I((*p)(0), (*p)(1), (*p)(2));
-		 row_index++;
-/*		 if (rows[row_index - 1] >= dof_map.first_dof() && rows[row_index-1] <= dof_map.last_dof())
-PetscPrintf(PETSC_COMM_SELF,"on processor.\n");
-else
-PetscPrintf(PETSC_COMM_SELF,"off processor.\n");
-*/
-	       }
-
-              if (row_index > 0)
-	      {
-// PetscPrintf(PETSC_COMM_SELF, "Row Index = %D, sizes: RHS=%D, ROW=%D, NOSC=%D, PROC=%D\n", row_index, rhs.size(), rows.size(), node_on_side_count,processor_id);
-
-// for (unsigned int i = 0; i < rows.size(); i++)
-// PetscPrintf(PETSC_COMM_SELF, "V: %D (%D):\n", rows[i], processor_id);
-// PetscPrintf(PETSC_COMM_SELF, "V-FINISHED (%D).\n", processor_id);
-e(100, processor_id);
-              system.matrix->zero_rows(rows, 1.);
-              system.rhs->insert(rhs, rows);
-e(101, processor_id);
-	      }
-	  }
+      //        system.matrix->zero_rows(rows, 1.);
+    //          system.rhs->insert(rhs, rows);
     }
+
+vector<unsigned int> row;
+vector<double> rhs;
+rhs.resize(node_count);
+row.resize(node_count);
+
+unsigned int index = 0;
+for (unsigned int i = 0; i < bddy_dof_done.size(); i++)
+if (bddy_dof_done[i])
+{
+rhs[index] = 0;
+row[index++] = dof_map.first_dof() + i;
+}
+system.matrix->zero_rows(row, 1.);
+system.rhs->insert(rhs, row);
+
 }
 e(102, processor_id);
 system.matrix->close();
@@ -1110,6 +1103,4 @@ Number exact_solution_I(const Point& p, const Parameters&, const std::string&, c
 {
 return exact_solution_I(p(0),p(1),p(2));
 }
-
-
 
