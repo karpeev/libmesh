@@ -71,14 +71,6 @@ using std::vector;
 void assemble_helmholtz(EquationSystems& es,
                       const std::string& system_name);
 
-// assemble just the matrix for use in rediscretization. We don't need to make RHS there
-
-// void assemble_helmholtz_matrix(EquationSystems& es,
-//                      const std::string& system_name, PetscMatrix<Number>*);
-
-// void assemble_helmholtz_solution(EquationSystems& es,
-//                      const std::string& system_name, PetscVector<Number>*);
-
 // error checking function
 
 void e(unsigned int i) { 
@@ -112,9 +104,20 @@ PetscBool print_matrix = PETSC_FALSE;
 
 Real gamma_R = 0.0;
 Real gamma_I =  0.0;
-PetscBool use_penalty = PETSC_FALSE;
+PetscBool use_bc = PETSC_FALSE;
 
 unsigned int dim = 3;
+
+// this program is divided into three sections.
+
+// section one builds the mesh
+// section two runs the solver, with a switch for using geometric multigrid
+// the third is outside main, as is the matrix assembly.
+// note that currently FAC is implemented incorrectly. It uses a global smoother
+// but in fact FAC is supposed to use a local smoother. It also adds in the coarse effect
+// of the boundary coarse nodes. (See McCormick)
+
+
 
 int main (int argc, char** argv)
 {
@@ -155,7 +158,7 @@ int main (int argc, char** argv)
     PetscOptionsGetBool(NULL, "-use_debug", &multigrid_ex1_print_statements_active, NULL);
     PetscOptionsGetBool(NULL, "-print_matrix", &print_matrix, NULL);
     PetscOptionsGetBool(NULL, "-mesh_build", &mesh_build, NULL);
-    PetscOptionsGetBool(NULL, "-use_penalty", &use_penalty, NULL);
+    PetscOptionsGetBool(NULL, "-use_bc", &use_bc, NULL);
     PetscOptionsGetBool(NULL, "-use_gmg", &use_gmg, NULL);
     PetscBool print_interp = PETSC_FALSE;
     PetscOptionsGetBool(NULL, "-write_interp", &print_interp,NULL);
@@ -469,19 +472,9 @@ PrintStatus("gathering first data . . .");
   petsc_vec = (PetscVector<Number>*) system.rhs;
   petsc_mat = (PetscMatrix<Number>*) system.matrix;
 
-//  MatAssemblyBegin( ((PetscMatrix<Number>*)system.matrix)->mat(), MAT_FINAL_ASSEMBLY);
-//  MatAssemblyEnd(((PetscMatrix<Number>*)system.matrix)->mat(), MAT_FINAL_ASSEMBLY);
-
-//  VecAssemblyBegin(((PetscVector<Number>*) system.rhs)->vec());
-//   VecAssemblyEnd(((PetscVector<Number>*) system.rhs)->vec());
-
 PetscPrintf(PETSC_COMM_SELF, "AND CONTINUING ONTO SWAPPING!\n");
   level_A[0]->swap(*petsc_mat);
   level_vector[0]->swap(*petsc_vec);
-// MatView(( (PetscMatrix<Number>*) system.matrix)->mat(), PETSC_VIEWER_STDOUT_WORLD);
-
-  // MatView(level_A[0]->mat(), PETSC_VIEWER_STDOUT_WORLD);
-
 
 if (use_gmg) {
 
@@ -508,19 +501,6 @@ PrintStatus("setting up system 2 . . .");
 e(2);
 
 
-// PrintStatus("printing matrix to matlab file . . .");
-// level_A[0]->print_matlab("libmesh_matrix.mat");
-
-
-/*
- std::cout << level_vector[0]->size() << " size_of_level\n";
- std::cout << system.rhs->size() << " size of rhs\n"; 
-if (MULTIGRID_EX1_ALLOW_REDISCRETIZE)
- std::cout << level_A[0]->m() << " size_of_mat_m\n";
- std::cout << system.matrix->m() << " size of matrix\n";
-  */
-e(4);
-
 PrintStatus("coarsening mesh 2 . . .");
 
  system_2.project_solution_on_reinit() = false;
@@ -529,8 +509,9 @@ PrintStatus("coarsening mesh 2 . . .");
   mesh_refinement_2.coarsen_by_parents();
   mesh_refinement_2.clean_refinement_flags();
   flag_elements_FAC(mesh_2, id_converter[0]);
+PetscPrintf(PETSC_COMM_WORLD, ":\n");
   mesh_refinement_2.coarsen_elements();
-  //equation_systems_2.reinit();                  // performed coarsening for first round
+PetscPrintf(PETSC_COMM_WORLD, ":\n");
    equation_systems_2.reinit();
 flag_elements_FAC_end(id_converter[0]);
 
@@ -567,13 +548,7 @@ PrintStatus("gathering second data . . .");
  
  MatAssemblyBegin(level_A[1]->mat(),MAT_FINAL_ASSEMBLY);
  MatAssemblyEnd(level_A[1]->mat(),MAT_FINAL_ASSEMBLY);
-/*
-  std::cout << level_vector[1]->size() << " size_of_level\n";
-  std::cout << system_2.rhs->size() << " size of rhs\n";
-  std::cout << level_A[1]->m() << " size_of_mat_m\n";
-  std::cout << system_2.matrix->m() << " size of matrix\n";
 
-*/
  system_3.project_solution_on_reinit() = false;
 PrintStatus("coarsening mesh 3 . . .");
   MeshRefinement mesh_refinement_3(mesh_3);
@@ -596,12 +571,6 @@ system_3.assemble();
 
   level_A[2]->swap(*petsc_mat);
 
-/*
- std::cout << level_vector[2]->size() << " size_of_level\n";
- std::cout << system_3.rhs->size() << " size of rhs\n";
- std::cout << level_A[2]->m() << " size_of_mat_m\n";
- std::cout << system_3.matrix->m() << " size of matrix\n";
-*/
 e(1);
  build_interpolation(equation_systems, equation_systems_2, "Helmholtz", *level_interp[0], *level_vector[0], *level_vector[1], id_converter[0]);
 e(2);
@@ -629,31 +598,18 @@ system_2.solution->init(*level_vector[1]);
  ExodusII_IO (mesh_2).write_equation_systems("interpolated_from.e", equation_systems_2);
 }
 e(4);
-//  level_interp[0]->get_transpose(*level_restrct[0]);
- std::cout << level_interp[0]->m() << ", " << level_interp[0]->n() << " :: ";
-// std::cout << level_restrct[0]->m() << ", " << level_restrct[0]->n() << "\n";
-//  level_restrct[0]->vector_mult(*level_vector[1], *level_vector[0]);
 
 
-/*  #ifdef LIBMESH_HAVE_EXODUS_API
-    ExodusII_IO (mesh_2).write_equation_systems ("lshaped_2.e",   // Print the coarsened
-                                         equation_systems);
-  #endif // #ifdef LIBMESH_HAVE_EXODUS_API
-*/
-e(8);
  for (unsigned int i = 2; i < n_levels_coarsen; i++)
  {
 e(7+i);
 
-  // assemble_helmholtz(equation_systems_3, "Helmholtz", level_A[i]);
 
 PrintStatus("gathering more data . . .");
 
   build_interpolation(equation_systems_2, equation_systems_3, "Helmholtz", *level_interp[i-1], *level_vector[i-1], *level_vector[i], id_converter[i-1]);
 
-// level_interp[i-1]->get_transpose(*level_restrct[i-1]);
 e(101);
-// level_restrct[i-1]->vector_mult(*level_vector[i], *level_vector[i-1]);
   
 
 
@@ -671,7 +627,6 @@ VecSetRandom(level_vector[2]->vec(), rctx);
 
  level_interp[1]->vector_mult(*level_vector[1], *level_vector[2]);
 
-// VecView(level_vector[1]->vec(), PETSC_VIEWER_STDOUT_WORLD);
 system_2.solution->init(*level_vector[1]);
 system_3.solution->init(*level_vector[2]);
  *system_2.solution = *level_vector[1];
@@ -693,7 +648,6 @@ system_3.solution->init(*level_vector[2]);
     flag_elements_FAC(mesh_2, id_converter[0]);
     mesh_refinement_2.coarsen_elements();
     mesh_refinement_3.coarsen_elements();
-   // equation_systems_2.reinit();
     equation_systems_2.reinit();
     equation_systems_3.reinit();
     flag_elements_FAC_end(id_converter[i]);
@@ -707,26 +661,11 @@ system_3.assemble();
 
   MatAssemblyBegin(level_A[i+1]->mat(),MAT_FINAL_ASSEMBLY);
   MatAssemblyEnd(level_A[i+1]->mat(), MAT_FINAL_ASSEMBLY);
-// std::cout << "About to view " << i + 1<< '\n';
-  // MatView(level_A[i+1]->mat(), PETSC_VIEWER_STDOUT_WORLD);
 
-/*
- std::cout << level_vector[i+1]->size() << " size_of_level\n";
- std::cout << system_3.rhs->size() << " size of rhs\n";
- std::cout << level_A[i+1]->m() << " size_of_mat_m\n";
- std::cout << system_3.matrix->m() << " size of matrix\n";
-*/
   }
 
  }
 
-
-
-/*  #ifdef LIBMESH_HAVE_EXODUS_API
-    ExodusII_IO (mesh).write_equation_systems ("lshaped_interpolated_fine.e",
-                                         equation_systems);
-  #endif // #ifdef LIBMESH_HAVE_EXODUS_API
-*/
 
 }
 
@@ -739,7 +678,6 @@ PC pc;
 KSP ksp;
 KSPCreate(PETSC_COMM_WORLD,&ksp);
 e(1);
-// MatView(level_A[0]->mat(), PETSC_VIEWER_STDOUT_WORLD);
 
 MatNullSpace sp;
 
@@ -756,7 +694,6 @@ std::cout << "Null Space Test: " << check_valid << "\n";
 
 KSPSetOperators(ksp, level_A[0]->mat(),level_A[0]->mat());
 KSPGetPC(ksp,&pc);
-e(2);
 if (use_gmg) {
 PCSetType(pc,PCMG);
 PCMGSetLevels(pc,nlevels,NULL);
@@ -771,8 +708,6 @@ for (unsigned int i = 1; i < nlevels; i++)
 {
 e(1007);
 PetscPrintf(PETSC_COMM_WORLD, "Setting a residual . . .\n");
-//MatAssemblyBegin(level_interp[nlevels-1-i]->mat(), MAT_FINAL_ASSEMBLY);
-//MatAssemblyEnd(level_interp[nlevels-1-i]->mat(), MAT_FINAL_ASSEMBLY);
 
 PCMGSetInterpolation(pc,i,level_interp[nlevels-1-i]->mat());
 
@@ -788,10 +723,6 @@ std::cout << "Null Space Test: " << check_valid << "\n";
   if (!use_galerkin)
   PCMGSetResidual(pc, i-1, NULL, level_A[nlevels-i]->mat());
 
-// std::cout << "i: " << i << " (m,n): " << level_A[nlevels-i]->m() << ", " << level_A[nlevels-i]->n() << std::endl;
-// PetscBool check_if_assembled;
-// MatAssembled(level_A[nlevels-i]->mat(), &check_if_assembled);
-// std::cout << "Is assembled: " << check_if_assembled << '\n';
 e(1008);
 }
 }
@@ -806,23 +737,16 @@ VecDuplicate(level_vector[0]->vec(), &sol);
 e(1013);
 
 if (use_gmg && print_matrix)
+{
 MatView(level_A[nlevels-1]->mat(), PETSC_VIEWER_STDOUT_WORLD);
+}
 
-// Mat A;
-// KSPGetOperators(ksp,&A, NULL);
-// MatView(A, PETSC_VIEWER_STDOUT_WORLD);
-
-// KSPSetNormType(ksp, KSP_NORM_UNPRECONDITIONED);
 PetscPrintf(PETSC_COMM_WORLD, "KSP Setup . . .\n");
 ierr = KSPSetUp(ksp);CHKERRQ(ierr);
 
 PetscPrintf(PETSC_COMM_WORLD, "System Size: %D\n", level_A[0]->m());
 PetscPrintf(PETSC_COMM_WORLD, "KSP Solving . . .\n");
 
-// PetscRandom rctx;
-// PetscRandomCreate(PETSC_COMM_WORLD, &rctx);
-// PetscRandomSetType(rctx,PETSCRAND);
-// VecSetRandom(level_vector[0]->vec(), rctx);
 ierr = KSPSolve(ksp,level_vector[0]->vec(),sol);CHKERRQ(ierr);
 
 VecSet(sol, 1.);
@@ -834,7 +758,6 @@ level_A[0]->vector_mult(*system.solution, sol_check);
                                                  equation_systems);
 
 
-e(1014);
 PetscInt its = 0;
 KSPGetIterationNumber(ksp,&its);
 
@@ -868,7 +791,7 @@ PrintStatus("Complete.");
 void assemble_helmholtz(EquationSystems& es,
                       const std::string& system_name)
 {
- if (use_penalty)
+ if (use_bc)
 std::cout << "used penalty\n";
 
   libmesh_assert_equal_to (system_name, "Helmholtz");
@@ -1015,7 +938,7 @@ system.rhs->close();
 PetscPrintf(PETSC_COMM_WORLD, "First Part Done\n");
 
 
-if (use_penalty)
+if (use_bc) // add in boundary conditions
 {
   unsigned int processor_id = system.processor_id();
 
@@ -1023,11 +946,11 @@ if (use_penalty)
   vector<PetscBool> bddy_dof_done;
   bddy_dof_done.resize(system.rhs->local_size()); // this tells if this dof has been inserted.
 					   // note that we use this per variable.
+
 PetscPrintf(PETSC_COMM_SELF, "system.rhs->local_size()=%D\n", system.rhs->local_size());
 
-
-
-
+// currently, I simply set the RHS on the boundary to zero
+// later it should be altered to take general boundary conditions
 
   for (unsigned int var=0; var<n_variables; var++)
   {
