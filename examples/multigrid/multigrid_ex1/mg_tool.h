@@ -1,4 +1,11 @@
 
+// this file has the interpolation operator, and the FAC coarsening functions.
+// currently FAC coarsening is inefficient, as it runs over all elements instead of
+// using just local. That was done initially because there isn't a local_elements function
+// but only an active_local_elements(). This function should be easy to fix.
+// note that all calls to MGElemIDConverter are unnecessary. This object was only useful
+// when reparitioning was on, but for good performance it needs to be turned off.
+
 #include <vector>
 
 // Local includes
