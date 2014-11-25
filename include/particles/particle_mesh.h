@@ -13,47 +13,54 @@ namespace libMesh{
 
 
     void set_local_particles(const std::vector<Particle>& particles);
+
+    // We could use local Nodes as points to evaluate the influence of particles on the Nodes.
+    // The correspondence between the Nodes and the points is through the indices.
+    void set_local_points(const std::vector<Point>& points);
     void set_halo(Real halo);
     Real get_halo() const;
 
-    void  set_local_anchor_elem_ids(const std::vector<dof_id_type>& anchor_elems);
-    const std::vector<dof_id_type>& local_anchor_elem_ids() const {return _anchors; }
+
 
     unsigned int    num_local_particles()           const { return _num_local_particles; }
-    unsigned int    num_ghost_particles()           const { return _num_ghost_particles; }
     const Particle& local_particle(unsigned int i)  const { return _particles[i]; }
-    const Particle& ghost_particle(unsigned int i)  const { return _particles[_num_local_particles+i]; }
+    /* unsigned int    num_ghost_particles()           const { return _num_ghost_particles; } */
+    /* const Particle& ghost_particle(unsigned int i)  const { return _particles[_num_local_particles+i]; } */
     const Particle& particle(unsigned int i)        const { return _particles[i]; }
 
-    const std::vector<unsigned int> local_particle_halo(const unsigned int i) const;
-    const std::vector<unsigned int> local_anchor_elem_halo(const unsigned int i) const;
-
-
-    const std::vector<dof_id_type>&  local_elems_with_particles() const;
-    const std::vector<dof_id_type>&  local_particle_elem_ids(unsigned int i) const;
-    const std::vector<unsigned int>& local_elem_particles(unsigned int) const;
-
-    // Start translation of particles, possibly, across processor boundaries.
-    // Here we might, for example, move all of the local particles, figure out
-    // which ones are moving off the process and post the sends/receives.
-    void translation_begin(const std::vector<Point>& translation_vectors);
-    // Finish translating the particles.
-    void translation_end(const std::vector<Point>& translation_vectors);
-
-    // What's the advantage of the translation_begin()/translation_end() splitting?
-    // After translation_begin(), for those particles staying within the processor
-    // we might repartition them into halos and start computing their local field
-    // contributions.  This would require updating the halos twice:
-    // after translation_begin() and after translation_end(),
-    // as well as splitting halos into local halos and ghost halos.
+    // This routine will calculate all of the particle-element relations once the local particles have beeen set.
+    void setup();
 
     /*
-    AutoPtr<NumericVector<Number> >       create_global_particle_vector() const;
-    AutoPtr<NumericVector<Number> >       create_ghosted_particle_vector() const;
-    AutoPtr<SparseMatrix<Number> >        create_particle_particle_matrix() const;
+    unsigned int    num_local_points()              const { return _local_points.size(); }
+    const Point&    local_point(unsigned int i)     const { return _local_points[i]; }
     */
 
-    void setup();
+    // A list of particle indices within a disk of radius 'halo' of the i-th local point
+    /* const std::vector<unsigned int>& local_point_halo(const unsigned int i) const; */
+
+    // A list of particle indices within a disk of raidus 'halo' of the i-th local particle
+    /*const std::vector<unsigned int>& local_particle_halo(const unsigned int i) const;*/
+
+    // TODO: allow for turning on and off the halos of particles and points to save work
+    // when only particles or points need a halo.
+
+    // Elements that contain the i-th local particle (typically just 1 element)
+    const std::vector<dof_id_type>&  local_particle_elem_ids(unsigned int i) const;
+
+    // Definition: The local id of an element is defined as the position of that element
+    // when traversing the local elements using mesh's active_local_elements iterators.
+    // List of local element ids for the elements that contain particles.
+    const std::vector<dof_id_type>&  local_elems_with_particles() const;
+    // List of particles for local element with _local_ id e
+    const std::vector<unsigned int>& local_elem_particles(dof_id_type e) const;
+
+    // Translation of particles, possibly, across processor boundaries.
+    // Here we might, for example, move all of the local particles, figure out
+    // which ones are moving off the process and post the sends/receives.
+    // To update the particle-element relations call setup() after calling translate_local_particles().
+    void translate_local_particles(const std::vector<Point>& translation_vectors);
+
   protected:
     const MeshBase& _mesh;
 
