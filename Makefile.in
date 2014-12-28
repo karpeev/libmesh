@@ -340,6 +340,7 @@ am__libmesh_dbg_la_SOURCES_DIST = src/base/dof_map.C \
 	src/parallel/parallel_ghost_sync.C \
 	src/parallel/parallel_histogram.C src/parallel/parallel_node.C \
 	src/parallel/parallel_sort.C src/parallel/threads.C \
+	src/particles/particle_mesh.C src/particles/scatter.C \
 	src/partitioning/centroid_partitioner.C \
 	src/partitioning/linear_partitioner.C \
 	src/partitioning/metis_partitioner.C \
@@ -729,6 +730,8 @@ am__objects_1 = src/base/libmesh_dbg_la-dof_map.lo \
 	src/parallel/libmesh_dbg_la-parallel_node.lo \
 	src/parallel/libmesh_dbg_la-parallel_sort.lo \
 	src/parallel/libmesh_dbg_la-threads.lo \
+	src/particles/libmesh_dbg_la-particle_mesh.lo \
+	src/particles/libmesh_dbg_la-scatter.lo \
 	src/partitioning/libmesh_dbg_la-centroid_partitioner.lo \
 	src/partitioning/libmesh_dbg_la-linear_partitioner.lo \
 	src/partitioning/libmesh_dbg_la-metis_partitioner.lo \
@@ -1047,6 +1050,7 @@ am__libmesh_devel_la_SOURCES_DIST = src/base/dof_map.C \
 	src/parallel/parallel_ghost_sync.C \
 	src/parallel/parallel_histogram.C src/parallel/parallel_node.C \
 	src/parallel/parallel_sort.C src/parallel/threads.C \
+	src/particles/particle_mesh.C src/particles/scatter.C \
 	src/partitioning/centroid_partitioner.C \
 	src/partitioning/linear_partitioner.C \
 	src/partitioning/metis_partitioner.C \
@@ -1435,6 +1439,8 @@ am__objects_2 = src/base/libmesh_devel_la-dof_map.lo \
 	src/parallel/libmesh_devel_la-parallel_node.lo \
 	src/parallel/libmesh_devel_la-parallel_sort.lo \
 	src/parallel/libmesh_devel_la-threads.lo \
+	src/particles/libmesh_devel_la-particle_mesh.lo \
+	src/particles/libmesh_devel_la-scatter.lo \
 	src/partitioning/libmesh_devel_la-centroid_partitioner.lo \
 	src/partitioning/libmesh_devel_la-linear_partitioner.lo \
 	src/partitioning/libmesh_devel_la-metis_partitioner.lo \
@@ -1750,6 +1756,7 @@ am__libmesh_oprof_la_SOURCES_DIST = src/base/dof_map.C \
 	src/parallel/parallel_ghost_sync.C \
 	src/parallel/parallel_histogram.C src/parallel/parallel_node.C \
 	src/parallel/parallel_sort.C src/parallel/threads.C \
+	src/particles/particle_mesh.C src/particles/scatter.C \
 	src/partitioning/centroid_partitioner.C \
 	src/partitioning/linear_partitioner.C \
 	src/partitioning/metis_partitioner.C \
@@ -2138,6 +2145,8 @@ am__objects_3 = src/base/libmesh_oprof_la-dof_map.lo \
 	src/parallel/libmesh_oprof_la-parallel_node.lo \
 	src/parallel/libmesh_oprof_la-parallel_sort.lo \
 	src/parallel/libmesh_oprof_la-threads.lo \
+	src/particles/libmesh_oprof_la-particle_mesh.lo \
+	src/particles/libmesh_oprof_la-scatter.lo \
 	src/partitioning/libmesh_oprof_la-centroid_partitioner.lo \
 	src/partitioning/libmesh_oprof_la-linear_partitioner.lo \
 	src/partitioning/libmesh_oprof_la-metis_partitioner.lo \
@@ -2453,6 +2462,7 @@ am__libmesh_opt_la_SOURCES_DIST = src/base/dof_map.C \
 	src/parallel/parallel_ghost_sync.C \
 	src/parallel/parallel_histogram.C src/parallel/parallel_node.C \
 	src/parallel/parallel_sort.C src/parallel/threads.C \
+	src/particles/particle_mesh.C src/particles/scatter.C \
 	src/partitioning/centroid_partitioner.C \
 	src/partitioning/linear_partitioner.C \
 	src/partitioning/metis_partitioner.C \
@@ -2841,6 +2851,8 @@ am__objects_4 = src/base/libmesh_opt_la-dof_map.lo \
 	src/parallel/libmesh_opt_la-parallel_node.lo \
 	src/parallel/libmesh_opt_la-parallel_sort.lo \
 	src/parallel/libmesh_opt_la-threads.lo \
+	src/particles/libmesh_opt_la-particle_mesh.lo \
+	src/particles/libmesh_opt_la-scatter.lo \
 	src/partitioning/libmesh_opt_la-centroid_partitioner.lo \
 	src/partitioning/libmesh_opt_la-linear_partitioner.lo \
 	src/partitioning/libmesh_opt_la-metis_partitioner.lo \
@@ -3155,6 +3167,7 @@ am__libmesh_prof_la_SOURCES_DIST = src/base/dof_map.C \
 	src/parallel/parallel_ghost_sync.C \
 	src/parallel/parallel_histogram.C src/parallel/parallel_node.C \
 	src/parallel/parallel_sort.C src/parallel/threads.C \
+	src/particles/particle_mesh.C src/particles/scatter.C \
 	src/partitioning/centroid_partitioner.C \
 	src/partitioning/linear_partitioner.C \
 	src/partitioning/metis_partitioner.C \
@@ -3543,6 +3556,8 @@ am__objects_5 = src/base/libmesh_prof_la-dof_map.lo \
 	src/parallel/libmesh_prof_la-parallel_node.lo \
 	src/parallel/libmesh_prof_la-parallel_sort.lo \
 	src/parallel/libmesh_prof_la-threads.lo \
+	src/particles/libmesh_prof_la-particle_mesh.lo \
+	src/particles/libmesh_prof_la-scatter.lo \
 	src/partitioning/libmesh_prof_la-centroid_partitioner.lo \
 	src/partitioning/libmesh_prof_la-linear_partitioner.lo \
 	src/partitioning/libmesh_prof_la-metis_partitioner.lo \
@@ -4826,6 +4841,8 @@ libmesh_SOURCES = \
         src/parallel/parallel_node.C \
         src/parallel/parallel_sort.C \
         src/parallel/threads.C \
+        src/particles/particle_mesh.C \
+        src/particles/scatter.C \
         src/partitioning/centroid_partitioner.C \
         src/partitioning/linear_partitioner.C \
         src/partitioning/metis_partitioner.C \
@@ -5936,6 +5953,18 @@ src/parallel/libmesh_dbg_la-parallel_sort.lo:  \
 	src/parallel/$(DEPDIR)/$(am__dirstamp)
 src/parallel/libmesh_dbg_la-threads.lo: src/parallel/$(am__dirstamp) \
 	src/parallel/$(DEPDIR)/$(am__dirstamp)
+src/particles/$(am__dirstamp):
+	@$(MKDIR_P) src/particles
+	@: > src/particles/$(am__dirstamp)
+src/particles/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) src/particles/$(DEPDIR)
+	@: > src/particles/$(DEPDIR)/$(am__dirstamp)
+src/particles/libmesh_dbg_la-particle_mesh.lo:  \
+	src/particles/$(am__dirstamp) \
+	src/particles/$(DEPDIR)/$(am__dirstamp)
+src/particles/libmesh_dbg_la-scatter.lo:  \
+	src/particles/$(am__dirstamp) \
+	src/particles/$(DEPDIR)/$(am__dirstamp)
 src/partitioning/$(am__dirstamp):
 	@$(MKDIR_P) src/partitioning
 	@: > src/partitioning/$(am__dirstamp)
@@ -6994,6 +7023,12 @@ src/parallel/libmesh_devel_la-parallel_sort.lo:  \
 src/parallel/libmesh_devel_la-threads.lo:  \
 	src/parallel/$(am__dirstamp) \
 	src/parallel/$(DEPDIR)/$(am__dirstamp)
+src/particles/libmesh_devel_la-particle_mesh.lo:  \
+	src/particles/$(am__dirstamp) \
+	src/particles/$(DEPDIR)/$(am__dirstamp)
+src/particles/libmesh_devel_la-scatter.lo:  \
+	src/particles/$(am__dirstamp) \
+	src/particles/$(DEPDIR)/$(am__dirstamp)
 src/partitioning/libmesh_devel_la-centroid_partitioner.lo:  \
 	src/partitioning/$(am__dirstamp) \
 	src/partitioning/$(DEPDIR)/$(am__dirstamp)
@@ -8006,6 +8041,12 @@ src/parallel/libmesh_oprof_la-parallel_sort.lo:  \
 src/parallel/libmesh_oprof_la-threads.lo:  \
 	src/parallel/$(am__dirstamp) \
 	src/parallel/$(DEPDIR)/$(am__dirstamp)
+src/particles/libmesh_oprof_la-particle_mesh.lo:  \
+	src/particles/$(am__dirstamp) \
+	src/particles/$(DEPDIR)/$(am__dirstamp)
+src/particles/libmesh_oprof_la-scatter.lo:  \
+	src/particles/$(am__dirstamp) \
+	src/particles/$(DEPDIR)/$(am__dirstamp)
 src/partitioning/libmesh_oprof_la-centroid_partitioner.lo:  \
 	src/partitioning/$(am__dirstamp) \
 	src/partitioning/$(DEPDIR)/$(am__dirstamp)
@@ -9017,6 +9058,12 @@ src/parallel/libmesh_opt_la-parallel_sort.lo:  \
 	src/parallel/$(DEPDIR)/$(am__dirstamp)
 src/parallel/libmesh_opt_la-threads.lo: src/parallel/$(am__dirstamp) \
 	src/parallel/$(DEPDIR)/$(am__dirstamp)
+src/particles/libmesh_opt_la-particle_mesh.lo:  \
+	src/particles/$(am__dirstamp) \
+	src/particles/$(DEPDIR)/$(am__dirstamp)
+src/particles/libmesh_opt_la-scatter.lo:  \
+	src/particles/$(am__dirstamp) \
+	src/particles/$(DEPDIR)/$(am__dirstamp)
 src/partitioning/libmesh_opt_la-centroid_partitioner.lo:  \
 	src/partitioning/$(am__dirstamp) \
 	src/partitioning/$(DEPDIR)/$(am__dirstamp)
@@ -10026,6 +10073,12 @@ src/parallel/libmesh_prof_la-parallel_sort.lo:  \
 	src/parallel/$(DEPDIR)/$(am__dirstamp)
 src/parallel/libmesh_prof_la-threads.lo: src/parallel/$(am__dirstamp) \
 	src/parallel/$(DEPDIR)/$(am__dirstamp)
+src/particles/libmesh_prof_la-particle_mesh.lo:  \
+	src/particles/$(am__dirstamp) \
+	src/particles/$(DEPDIR)/$(am__dirstamp)
+src/particles/libmesh_prof_la-scatter.lo:  \
+	src/particles/$(am__dirstamp) \
+	src/particles/$(DEPDIR)/$(am__dirstamp)
 src/partitioning/libmesh_prof_la-centroid_partitioner.lo:  \
 	src/partitioning/$(am__dirstamp) \
 	src/partitioning/$(DEPDIR)/$(am__dirstamp)
@@ -10822,6 +10875,8 @@ mostlyclean-compile:
 	-rm -f src/numerics/*.lo
 	-rm -f src/parallel/*.$(OBJEXT)
 	-rm -f src/parallel/*.lo
+	-rm -f src/particles/*.$(OBJEXT)
+	-rm -f src/particles/*.lo
 	-rm -f src/partitioning/*.$(OBJEXT)
 	-rm -f src/partitioning/*.lo
 	-rm -f src/physics/*.$(OBJEXT)
@@ -12211,6 +12266,16 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_prof_la-parallel_node.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_prof_la-parallel_sort.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/parallel/$(DEPDIR)/libmesh_prof_la-threads.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/particles/$(DEPDIR)/libmesh_dbg_la-particle_mesh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/particles/$(DEPDIR)/libmesh_dbg_la-scatter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/particles/$(DEPDIR)/libmesh_devel_la-particle_mesh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/particles/$(DEPDIR)/libmesh_devel_la-scatter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/particles/$(DEPDIR)/libmesh_oprof_la-particle_mesh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/particles/$(DEPDIR)/libmesh_oprof_la-scatter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/particles/$(DEPDIR)/libmesh_opt_la-particle_mesh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/particles/$(DEPDIR)/libmesh_opt_la-scatter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/particles/$(DEPDIR)/libmesh_prof_la-particle_mesh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/particles/$(DEPDIR)/libmesh_prof_la-scatter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/partitioning/$(DEPDIR)/libmesh_dbg_la-centroid_partitioner.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/partitioning/$(DEPDIR)/libmesh_dbg_la-linear_partitioner.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/partitioning/$(DEPDIR)/libmesh_dbg_la-metis_partitioner.Plo@am__quote@
@@ -14835,6 +14900,20 @@ src/parallel/libmesh_dbg_la-threads.lo: src/parallel/threads.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/parallel/threads.C' object='src/parallel/libmesh_dbg_la-threads.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -c -o src/parallel/libmesh_dbg_la-threads.lo `test -f 'src/parallel/threads.C' || echo '$(srcdir)/'`src/parallel/threads.C
+
+src/particles/libmesh_dbg_la-particle_mesh.lo: src/particles/particle_mesh.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -MT src/particles/libmesh_dbg_la-particle_mesh.lo -MD -MP -MF src/particles/$(DEPDIR)/libmesh_dbg_la-particle_mesh.Tpo -c -o src/particles/libmesh_dbg_la-particle_mesh.lo `test -f 'src/particles/particle_mesh.C' || echo '$(srcdir)/'`src/particles/particle_mesh.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/particles/$(DEPDIR)/libmesh_dbg_la-particle_mesh.Tpo src/particles/$(DEPDIR)/libmesh_dbg_la-particle_mesh.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/particles/particle_mesh.C' object='src/particles/libmesh_dbg_la-particle_mesh.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -c -o src/particles/libmesh_dbg_la-particle_mesh.lo `test -f 'src/particles/particle_mesh.C' || echo '$(srcdir)/'`src/particles/particle_mesh.C
+
+src/particles/libmesh_dbg_la-scatter.lo: src/particles/scatter.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -MT src/particles/libmesh_dbg_la-scatter.lo -MD -MP -MF src/particles/$(DEPDIR)/libmesh_dbg_la-scatter.Tpo -c -o src/particles/libmesh_dbg_la-scatter.lo `test -f 'src/particles/scatter.C' || echo '$(srcdir)/'`src/particles/scatter.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/particles/$(DEPDIR)/libmesh_dbg_la-scatter.Tpo src/particles/$(DEPDIR)/libmesh_dbg_la-scatter.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/particles/scatter.C' object='src/particles/libmesh_dbg_la-scatter.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -c -o src/particles/libmesh_dbg_la-scatter.lo `test -f 'src/particles/scatter.C' || echo '$(srcdir)/'`src/particles/scatter.C
 
 src/partitioning/libmesh_dbg_la-centroid_partitioner.lo: src/partitioning/centroid_partitioner.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_dbg_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_dbg_la_CXXFLAGS) $(CXXFLAGS) -MT src/partitioning/libmesh_dbg_la-centroid_partitioner.lo -MD -MP -MF src/partitioning/$(DEPDIR)/libmesh_dbg_la-centroid_partitioner.Tpo -c -o src/partitioning/libmesh_dbg_la-centroid_partitioner.lo `test -f 'src/partitioning/centroid_partitioner.C' || echo '$(srcdir)/'`src/partitioning/centroid_partitioner.C
@@ -17734,6 +17813,20 @@ src/parallel/libmesh_devel_la-threads.lo: src/parallel/threads.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -c -o src/parallel/libmesh_devel_la-threads.lo `test -f 'src/parallel/threads.C' || echo '$(srcdir)/'`src/parallel/threads.C
 
+src/particles/libmesh_devel_la-particle_mesh.lo: src/particles/particle_mesh.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -MT src/particles/libmesh_devel_la-particle_mesh.lo -MD -MP -MF src/particles/$(DEPDIR)/libmesh_devel_la-particle_mesh.Tpo -c -o src/particles/libmesh_devel_la-particle_mesh.lo `test -f 'src/particles/particle_mesh.C' || echo '$(srcdir)/'`src/particles/particle_mesh.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/particles/$(DEPDIR)/libmesh_devel_la-particle_mesh.Tpo src/particles/$(DEPDIR)/libmesh_devel_la-particle_mesh.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/particles/particle_mesh.C' object='src/particles/libmesh_devel_la-particle_mesh.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -c -o src/particles/libmesh_devel_la-particle_mesh.lo `test -f 'src/particles/particle_mesh.C' || echo '$(srcdir)/'`src/particles/particle_mesh.C
+
+src/particles/libmesh_devel_la-scatter.lo: src/particles/scatter.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -MT src/particles/libmesh_devel_la-scatter.lo -MD -MP -MF src/particles/$(DEPDIR)/libmesh_devel_la-scatter.Tpo -c -o src/particles/libmesh_devel_la-scatter.lo `test -f 'src/particles/scatter.C' || echo '$(srcdir)/'`src/particles/scatter.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/particles/$(DEPDIR)/libmesh_devel_la-scatter.Tpo src/particles/$(DEPDIR)/libmesh_devel_la-scatter.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/particles/scatter.C' object='src/particles/libmesh_devel_la-scatter.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -c -o src/particles/libmesh_devel_la-scatter.lo `test -f 'src/particles/scatter.C' || echo '$(srcdir)/'`src/particles/scatter.C
+
 src/partitioning/libmesh_devel_la-centroid_partitioner.lo: src/partitioning/centroid_partitioner.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_devel_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_devel_la_CXXFLAGS) $(CXXFLAGS) -MT src/partitioning/libmesh_devel_la-centroid_partitioner.lo -MD -MP -MF src/partitioning/$(DEPDIR)/libmesh_devel_la-centroid_partitioner.Tpo -c -o src/partitioning/libmesh_devel_la-centroid_partitioner.lo `test -f 'src/partitioning/centroid_partitioner.C' || echo '$(srcdir)/'`src/partitioning/centroid_partitioner.C
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/partitioning/$(DEPDIR)/libmesh_devel_la-centroid_partitioner.Tpo src/partitioning/$(DEPDIR)/libmesh_devel_la-centroid_partitioner.Plo
@@ -20631,6 +20724,20 @@ src/parallel/libmesh_oprof_la-threads.lo: src/parallel/threads.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/parallel/threads.C' object='src/parallel/libmesh_oprof_la-threads.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/parallel/libmesh_oprof_la-threads.lo `test -f 'src/parallel/threads.C' || echo '$(srcdir)/'`src/parallel/threads.C
+
+src/particles/libmesh_oprof_la-particle_mesh.lo: src/particles/particle_mesh.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -MT src/particles/libmesh_oprof_la-particle_mesh.lo -MD -MP -MF src/particles/$(DEPDIR)/libmesh_oprof_la-particle_mesh.Tpo -c -o src/particles/libmesh_oprof_la-particle_mesh.lo `test -f 'src/particles/particle_mesh.C' || echo '$(srcdir)/'`src/particles/particle_mesh.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/particles/$(DEPDIR)/libmesh_oprof_la-particle_mesh.Tpo src/particles/$(DEPDIR)/libmesh_oprof_la-particle_mesh.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/particles/particle_mesh.C' object='src/particles/libmesh_oprof_la-particle_mesh.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/particles/libmesh_oprof_la-particle_mesh.lo `test -f 'src/particles/particle_mesh.C' || echo '$(srcdir)/'`src/particles/particle_mesh.C
+
+src/particles/libmesh_oprof_la-scatter.lo: src/particles/scatter.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -MT src/particles/libmesh_oprof_la-scatter.lo -MD -MP -MF src/particles/$(DEPDIR)/libmesh_oprof_la-scatter.Tpo -c -o src/particles/libmesh_oprof_la-scatter.lo `test -f 'src/particles/scatter.C' || echo '$(srcdir)/'`src/particles/scatter.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/particles/$(DEPDIR)/libmesh_oprof_la-scatter.Tpo src/particles/$(DEPDIR)/libmesh_oprof_la-scatter.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/particles/scatter.C' object='src/particles/libmesh_oprof_la-scatter.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/particles/libmesh_oprof_la-scatter.lo `test -f 'src/particles/scatter.C' || echo '$(srcdir)/'`src/particles/scatter.C
 
 src/partitioning/libmesh_oprof_la-centroid_partitioner.lo: src/partitioning/centroid_partitioner.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_oprof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_oprof_la_CXXFLAGS) $(CXXFLAGS) -MT src/partitioning/libmesh_oprof_la-centroid_partitioner.lo -MD -MP -MF src/partitioning/$(DEPDIR)/libmesh_oprof_la-centroid_partitioner.Tpo -c -o src/partitioning/libmesh_oprof_la-centroid_partitioner.lo `test -f 'src/partitioning/centroid_partitioner.C' || echo '$(srcdir)/'`src/partitioning/centroid_partitioner.C
@@ -23530,6 +23637,20 @@ src/parallel/libmesh_opt_la-threads.lo: src/parallel/threads.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -c -o src/parallel/libmesh_opt_la-threads.lo `test -f 'src/parallel/threads.C' || echo '$(srcdir)/'`src/parallel/threads.C
 
+src/particles/libmesh_opt_la-particle_mesh.lo: src/particles/particle_mesh.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -MT src/particles/libmesh_opt_la-particle_mesh.lo -MD -MP -MF src/particles/$(DEPDIR)/libmesh_opt_la-particle_mesh.Tpo -c -o src/particles/libmesh_opt_la-particle_mesh.lo `test -f 'src/particles/particle_mesh.C' || echo '$(srcdir)/'`src/particles/particle_mesh.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/particles/$(DEPDIR)/libmesh_opt_la-particle_mesh.Tpo src/particles/$(DEPDIR)/libmesh_opt_la-particle_mesh.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/particles/particle_mesh.C' object='src/particles/libmesh_opt_la-particle_mesh.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -c -o src/particles/libmesh_opt_la-particle_mesh.lo `test -f 'src/particles/particle_mesh.C' || echo '$(srcdir)/'`src/particles/particle_mesh.C
+
+src/particles/libmesh_opt_la-scatter.lo: src/particles/scatter.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -MT src/particles/libmesh_opt_la-scatter.lo -MD -MP -MF src/particles/$(DEPDIR)/libmesh_opt_la-scatter.Tpo -c -o src/particles/libmesh_opt_la-scatter.lo `test -f 'src/particles/scatter.C' || echo '$(srcdir)/'`src/particles/scatter.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/particles/$(DEPDIR)/libmesh_opt_la-scatter.Tpo src/particles/$(DEPDIR)/libmesh_opt_la-scatter.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/particles/scatter.C' object='src/particles/libmesh_opt_la-scatter.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -c -o src/particles/libmesh_opt_la-scatter.lo `test -f 'src/particles/scatter.C' || echo '$(srcdir)/'`src/particles/scatter.C
+
 src/partitioning/libmesh_opt_la-centroid_partitioner.lo: src/partitioning/centroid_partitioner.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_opt_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_opt_la_CXXFLAGS) $(CXXFLAGS) -MT src/partitioning/libmesh_opt_la-centroid_partitioner.lo -MD -MP -MF src/partitioning/$(DEPDIR)/libmesh_opt_la-centroid_partitioner.Tpo -c -o src/partitioning/libmesh_opt_la-centroid_partitioner.lo `test -f 'src/partitioning/centroid_partitioner.C' || echo '$(srcdir)/'`src/partitioning/centroid_partitioner.C
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/partitioning/$(DEPDIR)/libmesh_opt_la-centroid_partitioner.Tpo src/partitioning/$(DEPDIR)/libmesh_opt_la-centroid_partitioner.Plo
@@ -26428,6 +26549,20 @@ src/parallel/libmesh_prof_la-threads.lo: src/parallel/threads.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/parallel/libmesh_prof_la-threads.lo `test -f 'src/parallel/threads.C' || echo '$(srcdir)/'`src/parallel/threads.C
 
+src/particles/libmesh_prof_la-particle_mesh.lo: src/particles/particle_mesh.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -MT src/particles/libmesh_prof_la-particle_mesh.lo -MD -MP -MF src/particles/$(DEPDIR)/libmesh_prof_la-particle_mesh.Tpo -c -o src/particles/libmesh_prof_la-particle_mesh.lo `test -f 'src/particles/particle_mesh.C' || echo '$(srcdir)/'`src/particles/particle_mesh.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/particles/$(DEPDIR)/libmesh_prof_la-particle_mesh.Tpo src/particles/$(DEPDIR)/libmesh_prof_la-particle_mesh.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/particles/particle_mesh.C' object='src/particles/libmesh_prof_la-particle_mesh.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/particles/libmesh_prof_la-particle_mesh.lo `test -f 'src/particles/particle_mesh.C' || echo '$(srcdir)/'`src/particles/particle_mesh.C
+
+src/particles/libmesh_prof_la-scatter.lo: src/particles/scatter.C
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -MT src/particles/libmesh_prof_la-scatter.lo -MD -MP -MF src/particles/$(DEPDIR)/libmesh_prof_la-scatter.Tpo -c -o src/particles/libmesh_prof_la-scatter.lo `test -f 'src/particles/scatter.C' || echo '$(srcdir)/'`src/particles/scatter.C
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/particles/$(DEPDIR)/libmesh_prof_la-scatter.Tpo src/particles/$(DEPDIR)/libmesh_prof_la-scatter.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/particles/scatter.C' object='src/particles/libmesh_prof_la-scatter.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -c -o src/particles/libmesh_prof_la-scatter.lo `test -f 'src/particles/scatter.C' || echo '$(srcdir)/'`src/particles/scatter.C
+
 src/partitioning/libmesh_prof_la-centroid_partitioner.lo: src/partitioning/centroid_partitioner.C
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmesh_prof_la_CPPFLAGS) $(CPPFLAGS) $(libmesh_prof_la_CXXFLAGS) $(CXXFLAGS) -MT src/partitioning/libmesh_prof_la-centroid_partitioner.lo -MD -MP -MF src/partitioning/$(DEPDIR)/libmesh_prof_la-centroid_partitioner.Tpo -c -o src/partitioning/libmesh_prof_la-centroid_partitioner.lo `test -f 'src/partitioning/centroid_partitioner.C' || echo '$(srcdir)/'`src/partitioning/centroid_partitioner.C
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/partitioning/$(DEPDIR)/libmesh_prof_la-centroid_partitioner.Tpo src/partitioning/$(DEPDIR)/libmesh_prof_la-centroid_partitioner.Plo
@@ -28088,6 +28223,7 @@ clean-libtool:
 	-rm -rf src/mesh/.libs src/mesh/_libs
 	-rm -rf src/numerics/.libs src/numerics/_libs
 	-rm -rf src/parallel/.libs src/parallel/_libs
+	-rm -rf src/particles/.libs src/particles/_libs
 	-rm -rf src/partitioning/.libs src/partitioning/_libs
 	-rm -rf src/physics/.libs src/physics/_libs
 	-rm -rf src/quadrature/.libs src/quadrature/_libs
@@ -28537,6 +28673,8 @@ distclean-generic:
 	-rm -f src/numerics/$(am__dirstamp)
 	-rm -f src/parallel/$(DEPDIR)/$(am__dirstamp)
 	-rm -f src/parallel/$(am__dirstamp)
+	-rm -f src/particles/$(DEPDIR)/$(am__dirstamp)
+	-rm -f src/particles/$(am__dirstamp)
 	-rm -f src/partitioning/$(DEPDIR)/$(am__dirstamp)
 	-rm -f src/partitioning/$(am__dirstamp)
 	-rm -f src/physics/$(DEPDIR)/$(am__dirstamp)
@@ -28565,7 +28703,7 @@ clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf src/apps/$(DEPDIR) src/base/$(DEPDIR) src/error_estimation/$(DEPDIR) src/fe/$(DEPDIR) src/geom/$(DEPDIR) src/mesh/$(DEPDIR) src/numerics/$(DEPDIR) src/parallel/$(DEPDIR) src/partitioning/$(DEPDIR) src/physics/$(DEPDIR) src/quadrature/$(DEPDIR) src/reduced_basis/$(DEPDIR) src/solution_transfer/$(DEPDIR) src/solvers/$(DEPDIR) src/systems/$(DEPDIR) src/utils/$(DEPDIR)
+	-rm -rf src/apps/$(DEPDIR) src/base/$(DEPDIR) src/error_estimation/$(DEPDIR) src/fe/$(DEPDIR) src/geom/$(DEPDIR) src/mesh/$(DEPDIR) src/numerics/$(DEPDIR) src/parallel/$(DEPDIR) src/particles/$(DEPDIR) src/partitioning/$(DEPDIR) src/physics/$(DEPDIR) src/quadrature/$(DEPDIR) src/reduced_basis/$(DEPDIR) src/solution_transfer/$(DEPDIR) src/solvers/$(DEPDIR) src/systems/$(DEPDIR) src/utils/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-libtool distclean-tags
@@ -28617,7 +28755,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf src/apps/$(DEPDIR) src/base/$(DEPDIR) src/error_estimation/$(DEPDIR) src/fe/$(DEPDIR) src/geom/$(DEPDIR) src/mesh/$(DEPDIR) src/numerics/$(DEPDIR) src/parallel/$(DEPDIR) src/partitioning/$(DEPDIR) src/physics/$(DEPDIR) src/quadrature/$(DEPDIR) src/reduced_basis/$(DEPDIR) src/solution_transfer/$(DEPDIR) src/solvers/$(DEPDIR) src/systems/$(DEPDIR) src/utils/$(DEPDIR)
+	-rm -rf src/apps/$(DEPDIR) src/base/$(DEPDIR) src/error_estimation/$(DEPDIR) src/fe/$(DEPDIR) src/geom/$(DEPDIR) src/mesh/$(DEPDIR) src/numerics/$(DEPDIR) src/parallel/$(DEPDIR) src/particles/$(DEPDIR) src/partitioning/$(DEPDIR) src/physics/$(DEPDIR) src/quadrature/$(DEPDIR) src/reduced_basis/$(DEPDIR) src/solution_transfer/$(DEPDIR) src/solvers/$(DEPDIR) src/systems/$(DEPDIR) src/utils/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
