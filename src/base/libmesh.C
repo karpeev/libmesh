@@ -952,5 +952,6 @@ template void         command_line_vector<int>         (const std::string&, std:
 template void         command_line_vector<float>       (const std::string&, std::vector<float>&);
 template void         command_line_vector<double>      (const std::string&, std::vector<double>&);
 template void         command_line_vector<long double> (const std::string&, std::vector<long double>&);
+template void         command_line_vector<std::string> (const std::string&, std::vector<std::string>&);
 
 } // namespace libMesh
