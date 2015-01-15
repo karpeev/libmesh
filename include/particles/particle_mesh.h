@@ -59,6 +59,11 @@ namespace libMesh{
     void translate_local_particles(const std::vector<Point>& shifts);
 
   protected:
+#ifdef DEBUG
+    std::vector<std::string> _vdebug;
+    bool __debug(const char*s) {return std::find(_vdebug.begin(),_vdebug.end(),std::string(s)) != _vdebug.end();};
+#endif
+    std::ostream& __rankprint(std::ostream& os) {os << "["<<this->comm().rank()<<"|"<<this->comm().size()<<"]: "; return os;}
     bool _setup;
 
     // Local particles -- some of which might not be local, if we are in the middle of translation.

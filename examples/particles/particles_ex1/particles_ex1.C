@@ -33,6 +33,12 @@
 
 using namespace libMesh;
 
+#ifdef DEBUG
+std::vector<std::string> vdebug;
+bool debug(const char* s) {return std::find(vdebug.begin(),vdebug.end(),std::string(s)) != vdebug.end();}
+#endif
+
+std::ostream& rankprint(const Parallel::Communicator& comm,std::ostream& os) {os << "["<<comm.rank()<<"|"<<comm.size()<<"]: "; return os;}
 
 template <class T>
 std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
@@ -86,7 +92,12 @@ Real time_diff(timeval start, timeval end) {
   return (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec)*1e-6;
 }
 
-bool add_particle(ChargedParticles& qparticles, MeshBase& mesh, Real x, Real y, Real z, Real q) {
+bool add_particle(MeshBase& mesh, ChargedParticles& qparticles, Real x, Real y, Real z, Real q) {
+#ifdef DEBUG
+  std::vector<std::string> vdebug;
+  command_line_vector("debug",vdebug);
+  bool debug = std::find(vdebug.begin(),vdebug.end(),std::string("add_particle")) != vdebug.end();
+#endif
   Real testX = x;
   Real testY = y;
   Real testZ = z;
@@ -95,14 +106,32 @@ bool add_particle(ChargedParticles& qparticles, MeshBase& mesh, Real x, Real y, 
   if(testZ == (int)testZ) testZ += .5;
   Point testPoint(testX, testY, testZ);
   const Elem* elem = mesh.point_locator()(testPoint);
-  if(elem == NULL) return false;
-  if(elem->processor_id() != mesh.processor_id()) return NULL;
-  Point point(x, y, z);
-  qparticles.push_back(ChargedParticle(point, q));
+  if(elem == NULL) {
+#ifdef DEBUG
+    if (debug) {
+      std::cout << "[" << mesh.comm().rank()<<"|"<<mesh.comm().size()<<"]: " << "rejected particle outside of mesh: location  " << testPoint << std::endl;
+    }
+#endif
+    return false;
+  }
+  if(elem->processor_id() != mesh.processor_id()) {
+#ifdef DEBUG
+    if (debug) {
+      std::cout << "[" << mesh.comm().rank()<<"|"<<mesh.comm().size()<<"]: " << "rejected particle outside of processor partition: location  " << testPoint << std::endl;
+    }
+#endif
+    return false;
+  }
+  qparticles.push_back(ChargedParticle(testPoint, q));
+#ifdef DEBUG
+    if (debug) {
+      std::cout << "[" << mesh.comm().rank()<<"|"<<mesh.comm().size()<<"]: " << "added particle: location  " << testPoint << std::endl;
+    }
+#endif
   return true;
 }
 
-void make_mesh_and_particles(int dim, int width, int particles_per_axis, UnstructuredMesh& mesh, ChargedParticles& qparticles)
+void make_mesh_and_particles(UnstructuredMesh& mesh, int dim, int width, int particles_per_axis,  ChargedParticles& qparticles)
 {
   int height = dim >= 2 ? width : 1;
   int depth = dim >= 3 ? width : 1;
@@ -127,7 +156,7 @@ void make_mesh_and_particles(int dim, int width, int particles_per_axis, Unstruc
     if(maxX == width) maxI = particles_per_axis;
     for(int i = minI; i < maxI; i++) {
       Point point((i + .5)*interval, .5, .5);
-      qparticles.push_back(ChargedParticle(point, point(0)*10));
+      add_particle(mesh,qparticles,point(0),point(1),point(2),point(0)+point(1)+point(2));
     }
   }
   else {
@@ -137,7 +166,7 @@ void make_mesh_and_particles(int dim, int width, int particles_per_axis, Unstruc
 	  Real x = width*(i + .5)/x_count;
 	  Real y = height*(j + .5)/y_count;
 	  Real z = depth*(k + .5)/z_count;
-          add_particle(qparticles,mesh,x,y,z,x+y+z);
+          add_particle(mesh,qparticles,x,y,z,x+y+z);
         }
       }
     }
@@ -162,7 +191,7 @@ void print_help(int, char** argv)
                << "Run in serial with build METHOD <method> as follows:\n"
                << "\n"
                << argv[0] << "\n"
-               << "               [--verbose] [layout=2|3] [width=<w>] [density=<k>]\n"
+               << "               [--verbose [--keep-cout]] [layout=2|3] [width=<w>] [density=<k>] [debug='[function[ function]...]']\n"
 	       << "MEANING:\n"
 	       << "Mesh:\n"
 	       << "  The mesh is made up of unit cube elements laid out as follows:\n"
@@ -173,10 +202,12 @@ void print_help(int, char** argv)
 	       << "Particles:\n"
 	       << "  Particles are laid out within the mesh with 'density' particles in each direction\n"
 	       << "DEFAULTS:\n"
-	       << "   verbose ............. false (verbosity) \n"
 	       << "   layout  ............. 1     (dimensionality of the mesh layout)\n"
 	       << "   width ............... 1     (mesh width in unit cubes)\n"
 	       << "   density ............. 3\n"
+	       << "NOTES:\n"
+               << "   Use standard libMesh --keep-cout option to enable stdout on all processor\n"
+	       << "   (enabled only on rank 0 by default); useful for debugging output with debug='...'\n"
                << "\n"
                << std::endl;
 }
@@ -197,13 +228,27 @@ int main(int argc, char** argv) {
     return(0);
   }
 
-  int layout  = command_line_value("layout",3);
+  int layout  = command_line_value("layout",1);
   int width   = command_line_value("width",1);
-  int density = command_line_value("density",3);
+  int density = command_line_value("density",1);
+
+#ifdef DEBUG
+  command_line_vector("debug",vdebug);
+#endif
+
+
+  if (on_command_line("--verbose")) {
+    if (!init.comm().rank()) {
+      std::cout << "layout:  " << layout  << std::endl;
+      std::cout << "width:   " << width   << std::endl;
+      std::cout << "density: " << density << std::endl;
+      std::cout << "debug:   " << vdebug  << std::endl;
+    }
+  }
 
   SerialMesh mesh(init.comm());
   AutoPtr<ChargedParticles> qparticles(new ChargedParticles());
-  make_mesh_and_particles(layout, width, density, mesh, *qparticles);
+  make_mesh_and_particles(mesh,layout, width, density,*qparticles);
   mesh.print_info();
 
   ParticleMesh pm(mesh);

@@ -12,6 +12,9 @@ using namespace libMesh;
 ParticleMesh::ParticleMesh(MeshBase& mesh, MeshData* mesh_data)
   : EquationSystems(mesh,mesh_data), _setup(false)
 {
+#ifdef DEBUG
+  command_line_vector("debug",_vdebug);
+#endif
 }
 
 ParticleMesh::~ParticleMesh()
@@ -128,20 +131,44 @@ void ParticleMesh::pack(int src, int /*elemid*/,Scatter::OutBuffer& obuffer) {
   }
 }
 
+#undef  __FUNCT__
+#define __FUNCT__ "ParticleMesh::unpack"
 void ParticleMesh::unpack(int src, int/*elemid*/,Scatter::InBuffer& ibuffer) {
+#ifdef DEBUG
+  std::vector<std::string> vdebug;
+  command_line_vector("debug",vdebug);
+  bool debug = std::find(vdebug.begin(),vdebug.end(),std::string(__FUNCT__)) != vdebug.end();
+#endif
   // Unpack all of the received particles and add them as local (should we check that they are?)
   unsigned int src_size;
   ibuffer.read(src_size);
+#ifdef DEBUG
+  if (debug) {
+    std::cout << "[" << this->comm().rank()<<"|"<< this->comm().size()<<"]: " << __FUNCT__ << ": unpacking " << src_size << " particles from source " << src << std::endl;
+  }
+#endif
   for (unsigned int i = 0; i < src_size; ++i) {
     unsigned int p_id;
+    // FIXME: p_id is the 'particle id' output parameter; should return it through the return value
     _local_particles->read(ibuffer,p_id);
     __add_local_elem_particle_id(src,p_id);
   }
 
 }
 
+#undef  __FUNCT__
+#define __FUNCT__ "ParticleMesh::unpack"
 void ParticleMesh::set_local_particles(AutoPtr<Particles> particles)
 {
+#ifdef DEBUG
+  std::vector<std::string> vdebug;
+  command_line_vector("debug",vdebug);
+  bool debug = std::find(vdebug.begin(),vdebug.end(),std::string(__FUNCT__)) != vdebug.end();
+  if (debug) {
+    std::cout << "[" << this->comm().rank()<<"|"<< this->comm().size()<<"]: " << __FUNCT__ << ": adding " << particles->size() << " particles\n";
+  }
+#endif
+
   for (unsigned int i = 0; i < particles->size(); ++i) {
     const Point& q    = (*particles)(i);
     const Elem*     elem = _mesh.point_locator()(q);
@@ -162,8 +189,7 @@ void ParticleMesh::set_local_particles(AutoPtr<Particles> particles)
 
 
 
-void ParticleMesh::print_info() const
-{
+void ParticleMesh::print_info() const {
   MeshTools::BoundingBox bb = MeshTools::processor_bounding_box(_mesh,processor_id());
   std::ostringstream sout;
   if (!processor_id()) {
