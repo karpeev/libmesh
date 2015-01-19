@@ -268,8 +268,12 @@ int main(int argc, char** argv) {
   pm.print_info();
   // Translate the qparticles by 0.75 to the right.
   Point shift(0.75,0.0,0.0);
-  std::vector<Point> shifts(qparticles.size(),shift);
+  std::vector<Point> shifts(qparticles->size(),shift);
+  if (!init.comm().processor_id()) {
+    std::cout << "Translating local particles ..." << std::endl;
+  }
   pm.translate_local_particles(shifts);
+  pm.print_info();
   return 0;
 }
 
