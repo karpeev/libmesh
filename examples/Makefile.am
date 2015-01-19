@@ -32,6 +32,7 @@ SUBDIRS = \
 	miscellaneous/miscellaneous_ex10 \
 	miscellaneous/miscellaneous_ex11 \
 	particles/particles_ex1   \
+	particles/particles_ex2   \
 	subdomains/subdomains_ex1 \
 	subdomains/subdomains_ex2 \
 	subdomains/subdomains_ex3 \
