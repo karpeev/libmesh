@@ -37,6 +37,11 @@ using namespace libMesh;
 std::vector<std::string> vdebug;
 bool debug(const char* s) {return std::find(vdebug.begin(),vdebug.end(),std::string(s)) != vdebug.end();}
 #endif
+// Global variables that need to be constructed collectively.
+// Some would prefer to put it into the state of an 'Example' class object, but that tends to make this straightforward
+// code more convoluted with lots of inversion of control patterns.
+SerialMesh              *mesh;
+
 
 std::ostream& rankprint(const Parallel::Communicator& comm,std::ostream& os) {os << "["<<comm.rank()<<"|"<<comm.size()<<"]: "; return os;}
 
@@ -246,12 +251,17 @@ int main(int argc, char** argv) {
     }
   }
 
-  SerialMesh mesh(init.comm());
+  mesh    = new SerialMesh(init.comm());
+  // Force the construction of the point locator, since it is collective.
+  // Point locator may then be used serially by the individual ranks.
+  // This is a behavior that is hard to encapsulate, short of making ANY
+  // use of point locator collective.
+  mesh->point_locator();
   AutoPtr<ChargedParticles> qparticles(new ChargedParticles());
-  make_mesh_and_particles(mesh,layout, width, density,*qparticles);
-  mesh.print_info();
+  make_mesh_and_particles(*mesh,layout, width, density,*qparticles);
+  mesh->print_info();
 
-  ParticleMesh pm(mesh);
+  ParticleMesh pm(*mesh);
   // To avoid ambiguity of conversion (there are at least two ways to make AutoPtr<T> from AutoPtr<T1> when T1 is derived from T),
   // explicitly force a cast (i.e., pick one of those conversions).
   pm.set_local_particles((AutoPtr<ParticleMesh::Particles>)qparticles);
