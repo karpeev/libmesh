@@ -56,6 +56,9 @@ namespace libMesh{
     // Here we might, for example, move all of the local particles, figure out
     // which ones are moving off the process and post the sends/receives.
     // To update the particle-element relations call setup() after calling translate_local_particles().
+    // TODO: should we make shifts into a pair of iterators? This might save memory, for example,
+    //       when shifting the system uniformly.  However, (a) this use case is rather synthetic,
+    //       (b) the memory/time savings would probably be in the noise for any real use case.
     void translate_local_particles(const std::vector<Point>& shifts);
 
   protected:
