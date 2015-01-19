@@ -223,7 +223,7 @@ void print_help(int, char** argv)
 //  width: The width of the mesh.  Mesh is made up of unit cube elements.
 //      The height and depth will either be 1 or be equal to the width,
 //      depending on dim.
-//  particles_per_axis: Number of particles location along each of the
+//  density: Number of particles location along each of the
 //      dim axes.
 int main(int argc, char** argv) {
   LibMeshInit init(argc, argv);
