@@ -62,6 +62,7 @@
 #include "libmesh/exact_solution.h"
 #include "libmesh/string_to_enum.h"
 #include "mg_tool.h"
+#include "dm_sample.h"
 
 PetscBool multigrid_ex1_print_statements_active = PETSC_TRUE;
 
@@ -444,7 +445,6 @@ PrintStatus("initializing storage . . .");
   PetscVector<Number> **level_vector = new PetscVector<Number>* [n_levels_coarsen];
   PetscMatrix<Number> **level_interp = new PetscMatrix<Number>* [n_levels_coarsen];
   PetscMatrix<Number> **level_A      = new PetscMatrix<Number>* [n_levels_coarsen];
-  MGElemIDConverter    *id_converter = new MGElemIDConverter    [n_levels_coarsen];
 
   PetscMatrix<Number> **level_restrct = new PetscMatrix<Number>* [n_levels_coarsen];
 
@@ -508,12 +508,11 @@ PrintStatus("coarsening mesh 2 . . .");
   MeshRefinement mesh_refinement_2(mesh_2);
   mesh_refinement_2.coarsen_by_parents();
   mesh_refinement_2.clean_refinement_flags();
-  flag_elements_FAC(mesh_2, id_converter[0]);
+  flag_elements_FAC(mesh_2);
 PetscPrintf(PETSC_COMM_WORLD, ":\n");
   mesh_refinement_2.coarsen_elements();
 PetscPrintf(PETSC_COMM_WORLD, ":\n");
    equation_systems_2.reinit();
-flag_elements_FAC_end(id_converter[0]);
 
 e(5);
 
@@ -553,10 +552,9 @@ PrintStatus("gathering second data . . .");
 PrintStatus("coarsening mesh 3 . . .");
   MeshRefinement mesh_refinement_3(mesh_3);
   mesh_refinement_3.coarsen_by_parents();
-  flag_elements_FAC(mesh_3, id_converter[1]);
+  flag_elements_FAC(mesh_3);
   mesh_refinement_3.coarsen_elements();
   equation_systems_3.reinit();
-  flag_elements_FAC_end(id_converter[1]);
 
 PrintStatus("gathering 3rd data . . .");
 
@@ -572,7 +570,7 @@ system_3.assemble();
   level_A[2]->swap(*petsc_mat);
 
 e(1);
- build_interpolation(equation_systems, equation_systems_2, "Helmholtz", *level_interp[0], *level_vector[0], *level_vector[1], id_converter[0]);
+ build_interpolation(equation_systems, equation_systems_2, "Helmholtz", *level_interp[0], *level_vector[0], *level_vector[1]);
 e(2);
 
 if (print_interp)
@@ -607,7 +605,7 @@ e(7+i);
 
 PrintStatus("gathering more data . . .");
 
-  build_interpolation(equation_systems_2, equation_systems_3, "Helmholtz", *level_interp[i-1], *level_vector[i-1], *level_vector[i], id_converter[i-1]);
+  build_interpolation(equation_systems_2, equation_systems_3, "Helmholtz", *level_interp[i-1], *level_vector[i-1], *level_vector[i]);
 
 e(101);
   
@@ -644,14 +642,12 @@ system_3.solution->init(*level_vector[2]);
 
   if (i != n_levels_coarsen-1)
   {
-    flag_elements_FAC(mesh_3, id_converter[i]);
-    flag_elements_FAC(mesh_2, id_converter[0]);
+    flag_elements_FAC(mesh_3);
+    flag_elements_FAC(mesh_2);
     mesh_refinement_2.coarsen_elements();
     mesh_refinement_3.coarsen_elements();
     equation_systems_2.reinit();
     equation_systems_3.reinit();
-    flag_elements_FAC_end(id_converter[i]);
-    flag_elements_FAC_end(id_converter[0]);
 
 system_3.assemble();
     petsc_vec = (PetscVector<Number>*) system_3.rhs;

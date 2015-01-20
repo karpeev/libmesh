@@ -43,22 +43,6 @@ if (MG_TOOL_PRINT_STATEMENTS_ACTIVE)
 std::cout << "PrintMGTool: " << i << std::endl << std::flush; 
 }
 
-class MGElemIDConverter {
-
-private:
-std::vector<unsigned int> id_on_fine;
-std::vector<unsigned int> id_on_coarse;
-std::vector<const Elem*>  elem_fine;
-unsigned int n; // current position
-
-public:
-void resize(unsigned int);
-bool add_elem(const Elem*);
-unsigned int c_to_f(unsigned int);
-
-friend void flag_elements_FAC_end(MGElemIDConverter & );
-};
-
 unsigned int MGCountLevelsFAC(MeshBase & mesh)
 {
  ConstElemRange range
@@ -86,7 +70,7 @@ return max_levels;
 }
 
 
-void build_interpolation(EquationSystems & es_fine, EquationSystems & es_coarse, std::string system_name, PetscMatrix<Number>& Interpolation, PetscVector<Number> & fine_level, PetscVector<Number> & coarse_level, MGElemIDConverter& id_converter)
+void build_interpolation(EquationSystems & es_fine, EquationSystems & es_coarse, std::string system_name, PetscMatrix<Number>& Interpolation, PetscVector<Number> & fine_level, PetscVector<Number> & coarse_level)
 {
 
 const double zero_threshold_mg_tool = 1e-30;
@@ -416,67 +400,8 @@ Interpolation.close();
  
 // end of function
 
-unsigned int MGElemIDConverter::c_to_f(unsigned int  id)
-{
-if (id < id_on_fine.size())
-{
-if (id_on_coarse[id] == id) {
-if (id_on_fine[id] != id)
-PetscPrintf(PETSC_COMM_SELF, "Note: MGElemIDConverter is doing something useful.\n");
-return id_on_fine[id];
-}
-else
-{
-PetscPrintf(PETSC_COMM_SELF, "Note: Original Method not Accurate for MPI.\n");
-for (unsigned int i = 0; i < n; i++)
-if (id == id_on_coarse[i])
-return id_on_fine[i];
-}
-}
-else {
-std::cout << "Warning: MGElemIDConverter::c_to_f(unsigned int) recieved too large an id: " << id << ", ";
-std::cout << "while max is " << id_on_fine.size() << std::endl; }
 
-return 0; // if nothing showed up, default to 0
-}
-
-void MGElemIDConverter::resize(unsigned int new_size)
-{
-id_on_fine.resize(new_size);
-elem_fine.resize(new_size);
-id_on_coarse.resize(new_size);
-
-n = 0;
-}
-
-bool MGElemIDConverter::add_elem(const Elem* new_elem) // returns 1 if taken, 0 if not taken
-{
-for (unsigned int i = 0; i < n; i++)
-if (elem_fine[i] == new_elem)
-return 0;
-
-if (n >= id_on_fine.size())
-return 0;
-
-id_on_fine[n] = new_elem->id();
-elem_fine[n] = new_elem;
-n++;
-
-return 1;
-}
-
-
-
-void flag_elements_FAC_end(MGElemIDConverter & id_converter)
-{
-for (unsigned int i = 0; i < id_converter.n; i++) {
-id_converter.id_on_coarse[i] = id_converter.elem_fine[i]->id();
-// PetscPrintf(PETSC_COMM_SELF, "(%D, %D, %D)\n",i,  id_converter.id_on_coarse[i], id_converter.id_on_fine[i]);
-}
-}
-
-
-void flag_elements_FAC(MeshBase & _mesh, MGElemIDConverter & id_converter)
+void flag_elements_FAC(MeshBase & _mesh)
 {
 
 
@@ -509,8 +434,6 @@ void flag_elements_FAC(MeshBase & _mesh, MGElemIDConverter & id_converter)
   e_it = _mesh.active_elements_begin();
   const MeshBase::element_iterator e_end_2 = _mesh.active_elements_end();
 
-  id_converter.resize(total_elem);
-
   for (; e_it != e_end_2; ++e_it)  // refine just the maximum level
   {
   Elem* elem = *e_it;
@@ -531,15 +454,6 @@ void flag_elements_FAC(MeshBase & _mesh, MGElemIDConverter & id_converter)
   }
 
 e_it = _mesh.elements_begin();
-
-for (; e_it != e_end; ++e_it)
-{
-Elem* elem = *e_it;
-if (elem->refinement_flag() != Elem::COARSEN)
-id_converter.add_elem(elem);
-// else
-// PetscPrintf(PETSC_COMM_WORLD, "This element will be coarsened: %D\n", elem->id());
-}
 
 }
 
