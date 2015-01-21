@@ -156,7 +156,7 @@ int main (int argc, char** argv)
     PetscBool use_gmg = PETSC_FALSE;
     PetscBool mesh_build = PETSC_FALSE;
     PetscBool use_galerkin = PETSC_FALSE;
-    PetscOptionsGetBool(NULL, "-use_galerkin", &use_galerkin, NULL);
+    PetscOptionsGetBool(NULL, "-pc_mg_galerkin", &use_galerkin, NULL);
     PetscOptionsGetBool(NULL, "-use_debug", &multigrid_ex1_print_statements_active, NULL);
     PetscOptionsGetBool(NULL, "-print_matrix", &print_matrix, NULL);
     PetscOptionsGetBool(NULL, "-mesh_build", &mesh_build, NULL);
@@ -417,7 +417,6 @@ else // here we are solving instead of mesh_building. Note we don't do both in o
 if (use_gmg)
 {
 
-// MeshData  data(mesh);
 PrintStatus("loading mesh . . .");
 
 
@@ -431,7 +430,9 @@ e(0);
   system.add_variable("u_R", static_cast<Order>(approx_order), Utility::string_to_enum<FEFamily>(approx_type));
   system.add_variable("u_C", static_cast<Order>(approx_order),Utility::string_to_enum<FEFamily>(approx_type));
   equation_systems.get_system("Helmholtz").attach_assemble_function (assemble_helmholtz);
-  e(2);
+
+PrintStatus("initializing storage . . .");
+
   dm** dm_levels;
   dm_levels = new dm*[n_levels_coarsen];
 e(3);
@@ -445,12 +446,10 @@ e(4);
 
  std::cout << "\nNumber of Levels: " << MGCountLevelsFAC(mesh_mg) << std::endl << std::endl;
 
-PrintStatus("initializing storage . . .");
   PetscMatrix<Number> **level_interp = new PetscMatrix<Number>* [n_levels_coarsen];
 
   for (unsigned int i = 0; i < n_levels_coarsen; i++)
   level_interp[i] = new PetscMatrix<Number>(system.comm());
-
 
 
 for (unsigned int k = 0; k < n_levels_coarsen-1; k++)
@@ -464,64 +463,9 @@ for (unsigned int k = 0; k < n_levels_coarsen-1; k++)
   dm_levels[k]->coarsen(*dm_levels[k+1]);
 
   dm_levels[k]->createInterpolation(*dm_levels[k+1], *level_interp[k]);
-
-/* 
-
-if (print_interp)
-{
-VecAssemblyBegin(level_vector[0]->vec());
-VecAssemblyEnd(level_vector[0]->vec());
-VecAssemblyBegin(level_vector[1]->vec());
-VecAssemblyEnd(level_vector[1]->vec());
-
-PetscRandom rctx;
-PetscRandomCreate(PETSC_COMM_WORLD, &rctx);
-PetscRandomSetType(rctx,PETSCRAND);
-VecSetRandom(level_vector[1]->vec(), rctx);
-
- level_interp[0]->vector_mult(*level_vector[0], *level_vector[1]);
-e(3);
-
-system.solution->init(*level_vector[0]);
-system_2.solution->init(*level_vector[1]);
- *system.solution = *level_vector[0];
- *system_2.solution = *level_vector[1];
- ExodusII_IO (mesh).write_equation_systems("interpolated.e", equation_systems);
- ExodusII_IO (mesh_2).write_equation_systems("interpolated_from.e", equation_systems_2);
-}
-e(4);
-
-*/
-
-/*
-if (print_interp && i == 2)
-{
-VecAssemblyBegin(level_vector[1]->vec());
-VecAssemblyEnd(level_vector[1]->vec());
-VecAssemblyBegin(level_vector[2]->vec());
-VecAssemblyEnd(level_vector[2]->vec());
-
-PetscRandom rctx;
-PetscRandomCreate(PETSC_COMM_WORLD, &rctx);
-PetscRandomSetType(rctx,PETSCRAND);
-VecSetRandom(level_vector[2]->vec(), rctx);
-
- level_interp[1]->vector_mult(*level_vector[1], *level_vector[2]);
-
-system_2.solution->init(*level_vector[1]);
-system_3.solution->init(*level_vector[2]);
- *system_2.solution = *level_vector[1];
- *system_3.solution = *level_vector[2];
- ExodusII_IO (mesh_2).write_equation_systems("interpolated_2.e", equation_systems_2);
- ExodusII_IO (mesh_3).write_equation_systems("interpolated_from_2.e", equation_systems_3);
-
-
- ConstElemRange range
-  (mesh_2.active_elements_begin(),
-  mesh_2.active_elements_end());
-
-}
-*/
+  
+  if (!use_galerkin)
+    dm_levels[k+1]->assemble();
 }
 
 PetscErrorCode ierr;
@@ -534,19 +478,6 @@ KSP ksp;
 KSPCreate(PETSC_COMM_WORLD,&ksp);
 e(1);
 
-/*
-MatNullSpace sp;
-
-if (use_null_space)
-{
-PetscBool check_valid = PETSC_FALSE;
-MatNullSpaceCreate(PetscObjectComm((PetscObject) level_A[0]->mat()), PETSC_TRUE, 0, NULL, &sp);
-MatSetNullSpace(level_A[0]->mat(), sp);
-MatNullSpaceTest(sp, level_A[0]->mat(), &check_valid);
-std::cout << "Null Space Test: " << check_valid << "\n";
-}
-*/
-
 
 KSPSetOperators(ksp, dm_levels[0]->get_mat(),dm_levels[0]->get_mat());
 KSPGetPC(ksp,&pc);
@@ -556,32 +487,17 @@ PCMGSetLevels(pc,nlevels,NULL);
 PCMGSetType(pc,PC_MG_MULTIPLICATIVE);
 e(1006);
 
-
-// if (!use_galerkin)
-// PCMGSetResidual(pc, nlevels - 1, NULL, level_A[0]->mat());
-
 for (unsigned int i = 1; i < nlevels; i++)
-{
-e(1007);
-PetscPrintf(PETSC_COMM_WORLD, "Setting a residual . . .\n");
-
 PCMGSetInterpolation(pc,i,level_interp[nlevels-1-i]->mat());
 
-/*
-if (use_null_space)
-{
-PetscBool check_valid = PETSC_FALSE;
-MatNullSpaceCreate(PetscObjectComm((PetscObject) level_A[nlevels-i]->mat()), PETSC_TRUE, 0, NULL, &sp);
-MatSetNullSpace(level_A[nlevels-i]->mat(), sp);
-MatNullSpaceTest(sp, level_A[nlevels-i]->mat(), &check_valid);
-std::cout << "Null Space Test: " << check_valid << "\n";
 }
-*/
-//  if (!use_galerkin)
-//  PCMGSetResidual(pc, i-1, NULL, level_A[nlevels-i]->mat());
 
-e(1008);
-}
+if (!use_galerkin)
+for (unsigned int i = 0; i < nlevels; i++)
+{
+    KSP smoother;
+    PCMGGetSmoother(pc, nlevels - 1 - i, &smoother);
+    KSPSetOperators(smoother, dm_levels[i]->get_mat(), dm_levels[i]->get_mat());
 }
 e(3);
 KSPSetFromOptions(ksp);
@@ -593,12 +509,6 @@ Vec sol;
 VecDuplicate(level_vector.vec(), &sol);
 e(1013);
 VecSet(level_vector.vec(), 1.0);
-/*
-if (use_gmg && print_matrix)
-{
-MatView(level_A[nlevels-1]->mat(), PETSC_VIEWER_STDOUT_WORLD);
-}
-*/
 
 PetscPrintf(PETSC_COMM_WORLD, "KSP Setup . . .\n");
 ierr = KSPSetUp(ksp);CHKERRQ(ierr);
