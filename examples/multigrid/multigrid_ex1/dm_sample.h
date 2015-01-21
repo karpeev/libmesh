@@ -72,7 +72,7 @@ if (set && !coarse_dm.is_set()) {
   Mesh * mesh_mg = new Mesh(*temporary_mesh);
   coarse_dm.eq = new EquationSystems(*mesh_mg);
 
-// This is a temporary explicit system defining
+// This is a temporary explicit definition of the system
 // Need a system deep copy here
 
   LinearImplicitSystem & system = coarse_dm.eq->add_system<LinearImplicitSystem>(sys_name);
@@ -96,6 +96,8 @@ if (set && !coarse_dm.is_set()) {
   coarse_dm.assemble();
   coarse_dm.set = 1;
   coarse_dm.memory_allocation = 1;
+
+  coarse_dm.eq->reinit();
 
   }
 else
