@@ -62,7 +62,6 @@
 #include "libmesh/exact_solution.h"
 #include "libmesh/string_to_enum.h"
 #include "mg_tool.h"
-#include "dm_sample.h"
 
 PetscBool multigrid_ex1_print_statements_active = PETSC_TRUE;
 
@@ -71,6 +70,8 @@ using std::vector;
 
 void assemble_helmholtz(EquationSystems& es,
                       const std::string& system_name);
+
+#include "dm_sample.h"
 
 // error checking function
 
@@ -413,165 +414,58 @@ mesh.write("refined_cube.xda");
 //      			BEGIN MULTIGRID LEVEL BUILDING
 else // here we are solving instead of mesh_building. Note we don't do both in one go
      // because we don't want the mesh builder to use Multigrid
+if (use_gmg)
 {
 
 // MeshData  data(mesh);
 PrintStatus("loading mesh . . .");
 
-  mesh.read("refined_cube.xda");
 
-  EquationSystems equation_systems (mesh);
+  Mesh mesh_mg(init.comm());
+e(0);
+  mesh_mg.read("refined_cube.xda");
 
+  EquationSystems equation_systems(mesh_mg);
 
-PrintStatus("building system 1 . . .");
-LinearImplicitSystem& system = equation_systems.add_system<LinearImplicitSystem> ("Helmholtz");
-
-  system.add_variable("u_R", static_cast<Order>(approx_order),
-                        Utility::string_to_enum<FEFamily>(approx_type));
+  LinearImplicitSystem & system = equation_systems.add_system<LinearImplicitSystem> ("Helmholtz");
+  system.add_variable("u_R", static_cast<Order>(approx_order), Utility::string_to_enum<FEFamily>(approx_type));
   system.add_variable("u_C", static_cast<Order>(approx_order),Utility::string_to_enum<FEFamily>(approx_type));
-
   equation_systems.get_system("Helmholtz").attach_assemble_function (assemble_helmholtz);
+  e(2);
+  dm** dm_levels;
+  dm_levels = new dm*[n_levels_coarsen];
+e(3);
+  dm_levels[0] = new dm("Helmholtz");
+e(4);
+  dm_levels[0]->set_eq(&equation_systems,&mesh_mg, &system, approx_order,approx_type);
+  e(5);
 
-  equation_systems.init();
+  PetscVector<Number> level_vector(init.comm());
+  dm_levels[0]->copy_rhs(level_vector);
 
- std::cout << "\nNumber of Levels Test: " << MGCountLevelsFAC(mesh) << std::endl << std::endl;
-
-
-  // Here I begin experimentation
-
-
+ std::cout << "\nNumber of Levels: " << MGCountLevelsFAC(mesh_mg) << std::endl << std::endl;
 
 PrintStatus("initializing storage . . .");
-  PetscVector<Number> **level_vector = new PetscVector<Number>* [n_levels_coarsen];
   PetscMatrix<Number> **level_interp = new PetscMatrix<Number>* [n_levels_coarsen];
-  PetscMatrix<Number> **level_A      = new PetscMatrix<Number>* [n_levels_coarsen];
-
-  PetscMatrix<Number> **level_restrct = new PetscMatrix<Number>* [n_levels_coarsen];
 
   for (unsigned int i = 0; i < n_levels_coarsen; i++)
-{
-  level_vector[i] = new PetscVector<Number>(system.comm());
   level_interp[i] = new PetscMatrix<Number>(system.comm());
-  level_A[i]      = new PetscMatrix<Number>(system.comm());
-  level_restrct[i] = new PetscMatrix<Number>(system.comm());
-
-  unsigned int n_processors = level_A[i]->n_processors();
-
-  level_A[i]->init(n_processors, n_processors, 1, 1, 1, 1);
-  level_vector[i]->init(n_processors, 1, 0);
-
-}
-e(3);
-
-  PetscVector<Number> * petsc_vec;
-  PetscMatrix<Number> * petsc_mat;
-
-PrintStatus("gathering first data . . .");
-
-  system.assemble();
-  petsc_vec = (PetscVector<Number>*) system.rhs;
-  petsc_mat = (PetscMatrix<Number>*) system.matrix;
-
-PetscPrintf(PETSC_COMM_SELF, "AND CONTINUING ONTO SWAPPING!\n");
-  level_A[0]->swap(*petsc_mat);
-  level_vector[0]->swap(*petsc_vec);
-
-if (use_gmg) {
-
-
-  mesh.skip_partitioning(1); // prevents reparitioning upon each coarsening
-
-PrintStatus("building mesh 2 . . .");
-  Mesh mesh_2(mesh);
 
 
 
+for (unsigned int k = 0; k < n_levels_coarsen-1; k++)
+{
 
-                                // equation_system_2, and equation_system_3 will be looped over
-PrintStatus("setting up system 2 . . .");
+  dm_levels[k+1] = new dm("Helmholtz");
 
- EquationSystems equation_systems_2 (mesh_2);
-
-  LinearImplicitSystem& system_2 = equation_systems_2.add_system<LinearImplicitSystem> ("Helmholtz");
-  system_2.add_variable("u_R", static_cast<Order>(approx_order), Utility::string_to_enum<FEFamily>(approx_type));
-  system_2.add_variable("u_C", static_cast<Order>(approx_order),Utility::string_to_enum<FEFamily>(approx_type));
-  equation_systems_2.get_system("Helmholtz").attach_assemble_function (assemble_helmholtz);
-
-  equation_systems_2.init();
-e(2);
+  PetscPrintf(PETSC_COMM_WORLD, "Building and Coarsening Mesh %D . . .", k+2);
 
 
-PrintStatus("coarsening mesh 2 . . .");
+  dm_levels[k]->coarsen(*dm_levels[k+1]);
 
- system_2.project_solution_on_reinit() = false;
+  dm_levels[k]->createInterpolation(*dm_levels[k+1], *level_interp[k]);
 
-  MeshRefinement mesh_refinement_2(mesh_2);
-  mesh_refinement_2.coarsen_by_parents();
-  mesh_refinement_2.clean_refinement_flags();
-  flag_elements_FAC(mesh_2);
-PetscPrintf(PETSC_COMM_WORLD, ":\n");
-  mesh_refinement_2.coarsen_elements();
-PetscPrintf(PETSC_COMM_WORLD, ":\n");
-   equation_systems_2.reinit();
-
-e(5);
-
-PrintStatus("building mesh 3 . . .");
-
-  Mesh mesh_3(mesh_2);
-
-PrintStatus("building system 3 . . .");
-
-EquationSystems equation_systems_3 (mesh_3);
-
-  LinearImplicitSystem& system_3 = equation_systems_3.add_system<LinearImplicitSystem> ("Helmholtz");
-  system_3.add_variable("u_R", static_cast<Order>(approx_order), Utility::string_to_enum<FEFamily>(approx_type));
-  system_3.add_variable("u_C", static_cast<Order>(approx_order),Utility::string_to_enum<FEFamily>(approx_type));
-  equation_systems_3.get_system("Helmholtz").attach_assemble_function (assemble_helmholtz);
-
-  equation_systems_3.init();
-
-e(6);
-
-PrintStatus("gathering second data . . .");
-
-
- system_2.assemble();
-
- petsc_vec = (PetscVector<Number>*) system_2.rhs;
- petsc_mat = (PetscMatrix<Number>*) system_2.matrix;
-
-
- level_vector[1]->swap(*petsc_vec);
- level_A[1]->swap(*petsc_mat);
- 
- MatAssemblyBegin(level_A[1]->mat(),MAT_FINAL_ASSEMBLY);
- MatAssemblyEnd(level_A[1]->mat(),MAT_FINAL_ASSEMBLY);
-
- system_3.project_solution_on_reinit() = false;
-PrintStatus("coarsening mesh 3 . . .");
-  MeshRefinement mesh_refinement_3(mesh_3);
-  mesh_refinement_3.coarsen_by_parents();
-  flag_elements_FAC(mesh_3);
-  mesh_refinement_3.coarsen_elements();
-  equation_systems_3.reinit();
-
-PrintStatus("gathering 3rd data . . .");
-
-system_3.assemble();
- petsc_vec = (PetscVector<Number>*) system_3.rhs;
- petsc_mat = (PetscMatrix<Number>*) system_3.matrix;
- level_vector[2]->swap(*petsc_vec);
-
-
-
-
-
-  level_A[2]->swap(*petsc_mat);
-
-e(1);
- build_interpolation(equation_systems, equation_systems_2, "Helmholtz", *level_interp[0], *level_vector[0], *level_vector[1]);
-e(2);
+/* 
 
 if (print_interp)
 {
@@ -597,20 +491,9 @@ system_2.solution->init(*level_vector[1]);
 }
 e(4);
 
+*/
 
- for (unsigned int i = 2; i < n_levels_coarsen; i++)
- {
-e(7+i);
-
-
-PrintStatus("gathering more data . . .");
-
-  build_interpolation(equation_systems_2, equation_systems_3, "Helmholtz", *level_interp[i-1], *level_vector[i-1], *level_vector[i]);
-
-e(101);
-  
-
-
+/*
 if (print_interp && i == 2)
 {
 VecAssemblyBegin(level_vector[1]->vec());
@@ -638,31 +521,7 @@ system_3.solution->init(*level_vector[2]);
   mesh_2.active_elements_end());
 
 }
-
-
-  if (i != n_levels_coarsen-1)
-  {
-    flag_elements_FAC(mesh_3);
-    flag_elements_FAC(mesh_2);
-    mesh_refinement_2.coarsen_elements();
-    mesh_refinement_3.coarsen_elements();
-    equation_systems_2.reinit();
-    equation_systems_3.reinit();
-
-system_3.assemble();
-    petsc_vec = (PetscVector<Number>*) system_3.rhs;
-    petsc_mat = (PetscMatrix<Number>*) system_3.matrix;
-    level_vector[i+1]->swap(*petsc_vec);
-    level_A[i+1]->swap(*petsc_mat);
-
-  MatAssemblyBegin(level_A[i+1]->mat(),MAT_FINAL_ASSEMBLY);
-  MatAssemblyEnd(level_A[i+1]->mat(), MAT_FINAL_ASSEMBLY);
-
-  }
-
- }
-
-
+*/
 }
 
 PetscErrorCode ierr;
@@ -675,6 +534,7 @@ KSP ksp;
 KSPCreate(PETSC_COMM_WORLD,&ksp);
 e(1);
 
+/*
 MatNullSpace sp;
 
 if (use_null_space)
@@ -685,10 +545,10 @@ MatSetNullSpace(level_A[0]->mat(), sp);
 MatNullSpaceTest(sp, level_A[0]->mat(), &check_valid);
 std::cout << "Null Space Test: " << check_valid << "\n";
 }
+*/
 
 
-
-KSPSetOperators(ksp, level_A[0]->mat(),level_A[0]->mat());
+KSPSetOperators(ksp, dm_levels[0]->get_mat(),dm_levels[0]->get_mat());
 KSPGetPC(ksp,&pc);
 if (use_gmg) {
 PCSetType(pc,PCMG);
@@ -697,8 +557,8 @@ PCMGSetType(pc,PC_MG_MULTIPLICATIVE);
 e(1006);
 
 
- if (!use_galerkin)
- PCMGSetResidual(pc, nlevels - 1, NULL, level_A[0]->mat());
+// if (!use_galerkin)
+// PCMGSetResidual(pc, nlevels - 1, NULL, level_A[0]->mat());
 
 for (unsigned int i = 1; i < nlevels; i++)
 {
@@ -707,6 +567,7 @@ PetscPrintf(PETSC_COMM_WORLD, "Setting a residual . . .\n");
 
 PCMGSetInterpolation(pc,i,level_interp[nlevels-1-i]->mat());
 
+/*
 if (use_null_space)
 {
 PetscBool check_valid = PETSC_FALSE;
@@ -715,9 +576,9 @@ MatSetNullSpace(level_A[nlevels-i]->mat(), sp);
 MatNullSpaceTest(sp, level_A[nlevels-i]->mat(), &check_valid);
 std::cout << "Null Space Test: " << check_valid << "\n";
 }
-
-  if (!use_galerkin)
-  PCMGSetResidual(pc, i-1, NULL, level_A[nlevels-i]->mat());
+*/
+//  if (!use_galerkin)
+//  PCMGSetResidual(pc, i-1, NULL, level_A[nlevels-i]->mat());
 
 e(1008);
 }
@@ -729,54 +590,60 @@ KSPSetFromOptions(ksp);
 e(1010);
 
 Vec sol;
-VecDuplicate(level_vector[0]->vec(), &sol);
+VecDuplicate(level_vector.vec(), &sol);
 e(1013);
-
+VecSet(level_vector.vec(), 1.0);
+/*
 if (use_gmg && print_matrix)
 {
 MatView(level_A[nlevels-1]->mat(), PETSC_VIEWER_STDOUT_WORLD);
 }
+*/
 
 PetscPrintf(PETSC_COMM_WORLD, "KSP Setup . . .\n");
 ierr = KSPSetUp(ksp);CHKERRQ(ierr);
 
-PetscPrintf(PETSC_COMM_WORLD, "System Size: %D\n", level_A[0]->m());
+// PetscPrintf(PETSC_COMM_WORLD, "System Size: %D\n", level_A[0]->m());
+
 PetscPrintf(PETSC_COMM_WORLD, "KSP Solving . . .\n");
 
-ierr = KSPSolve(ksp,level_vector[0]->vec(),sol);CHKERRQ(ierr);
+ierr = KSPSolve(ksp,level_vector.vec(),sol);CHKERRQ(ierr);
 
+/*
+e(1014);
 VecSet(sol, 1.);
 PetscVector<Number> sol_check(sol,system.comm());
 system.solution->init(sol_check);
-level_A[0]->vector_mult(*system.solution, sol_check);
-
+system.matrix->vector_mult(*system.solution, sol_check);
+e(1015);
             ExodusII_IO (mesh).write_equation_systems ("ksp_solution.e",
                                                  equation_systems);
-
+*/
 
 PetscInt its = 0;
 KSPGetIterationNumber(ksp,&its);
 
 PetscPrintf(PETSC_COMM_WORLD, "Iterations %D\n", its);
 
-PetscVector<Number> solution(sol,init.comm());
-*system.solution = solution;
+// PetscVector<Number> solution(sol,init.comm());
+// *system.solution = solution;
 
+/*
   #ifdef LIBMESH_HAVE_EXODUS_API
     ExodusII_IO (mesh).write_equation_systems ("lshape_solved_solution.e",
                                          equation_systems);
   #endif // #ifdef LIBMESH_HAVE_EXODUS_API
+*/
 
 PrintStatus("cleaning up . . .");
 
 for (unsigned int i = 0; i < n_levels_coarsen; i++)
 {
- delete level_A[i];
- delete level_vector[i];
- delete level_interp[i];
- delete level_restrct[i];
+ delete dm_levels[i];
 }
- delete [] level_A; delete [] level_vector; delete [] level_interp; delete [] level_restrct;
+
+delete [] dm_levels;
+delete [] level_interp;
 }
 
 PrintStatus("Complete.");
@@ -787,8 +654,6 @@ PrintStatus("Complete.");
 void assemble_helmholtz(EquationSystems& es,
                       const std::string& system_name)
 {
- if (use_bc)
-std::cout << "used penalty\n";
 
   libmesh_assert_equal_to (system_name, "Helmholtz");
 
