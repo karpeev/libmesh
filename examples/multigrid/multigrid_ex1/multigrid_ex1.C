@@ -437,7 +437,7 @@ e(0);
 e(3);
   dm_levels[0] = new dm("Helmholtz");
 e(4);
-  dm_levels[0]->set_eq(&equation_systems,&mesh_mg, &system, approx_order,approx_type);
+  dm_levels[0]->set_eq(&equation_systems, approx_order,approx_type);
   e(5);
 
   PetscVector<Number> level_vector(init.comm());
