@@ -457,11 +457,10 @@ for (unsigned int k = 0; k < n_levels_coarsen-1; k++)
 
   dm_levels[k+1] = new dm("Helmholtz");
 
-  PetscPrintf(PETSC_COMM_WORLD, "Building and Coarsening Mesh %D . . .", k+2);
-
+  PetscPrintf(PETSC_COMM_SELF, "Building and Coarsening Mesh %D . . .", k+1);
 
   dm_levels[k]->coarsen(*dm_levels[k+1]);
-
+PetscPrintf(PETSC_COMM_SELF, "fine nodes: %D, coarse nodes: %D \n", dm_levels[k]->n_nodes(k), dm_levels[k+1]->n_nodes(k+1));
   dm_levels[k]->createInterpolation(*dm_levels[k+1], *level_interp[k]);
   
   if (!use_galerkin)

@@ -18,7 +18,15 @@ bool is_set();
 ~dm();
 void assemble();
 void copy_rhs(PetscVector<Number> &);
+unsigned int n_nodes(unsigned int);
 };
+
+unsigned int dm::n_nodes(unsigned int k)
+{
+unsigned int j = 0;
+j = eq->get_mesh().n_nodes();
+return j;
+}
 
 dm::~dm()
 {
@@ -68,9 +76,9 @@ if (set && !coarse_dm.is_set()) {
 
   eq->get_mesh().skip_partitioning(1); // later may wish to save old paritioning bool
 				   // and return to previous state
-  Mesh * temporary_mesh = (Mesh*) (&eq->get_mesh());
-  Mesh * mesh_mg = new Mesh(*temporary_mesh);
-  coarse_dm.eq = new EquationSystems(*mesh_mg);
+
+  AutoPtr<MeshBase> mesh_mg = eq->get_mesh().clone();
+  coarse_dm.eq = new EquationSystems( *mesh_mg );
 
 // This is a temporary explicit definition of the system
 // Need a system deep copy here
@@ -78,27 +86,32 @@ if (set && !coarse_dm.is_set()) {
   LinearImplicitSystem & system = coarse_dm.eq->add_system<LinearImplicitSystem>(sys_name);
   system.add_variable("u_R", static_cast<Order>(approx_order), Utility::string_to_enum<FEFamily>(approx_type));
   system.add_variable("u_C", static_cast<Order>(approx_order),Utility::string_to_enum<FEFamily>(approx_type));
- 
+
   coarse_dm.approx_order = approx_order;
   coarse_dm.approx_type = approx_type;
 
   coarse_dm.eq->get_system(sys_name).attach_assemble_function(assemble_helmholtz);
 
-  system.project_solution_on_reinit() = false;
-  coarse_dm.eq->init();
 
+  
+
+  system.project_solution_on_reinit() = false;
+
+
+  coarse_dm.eq->init();
   MeshRefinement mesh_refinement(*mesh_mg);
   mesh_refinement.coarsen_by_parents();
   mesh_refinement.clean_refinement_flags();
   flag_elements_FAC(*mesh_mg);
   mesh_refinement.coarsen_elements();
   coarse_dm.eq->reinit();
-  coarse_dm.assemble();
+
+  coarse_dm.assemble(); // right now it is building matrices no matter what.
+			// that is not good for the long-term
+
   coarse_dm.set = 1;
   coarse_dm.memory_allocation = 1;
-
-  coarse_dm.eq->reinit();
-
+  mesh_mg.release();
   }
 else
 ierr =  PetscPrintf(PETSC_COMM_SELF, "DM set-status wrong\n");
