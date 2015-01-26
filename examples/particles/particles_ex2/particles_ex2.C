@@ -74,11 +74,35 @@ std::ostream& operator<<(std::ostream& os, const ChargedParticle& q) {
 
 class ChargedParticles : public ParticleMesh::Particles, public std::vector<ChargedParticle> {
 public:
-  const Point& operator()(unsigned int i) const {return (*this)[i];}; // implicit cast to const Point&
+  const Point& operator()(unsigned int i) const {
+#ifdef DEBUG
+    if (i >= this->size()) {
+      std::ostringstream err;
+      err << "Particle index " << i << " is out of bounds: supposed to >= 0 and < " << this->size() << std::endl;
+    }
+#endif
+    const Point& p= (*this)[i];
+    return p;
+  };
   void translate(const std::vector<Point>& shift) {
     for(unsigned int i = 0; i < this->size(); ++i) (*this)[i] = (*this)[i] + shift[i];
   }
-  void write(Scatter::OutBuffer& obuf, unsigned int i) const {ChargedParticle p=(*this)[i];obuf.write(p(0));obuf.write(p(1));obuf.write(p(2));obuf.write(p.charge());}
+  void write(Scatter::OutBuffer& obuf, unsigned int i) const {
+#ifdef DEBUG
+    unsigned int sz = this->size();
+    if (i >= sz) {
+      std::ostringstream err;
+      err << "Particle index " << i << " is out of bounds: supposed to be < " << sz << std::endl;
+      libmesh_error_msg(err.str());
+    }
+#endif
+    const ChargedParticle& p=(*this)[i];
+    Real x = p(0), y = p(1), z = p(2), q = p.charge();
+    obuf.write(x);
+    obuf.write(y);
+    obuf.write(z);
+    obuf.write(q);
+  }
   void read(Scatter::InBuffer& ibuf, unsigned int& i) {
     Real x,y,z,q;
     ibuf.read(x);ibuf.read(y);ibuf.read(z);ibuf.read(q);
@@ -152,6 +176,7 @@ void make_mesh_and_particles(UnstructuredMesh& mesh, int dim, int width, int par
 
   MeshTools::BoundingBox processor_box
       = MeshTools::processor_bounding_box(mesh, mesh.processor_id());
+  mesh.point_locator(); // effectively a barrier
   if(dim == 1) {
     double minX = processor_box.min()(0);
     double maxX = processor_box.max()(0);
@@ -256,7 +281,6 @@ int main(int argc, char** argv) {
   // Point locator may then be used serially by the individual ranks.
   // This is a behavior that is hard to encapsulate, short of making ANY
   // use of point locator collective.
-  mesh->point_locator();
   AutoPtr<ChargedParticles> qparticles(new ChargedParticles());
   make_mesh_and_particles(*mesh,layout, width, density,*qparticles);
   mesh->print_info();
@@ -264,15 +288,18 @@ int main(int argc, char** argv) {
   ParticleMesh pm(*mesh);
   // To avoid ambiguity of conversion (there are at least two ways to make AutoPtr<T> from AutoPtr<T1> when T1 is derived from T),
   // explicitly force a cast (i.e., pick one of those conversions).
-  pm.set_local_particles((AutoPtr<ParticleMesh::Particles>)qparticles);
+  pm.set_particles((AutoPtr<ParticleMesh::Particles>)qparticles);
+  pm.setup();
+  // Note that qparticles is now owned by pm. This is another subtlety that might be unhelpful.
   pm.print_info();
-  // Translate the qparticles by 0.75 to the right.
-  Point shift(0.75,0.0,0.0);
-  std::vector<Point> shifts(qparticles->size(),shift);
-  if (!init.comm().processor_id()) {
-    std::cout << "Translating local particles ..." << std::endl;
+  // Translate the qparticles by 1.25 to the right.
+  const ParticleMesh::Particles& particles = pm.get_particles();
+  Point shift(1.25,0.0,0.0);
+  std::vector<Point> shifts(particles.size(),shift);
+  if (!init.comm().rank()) {
+    std::cout << "Translating particles ..." << std::endl;
   }
-  pm.translate_local_particles(shifts);
+  pm.translate_particles(shifts);
   pm.print_info();
   return 0;
 }
