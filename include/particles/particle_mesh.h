@@ -11,7 +11,7 @@
 
 
 
-namespace libMesh{
+namespace libMesh {
 
 
   class ParticleMesh : public EquationSystems, Scatter::Packer, Scatter::Unpacker {
@@ -41,36 +41,44 @@ namespace libMesh{
     ParticleMesh(MeshBase& mesh, MeshData* mesh_data=NULL);
     ~ParticleMesh();
 
-    void                     set_local_particles(AutoPtr<Particles> particles);
     void                     setup();
     bool                     is_setup(){return _setup;};
+    // TODO: add local particle setters that accept raw pointers and arrays; the arrays will be copied.
+    //       This is to avoid having to deal with the subtleties of AutoPtr array handling -- these are NOT
+    //       reference-counting smart pointers, so the ownership of the underlying pointer is GIVEN UP to
+    //       the ParticleMesh object upon set_local_particles(AutoPtr<...>).
+    // set_local_particles(Particles*& particles) should reset 'particles' to NULL to dissuade the user
+    // from dereferencing it :-) -- the ownership has been given up to ParticleMesh!
+    void                     set_particles(AutoPtr<Particles> particles);
     // FIXME: is there a clean way to return const AutoPtr<Particles> for symmetry with the set_xxx?
-    const Particles&         get_local_particles()  const { return *_local_particles; };
+    const Particles&         get_particles()  const { return *_particles; };
     void                     print_info() const;
 
 
     // List of particles for global element id e
-    const std::vector<unsigned int>& local_elem_particles(dof_id_type e) const;
+    const std::vector<unsigned int>& elem_particles(dof_id_type e) const;
 
     // Translation of particles, possibly, across processor boundaries.
     // Here we might, for example, move all of the local particles, figure out
     // which ones are moving off the process and post the sends/receives.
-    // To update the particle-element relations call setup() after calling translate_local_particles().
+    // To update the particle-element relations call setup() after calling translate_particles().
     // TODO: should we make shifts into a pair of iterators? This might save memory, for example,
     //       when shifting the system uniformly.  However, (a) this use case is rather synthetic,
     //       (b) the memory/time savings would probably be in the noise for any real use case.
-    void translate_local_particles(const std::vector<Point>& shifts);
+    void translate_particles(const std::vector<Point>& shifts);
 
   protected:
 #ifdef DEBUG
     std::vector<std::string> _vdebug;
-    bool __debug(const char*s) {return std::find(_vdebug.begin(),_vdebug.end(),std::string(s)) != _vdebug.end();};
+    bool          __debug(const char*s) {return std::find(_vdebug.begin(),_vdebug.end(),std::string(s)) != _vdebug.end();};
 #endif
     std::ostream& __rankprint(std::ostream& os) {os << "["<<this->comm().rank()<<"|"<<this->comm().size()<<"]: "; return os;}
+    void          __gatherprint(const std::ostringstream& sout, std::ostream& os = std::cout) const;
     bool _setup;
 
-    // Local particles -- some of which might not be local, if we are in the middle of translation.
-    AutoPtr<Particles>                                     _local_particles;
+    void          __map_particles(const Particles& particles);
+    // Particles -- some of which might not be local, if we are in the middle of translation.
+    AutoPtr<Particles>                                     _particles;
 
     // TODO: optimize away this temporary particle buffer.  It holds translated particles before they have
     // been scattered to their owning processors.  This could be done by splitting scatter into 'scatter_begin()'
@@ -83,13 +91,9 @@ namespace libMesh{
     // we only have sequential, not random, access to the local elements (through the iterator),
     // which likely involves an std::set with similar complexity to std::map.
     // TODO: investigate ways of switching to an array instead using a local renumbering of the ghosts
-    std::map<dof_id_type,std::vector<unsigned int> >      _local_elem_particle_ids;
+    std::map<dof_id_type,std::vector<unsigned int> >      _elem_particle_ids;
 
     AutoPtr<ScatterDistributed>                           _ghost_element_scatter; // ghost elements to their real counterparts
-
-    // This routine will calculate all of the particle-element relations and the particle scatter
-    // once the local particles have beeen set.
-    void map_particles();
 
     // TODO: factor this out into a separate packer operating on Particles
     void prepack(int /*ochannel*/,int /*source*/){};
@@ -99,7 +103,7 @@ namespace libMesh{
     // TODO: factor this out into a separate Rendezvous operating on MeshBase
     void __create_scatter();
 
-    void __add_local_elem_particle_id(dof_id_type e, unsigned int i);
+    void __add_elem_particle_id(dof_id_type e, unsigned int i);
  };// class ParticleMesh
 }// namespace libMesh
 
