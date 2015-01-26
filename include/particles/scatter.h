@@ -11,10 +11,12 @@
 // RendezvousAllToAll can result in a ScatterAllgather.
 // There could be an alternative implementation ScatterCrystal.
 
-#include "libmesh/parallel_object.h"
 #include <vector>
+#include <algorithm>
+#include <ostream>
 
 #include "libmesh/libmesh_common.h"
+#include "libmesh/parallel_object.h"
 
 namespace libMesh {
 
@@ -57,7 +59,7 @@ namespace libMesh {
       // something that we are trying to avoid.
     };
 
-    Scatter() : _setup(false), _prepack(false) {};
+    Scatter();
 
     bool get_prepacking() {return _prepack;};
 
@@ -81,7 +83,9 @@ namespace libMesh {
     bool has_ochannel(int ochannel) {return _ochannel_sources.find(ochannel) != _ochannel_sources.end();};
     //
 
-    void add_ichannel(int ochannel);
+    void add_ichannel(int ichannel);
+
+    void add_ichannels(const std::vector<int>& ichannels);
 
     void add_ichannel_sources(int ichannel,const std::vector<int>& sources);
 
@@ -100,9 +104,16 @@ namespace libMesh {
 
     bool is_setup() const {return _setup;};
 
+    void print_info();
+
     virtual void scatter(Packer& /*packer*/, Unpacker& /*unpacker*/) const {};
 
   protected:
+#ifdef DEBUG
+    std::vector<std::string> _vdebug;
+    bool __debug(const char*s) {return std::find(_vdebug.begin(),_vdebug.end(),std::string(s)) != _vdebug.end();};
+#endif
+
     bool _setup;
 
     bool _prepack;
@@ -146,6 +157,8 @@ namespace libMesh {
 
     virtual void setup() = 0;
 
+    virtual void print_info() const = 0;
+
     virtual void scatter(Scatter::Packer& packer, Scatter::Unpacker& unpacker) const = 0;
 
   protected:
@@ -184,12 +197,19 @@ namespace libMesh {
     virtual void rank_add_ochannels(int rank,const std::vector<int>& ochannels);
 
     void setup();
+
+    void print_info() const;
+
     void scatter(Scatter::Packer& packer, Scatter::Unpacker& unpacker) const;
   protected:
     /**
      * Communication tag used for sending indices to another processor.
      */
     const Parallel::MessageTag _tag;
+    template <typename T>
+    T& __rankprint(T& os) const {os << "["<<this->comm().rank()<<"|"<<this->comm().size()<<"]: "; return os;}
+    void          __gatherprint(const std::ostringstream& sout, std::ostream& os = std::cout) const;
+
   };// class ScatterDistributedMPI
 }
 

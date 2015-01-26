@@ -16,7 +16,8 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-// Local Includes -----------------------------------
+// Libmesh Includes -----------------------------------
+#include "libmesh/libmesh.h"
 #include "libmesh/libmesh_logging.h"
 #include "libmesh/parallel.h"
 #ifdef LIBMESH_HAVE_MPI
@@ -26,11 +27,35 @@
 
 // C++ Includes   -----------------------------------
 #include <algorithm>
+#include <ostream>
 
 namespace libMesh {
 
 using Parallel::Request;
 using Parallel::MessageTag;
+
+
+Scatter::Scatter() : _setup(false), _prepack(false)
+{
+#ifdef DEBUG
+  command_line_vector("debug",_vdebug);
+#endif
+}
+
+void ScatterDistributedMPI::__gatherprint(const std::ostringstream& sout, std::ostream& os) const {
+  libmesh_parallel_only(comm());
+  std::string text_str = sout.str();
+  std::vector<char> text(text_str.begin(), text_str.end());
+  text.push_back('\0');
+  comm().gather(0, text);
+  if (!processor_id()) {
+    int ci = 0;
+    while(ci < (int)text.size()) {
+      os << &text[ci] << std::endl;
+      while(text[ci++] != '\0');
+    }
+  }
+}
 
 void Scatter::add_ochannel(int c)
 {
@@ -42,6 +67,7 @@ void Scatter::add_ochannel(int c)
 
 void Scatter::add_ochannel_source(int ochannel, int source)
 {
+  _setup = false;
   std::map<int,std::vector<int> >::iterator ochannel_sources_it = _ochannel_sources.find(ochannel);
   if (ochannel_sources_it == _ochannel_sources.end()) {
     // TODO: obtain ochannel_it as part of insertion
@@ -53,6 +79,7 @@ void Scatter::add_ochannel_source(int ochannel, int source)
 
 void Scatter::add_ochannel_sources(int ochannel, const std::vector<int>& sources)
 {
+  _setup = false;
   std::map<int,std::vector<int> >::iterator ochannel_sources_it = _ochannel_sources.find(ochannel);
   if (ochannel_sources_it == _ochannel_sources.end()) {
     // TODO: obtain ochannel_sources_it as part of insertion
@@ -70,8 +97,20 @@ void Scatter::add_ichannel(int ichannel)
   }
 }
 
+void Scatter::add_ichannels(const std::vector<int>& ichannels)
+{
+  _setup = false;
+  for (std::vector<int>::const_iterator it = ichannels.begin(); it != ichannels.end(); ++it) {
+    int ic = *it;
+    if (_ichannel_sources.find(ic) == _ichannel_sources.end()) {
+      _ichannel_sources[ic] = std::vector<int>();
+    }
+  }
+}
+
 void Scatter::add_ichannel_source(int ichannel, int source)
 {
+  _setup = false;
   std::map<int,std::vector<int> >::iterator ichannel_sources_it = _ichannel_sources.find(ichannel);
   if (ichannel_sources_it == _ichannel_sources.end()) {
     // TODO: obtain ichannel_sources_it as part of insertion
@@ -83,6 +122,7 @@ void Scatter::add_ichannel_source(int ichannel, int source)
 
 void Scatter::add_ichannel_sources(int ichannel, const std::vector<int>& sources)
 {
+  _setup = false;
   std::map<int,std::vector<int> >::iterator ichannel_sources_it = _ichannel_sources.find(ichannel);
   if (ichannel_sources_it == _ichannel_sources.end()) {
     // TODO: obtain ichannel_sources_it as part of insertion
@@ -105,6 +145,7 @@ const std::vector<int>& ScatterDistributed::__rank_get_channels(int r, const std
 
 void ScatterDistributedMPI::rank_add_ochannel(int r, int c)
 {
+  _setup = false;
   // TODO: check that r is within the comm
   if (_rank_ochannels.find(r) == _rank_ochannels.end()) {
     _rank_ochannels[r] = std::vector<int>();
@@ -114,6 +155,7 @@ void ScatterDistributedMPI::rank_add_ochannel(int r, int c)
 
 void ScatterDistributedMPI::rank_add_ochannels(int r, const std::vector<int>& channels)
 {
+  _setup = false;
   // TODO: check that r is within the comm
   std::map<int,std::vector<int> >::iterator rit = _rank_ochannels.find(r);
   if (rit == _rank_ochannels.end()) {
@@ -126,6 +168,7 @@ void ScatterDistributedMPI::rank_add_ochannels(int r, const std::vector<int>& ch
 
 void ScatterDistributedMPI::rank_add_ichannel(int r, int c)
 {
+  _setup = false;
   // TODO: check r is within the comm
   if (_rank_ichannels.find(r) == _rank_ichannels.end()) {
     _rank_ichannels[r] = std::vector<int>();
@@ -133,17 +176,46 @@ void ScatterDistributedMPI::rank_add_ichannel(int r, int c)
     _rank_ichannels[r].push_back(c);
   }
 }
-
+#undef  __FUNCT__
+#define __FUNCT__ "ScatterDistributedMPI::rank_add_ichannels"
 void ScatterDistributedMPI::rank_add_ichannels(int r, const std::vector<int>& channels)
 {
+  _setup = false;
   // TODO: check that r is within the comm
   std::map<int,std::vector<int> >::iterator rit = _rank_ichannels.find(r);
   if (rit == _rank_ichannels.end()) {
+    // FIXME: just assign to channels in this case!
     _rank_ichannels[r] = std::vector<int>();
     // TODO: obtain rit as part of insertion
     rit = _rank_ichannels.find(r);
   }
+#ifdef DEBUG
+  if (__debug(__FUNCT__)) {
+    std::ostringstream sout;
+    __rankprint(sout);
+    sout << "DEBUG: " << __FUNCT__ << ": ";
+    sout << "Adding incoming channels from rank " << r << ": [ ";
+    for (unsigned int i = 0; i < channels.size(); ++i) {
+      sout << channels[i] << " ";
+    }
+    sout << "]\n";
+    std::cout << sout.str();
+  }
+#endif
   std::copy(channels.begin(),channels.end(),std::back_inserter(rit->second));
+#ifdef DEBUG
+  if (__debug(__FUNCT__)) {
+    std::ostringstream sout;
+    __rankprint(sout);
+    sout << "DEBUG: " << __FUNCT__ << ": ";
+    sout << "Resulting channels from rank " << r << ": [ ";
+    for (unsigned int i = 0; i < _rank_ichannels[r].size(); ++i) {
+      sout << _rank_ichannels[r][i] << " ";
+    }
+    sout << "]\n";
+    std::cout << sout.str();
+  }
+#endif
 }
 
 void ScatterDistributedMPI::setup() {
@@ -189,6 +261,8 @@ void ScatterDistributedMPI::scatter(Scatter::Packer& packer, Scatter::Unpacker& 
   //  the per-rank incoming channel sources, as static -- exchanged up front during the rendezvous -- and
   //  an opportunity for optimizing the communication thanks to this a priori information.
   //
+  int comm_rank = comm().rank();
+  int comm_size = comm().size();
   std::vector<Request> reqs(_rank_ochannels.size());
   // iterate over a rank's ochannels and pack all of the ochannels into a single OutBuffer
   int rank_ocount = 0;
@@ -257,6 +331,87 @@ void ScatterDistributedMPI::scatter(Scatter::Packer& packer, Scatter::Unpacker& 
     reqs[i].wait();
   }
   STOP_LOG("scatter", "ScatterDistributedMPI");
+}
+
+void ScatterDistributedMPI::print_info() const {
+  if (!comm().rank()) {
+    std::cout << "ScatterDistributedMPI: >>>>>\n";
+  }
+  {
+    std::ostringstream sout;
+    if (!comm().rank()) {
+      sout << "Outgoing: [ <source> ... <source> ] --> <channel>\n";
+    }
+    __rankprint(sout);
+    sout  << _ochannel_sources.size() << " channels\n";
+    for (std::map<int,std::vector<int> >::const_iterator ochannel_sources_it = _ochannel_sources.begin(); ochannel_sources_it != _ochannel_sources.end(); ++ochannel_sources_it) {
+      int ochannel = ochannel_sources_it->first;
+      const std::vector<int>& oc_sources = ochannel_sources_it->second;
+      sout << "[ ";
+      for (std::vector<int>::const_iterator oc_sources_it = oc_sources.begin(); oc_sources_it != oc_sources.end(); ++oc_sources_it) {
+	sout << *oc_sources_it << " ";
+      }
+      sout << "] --> " << ochannel << std::endl;
+    }
+    __gatherprint(sout);
+  }
+  {
+    std::ostringstream sout;
+    if (!comm().rank()) {
+      sout << "Outgoing: [ <channel> ... <channel> ] --> <rank>\n";
+    }
+    __rankprint(sout);
+    sout  << _rank_ochannels.size() << " ranks\n";
+    for (std::map<int,std::vector<int> >::const_iterator rank_ochannels_it = _rank_ochannels.begin(); rank_ochannels_it != _rank_ochannels.end(); ++rank_ochannels_it) {
+      int rank_o = rank_ochannels_it->first;
+      const std::vector<int>& r_ochannels = rank_ochannels_it->second;
+      sout << "[ ";
+      for (std::vector<int>::const_iterator r_ochannels_it = r_ochannels.begin(); r_ochannels_it != r_ochannels.end(); ++r_ochannels_it) {
+	sout << *r_ochannels_it << " ";
+      }
+      sout << "] --> " <<rank_o << std::endl;
+    }
+    __gatherprint(sout);
+  }
+  {
+    std::ostringstream sout;
+    if (!comm().rank()) {
+      sout << "Incoming: <channel> <-- [ <source> ... <source> ]\n";
+    }
+    __rankprint(sout);
+    sout  << _ichannel_sources.size() << " channels\n";
+    for (std::map<int,std::vector<int> >::const_iterator ichannel_sources_it = _ichannel_sources.begin(); ichannel_sources_it != _ichannel_sources.end(); ++ichannel_sources_it) {
+      int ichannel = ichannel_sources_it->first;
+      const std::vector<int>& ic_sources = ichannel_sources_it->second;
+      sout << ichannel << " <-- [ ";
+      for (std::vector<int>::const_iterator ic_sources_it = ic_sources.begin(); ic_sources_it != ic_sources.end(); ++ic_sources_it) {
+	sout << *ic_sources_it << " ";
+      }
+      sout << "]\n";
+    }
+    __gatherprint(sout);
+  }
+  {
+    std::ostringstream sout;
+    if (!comm().rank()) {
+      sout << "Incoming: rank <-- [ <channel> ... <channel> ]\n";
+    }
+    __rankprint(sout);
+    sout  << _rank_ochannels.size() << " ranks\n";
+    for (std::map<int,std::vector<int> >::const_iterator rank_ichannels_it = _rank_ichannels.begin(); rank_ichannels_it != _rank_ichannels.end(); ++rank_ichannels_it) {
+      int rank_i = rank_ichannels_it->first;
+      const std::vector<int>& r_ichannels = rank_ichannels_it->second;
+      sout << rank_i << " <-- [ ";
+      for (std::vector<int>::const_iterator r_ichannels_it = r_ichannels.begin(); r_ichannels_it != r_ichannels.end(); ++r_ichannels_it) {
+	sout << *r_ichannels_it << " ";
+      }
+      sout << "]\n";
+    }
+    __gatherprint(sout);
+  }
+  if (!comm().rank()) {
+    std::cout << "ScatterDistributedMPI: <<<<<\n";
+  }
 }
 
 } // end namespace libMesh
