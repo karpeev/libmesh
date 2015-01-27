@@ -267,6 +267,8 @@ libmesh_SOURCES =  \
         src/parallel/parallel_node.C \
         src/parallel/parallel_sort.C \
         src/parallel/threads.C \
+        src/particles/elem_ghost_rendezvous.C \
+        src/particles/parallel_printer.C \
         src/particles/particle_mesh.C \
         src/particles/scatter.C \
         src/partitioning/centroid_partitioner.C \
@@ -417,4 +419,4 @@ libmesh_SOURCES =  \
         src/utils/tree.C \
         src/utils/tree_node.C \
         src/utils/utility.C \
-        src/utils/xdr_cxx.C 
+        src/utils/xdr_cxx.C

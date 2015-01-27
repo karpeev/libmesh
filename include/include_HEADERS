@@ -262,6 +262,8 @@ include_HEADERS =  \
         parallel/parallel_sort.h \
         parallel/threads.h \
         parallel/threads_allocators.h \
+        particles/elem_ghost_rendezvous.h \
+        particles/parallel_printer.h \
         particles/particle_mesh.h \
         particles/scatter.h \
         partitioning/centroid_partitioner.h \
