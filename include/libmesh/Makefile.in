@@ -505,7 +505,8 @@ BUILT_SOURCES = auto_ptr.h dirichlet_boundaries.h dof_map.h \
 	parallel_conversion_utils.h parallel_elem.h \
 	parallel_ghost_sync.h parallel_hilbert.h parallel_histogram.h \
 	parallel_implementation.h parallel_node.h parallel_object.h \
-	parallel_sort.h threads.h threads_allocators.h particle_mesh.h \
+	parallel_sort.h threads.h threads_allocators.h \
+	elem_ghost_rendezvous.h parallel_printer.h particle_mesh.h \
 	scatter.h centroid_partitioner.h hilbert_sfc_partitioner.h \
 	linear_partitioner.h metis_csr_graph.h metis_partitioner.h \
 	morton_sfc_partitioner.h parmetis_partitioner.h partitioner.h \
@@ -1545,6 +1546,12 @@ threads.h: $(top_srcdir)/include/parallel/threads.h
 	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
 
 threads_allocators.h: $(top_srcdir)/include/parallel/threads_allocators.h
+	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
+
+elem_ghost_rendezvous.h: $(top_srcdir)/include/particles/elem_ghost_rendezvous.h
+	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
+
+parallel_printer.h: $(top_srcdir)/include/particles/parallel_printer.h
 	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
 
 particle_mesh.h: $(top_srcdir)/include/particles/particle_mesh.h
