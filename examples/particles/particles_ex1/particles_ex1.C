@@ -33,28 +33,13 @@
 
 using namespace libMesh;
 
+// Global array of function names to turn debugging prints on.
+// Initialized in main.
 #ifdef DEBUG
 std::vector<std::string> vdebug;
 bool debug(const char* s) {return std::find(vdebug.begin(),vdebug.end(),std::string(s)) != vdebug.end();}
 #endif
-// Global variables that need to be constructed collectively.
-// Some would prefer to put it into the state of an 'Example' class object, but that tends to make this straightforward
-// code more convoluted with lots of inversion of control patterns.
-SerialMesh              *mesh;
 
-
-std::ostream& rankprint(const Parallel::Communicator& comm,std::ostream& os) {os << "["<<comm.rank()<<"|"<<comm.size()<<"]: "; return os;}
-
-template <class T>
-std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
-  os << "[";
-  for(int i = 0; i < (int)vec.size(); i++) {
-    os << vec[i];
-    if(i < (int)vec.size() - 1) os << ", ";
-  }
-  os << "]";
-  return os;
-}
 
 class ChargedParticle : public Point {
 public:
@@ -66,117 +51,98 @@ private:
   Real _charge;
 };
 
-std::ostream& operator<<(std::ostream& os, const ChargedParticle& q) {
-  const Point& p = (Point)q;
-  os << "("<<p(0)<<","<<p(1)<<","<<p(2)<<"):" << q.charge();
-  return os;
-}
-
-class ChargedParticles : public ParticleMesh::Particles, public std::vector<ChargedParticle> {
+class ChargedParticles : public ParticleMesh::ParticlePacker, public ParticleMesh::ParticleUnPacker {
 public:
-  const Point& operator()(unsigned int i) const {return (*this)[i];}; // implicit cast to const Point&
-  void translate(const std::vector<Point>& shift) {
-    for(unsigned int i = 0; i < this->size(); ++i) (*this)[i] = (*this)[i] + shift[i];
+  unsigned int size() const {return _particles.size();}
+
+  const Point& operator()(dof_id_type id) const {
+#ifdef DEBUG
+    std::map<dof_id_type,ChargedParticle>::const_iterator it = _particles.find(id);
+    if (it == _particles.end()) {
+      std::ostringstream err;
+      err << "No particle with id << " << id << std::endl;
+      libmesh_error_msg(err.str());
+    }
+#endif
+    const Point& p= it->second; // implicit cast from ChargedParticle to Point
+    return p;
+  };
+
+  void pack(Scatter::OutBuffer& obuf, const Point& point,const dof_id_type& id) {
+    // WARNING! This may be confusing: we want to ignore the Point component of the ChargedParticle
+    // stored in this container and use the point passed in here: it might have been modified during
+    // translation.  Should we ask to pack only the additional payload?
+#ifdef DEBUG
+    std::map<dof_id_type,ChargedParticle>::const_iterator it = _particles.find(id);
+    if (it == _particles.end()) {
+      std::ostringstream err;
+      err << "No particle with id << " << id << std::endl;
+      libmesh_error_msg(err.str());
+    }
+#endif
+    const ChargedParticle& p=it->second;
+    // WARNING! This is where we used coordinates of the passed in point, rather than
+    // the coordinates stored in p.
+    Real x = point(0), y = point(1), z = point(2), q = p.charge();
+    obuf.write(x);
+    obuf.write(y);
+    obuf.write(z);
+    obuf.write(q);
+    obuf.write(id);
   }
-  void write(Scatter::OutBuffer& obuf, unsigned int i) const {ChargedParticle p=(*this)[i];obuf.write(p(0));obuf.write(p(1));obuf.write(p(2));obuf.write(p.charge());}
-  void read(Scatter::InBuffer& ibuf, unsigned int& i) {
+
+  void unpack(Scatter::InBuffer& ibuf, Point& point,dof_id_type& id) {
     Real x,y,z,q;
-    ibuf.read(x);ibuf.read(y);ibuf.read(z);ibuf.read(q);
-    ChargedParticle p(Point(x,y,z),q);
-    this->push_back(p);
-    i = this->size()-1;
+    ibuf.read(x);ibuf.read(y);ibuf.read(z);ibuf.read(q);ibuf.read(id);
+    point = Point(x,y,z);
+    ChargedParticle p(point,q);
+    _particles.insert(std::pair<dof_id_type,ChargedParticle>(id,p));
   }
-  unsigned int size()  const {return this->std::vector<ChargedParticle>::size();}
-  Particles*   clone() const {return new ChargedParticles();} // implicit cast to Particles*
-  void         clear() {this->std::vector<ChargedParticle>::clear();}
-  void         view(std::ostream& os) const {os << (const std::vector<ChargedParticle>&)(*this);}
-};
 
-
-Real time_diff(timeval start, timeval end) {
-  return (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec)*1e-6;
-}
-
-bool add_particle(MeshBase& mesh, ChargedParticles& qparticles, Real x, Real y, Real z, Real q) {
+  // This is a pure convenience method built for this example only.
+  bool add_mesh_particle(MeshBase& mesh,Real x, Real y, Real z, Real q) {
 #ifdef DEBUG
-  std::vector<std::string> vdebug;
-  command_line_vector("debug",vdebug);
-  bool debug = std::find(vdebug.begin(),vdebug.end(),std::string("add_particle")) != vdebug.end();
+    std::vector<std::string> vdebug;
+    command_line_vector("debug",vdebug);
+    bool debug = std::find(vdebug.begin(),vdebug.end(),std::string("ChargedParticles::add_mesh_particle")) != vdebug.end();
 #endif
-  Real testX = x;
-  Real testY = y;
-  Real testZ = z;
-  if(testX == (int)testX) testX += .5;
-  if(testY == (int)testY) testY += .5;
-  if(testZ == (int)testZ) testZ += .5;
-  Point testPoint(testX, testY, testZ);
-  const Elem* elem = mesh.point_locator()(testPoint);
-  if(elem == NULL) {
+    Real testX = x;
+    Real testY = y;
+    Real testZ = z;
+    if(testX == (int)testX) testX += .5;
+    if(testY == (int)testY) testY += .5;
+    if(testZ == (int)testZ) testZ += .5;
+    Point testPoint(testX, testY, testZ);
+    const Elem* elem = mesh.point_locator()(testPoint);
+    if(elem == NULL) {
 #ifdef DEBUG
-    if (debug) {
-      std::cout << "[" << mesh.comm().rank()<<"|"<<mesh.comm().size()<<"]: " << "rejected particle outside of mesh: location  " << testPoint << std::endl;
-    }
-#endif
-    return false;
-  }
-  if(elem->processor_id() != mesh.processor_id()) {
-#ifdef DEBUG
-    if (debug) {
-      std::cout << "[" << mesh.comm().rank()<<"|"<<mesh.comm().size()<<"]: " << "rejected particle outside of processor partition: location  " << testPoint << std::endl;
-    }
-#endif
-    return false;
-  }
-  qparticles.push_back(ChargedParticle(testPoint, q));
-#ifdef DEBUG
-    if (debug) {
-      std::cout << "[" << mesh.comm().rank()<<"|"<<mesh.comm().size()<<"]: " << "added particle: location  " << testPoint << std::endl;
-    }
-#endif
-  return true;
-}
-
-void make_mesh_and_particles(UnstructuredMesh& mesh, int dim, int width, int particles_per_axis,  ChargedParticles& qparticles)
-{
-  int height = dim >= 2 ? width : 1;
-  int depth = dim >= 3 ? width : 1;
-
-  int x_count = particles_per_axis;
-  int y_count = dim >= 2 ? particles_per_axis : 1;
-  int z_count = dim >= 3 ? particles_per_axis : 1;
-
-  if(dim == 1) {
-    mesh.partitioner().reset(new CentroidPartitioner(CentroidPartitioner::X));
-  }
-  MeshTools::Generation::build_cube(mesh, width, height, depth, 0, width, 0, height, 0, depth);
-
-  MeshTools::BoundingBox processor_box
-      = MeshTools::processor_bounding_box(mesh, mesh.processor_id());
-  if(dim == 1) {
-    double minX = processor_box.min()(0);
-    double maxX = processor_box.max()(0);
-    double interval = width/(double)particles_per_axis;
-    int minI = (int)ceil(minX/interval - .5);
-    int maxI = (int)ceil(maxX/interval - .5);
-    if(maxX == width) maxI = particles_per_axis;
-    for(int i = minI; i < maxI; i++) {
-      Point point((i + .5)*interval, .5, .5);
-      add_particle(mesh,qparticles,point(0),point(1),point(2),point(0)+point(1)+point(2));
-    }
-  }
-  else {
-    for(int i = 0; i < x_count; i++) {
-      for(int j = 0; j < y_count; j++) {
-        for(int k = 0; k < z_count; k++) {
-	  Real x = width*(i + .5)/x_count;
-	  Real y = height*(j + .5)/y_count;
-	  Real z = depth*(k + .5)/z_count;
-          add_particle(mesh,qparticles,x,y,z,x+y+z);
-        }
+      if (debug) {
+	std::cout << "[" << mesh.comm().rank()<<"|"<<mesh.comm().size()<<"]: " << "rejected particle outside of mesh: location  " << testPoint << std::endl;
       }
+#endif
+      return false;
     }
+    if(elem->processor_id() != mesh.processor_id()) {
+#ifdef DEBUG
+      if (debug) {
+	std::cout << "[" << mesh.comm().rank()<<"|"<<mesh.comm().size()<<"]: " << "rejected particle outside of processor partition: location  " << testPoint << std::endl;
+      }
+#endif
+      return false;
+    }
+    dof_id_type id = (dof_id_type)_particles.size();
+    ChargedParticle p(testPoint,q);
+    _particles.insert(std::pair<dof_id_type,ChargedParticle>(id,p));
+#ifdef DEBUG
+    if (debug) {
+      std::cout << "[" << mesh.comm().rank() << "|" << mesh.comm().size()<<"]: " << "added particle at location  " << testPoint << std::endl;
+    }
+#endif
+    return true;
   }
-}
+protected:
+  std::map<dof_id_type,ChargedParticle> _particles;
+};
 
 // Print usage information if requested on command line
 void print_help(int, char** argv)
@@ -196,8 +162,12 @@ void print_help(int, char** argv)
                << "Run in serial with build METHOD <method> as follows:\n"
                << "\n"
                << argv[0] << "\n"
-               << "               [--verbose [--keep-cout]] [layout=2|3] [width=<w>] [density=<k>] [debug='[function[ function]...]']\n"
+               << "               [--verbose [--keep-cout]] [--elem-info] [layout=2|3] [width=<w>] [density=<k>] [debug='[function[ function]...]']\n"
 	       << "MEANING:\n"
+	       << "Output:\n"
+	       << "  --verbose: print lots of output\n"
+	       << "  --keep-cout: each processor has a standard out (only rank 0 has it by default)\n"
+	       << "  --elem-info: report the element data and the particles attached to each element in the ParticleMesh object\n"
 	       << "Mesh:\n"
 	       << "  The mesh is made up of unit cube elements laid out as follows:\n"
 	       << "  layout=1: sequentially as a long string of cubes or\n"
@@ -217,8 +187,7 @@ void print_help(int, char** argv)
                << std::endl;
 }
 
-
-//NOTE: options are as follows:
+// NOTE: options are as follows:
 //  layout_dim: The dimensionality for laying out the particles (1, 2, or 3)
 //  width: The width of the mesh.  Mesh is made up of unit cube elements.
 //      The height and depth will either be 1 or be equal to the width,
@@ -246,26 +215,70 @@ int main(int argc, char** argv) {
     if (!init.comm().rank()) {
       std::cout << "layout:  " << layout  << std::endl;
       std::cout << "width:   " << width   << std::endl;
-      std::cout << "density: " << density << std::endl;
-      std::cout << "debug:   " << vdebug  << std::endl;
+      std::cout << "density: " << density << std::endl; // particles_per_axis
+      std::cout << "debug:   [ ";
+      for (unsigned int i = 0; i < vdebug.size(); ++i) std::cout << vdebug[i] << " ";
+      std::cout << "]" << std::endl;
     }
   }
 
-  mesh    = new SerialMesh(init.comm());
-  // Force the construction of the point locator, since it is collective.
-  // Point locator may then be used serially by the individual ranks.
-  // This is a behavior that is hard to encapsulate, short of making ANY
-  // use of point locator collective.
-  mesh->point_locator();
-  AutoPtr<ChargedParticles> qparticles(new ChargedParticles());
-  make_mesh_and_particles(*mesh,layout, width, density,*qparticles);
-  mesh->print_info();
+  bool elem_info = on_command_line("--elem-info");
 
-  ParticleMesh pm(*mesh);
-  // To avoid ambiguity of conversion (there are at least two ways to make AutoPtr<T> from AutoPtr<T1> when T1 is derived from T),
-  // explicitly force a cast (i.e., pick one of those conversions).
-  pm.set_local_particles((AutoPtr<ParticleMesh::Particles>)qparticles);
-  pm.print_info();
+  // Initialize mesh and particles
+  SerialMesh mesh(init.comm());
+  ChargedParticles qparticles;
+
+  int height = layout >= 2 ? width : 1;
+  int depth  = layout >= 3 ? width : 1;
+  int x_count = density;
+  int y_count = layout >= 2 ? density : 1;
+  int z_count = layout >= 3 ? density : 1;
+
+  if(layout == 1) {
+    mesh.partitioner().reset(new CentroidPartitioner(CentroidPartitioner::X));
+  }
+  MeshTools::Generation::build_cube(mesh, width, height, depth, 0, width, 0, height, 0, depth);
+
+  MeshTools::BoundingBox processor_box
+      = MeshTools::processor_bounding_box(mesh, mesh.processor_id());
+  // effectively a barrier -- need to make sure the point locator is constructed collectively
+  // Otherwise -- bad MPI errors :-)
+  // This is a wrinkle in libMesh's design.
+  mesh.point_locator();
+
+  if(layout == 1) {
+    double minX = processor_box.min()(0);
+    double maxX = processor_box.max()(0);
+    double interval = width/(double)density;
+    int minI = (int)ceil(minX/interval - .5);
+    int maxI = (int)ceil(maxX/interval - .5);
+    if(maxX == width) maxI = density;
+    for(int i = minI; i < maxI; i++) {
+      Point point((i + .5)*interval, .5, .5);
+      qparticles.add_mesh_particle(mesh,point(0),point(1),point(2),point(0)+point(1)+point(2));
+    }
+  }
+  else {
+    for(int i = 0; i < x_count; i++) {
+      for(int j = 0; j < y_count; j++) {
+        for(int k = 0; k < z_count; k++) {
+	  Real x = width*(i + .5)/x_count;
+	  Real y = height*(j + .5)/y_count;
+	  Real z = depth*(k + .5)/z_count;
+          qparticles.add_mesh_particle(mesh,x,y,z,x+y+z);
+        }
+      }
+    }
+  }
+  mesh.print_info();
+
+  ParticleMesh pm(mesh);
+  // Add the particles to ParticleMesh. Use its index in qparticles as the id.
+  for (unsigned int i = 0; i < qparticles.size(); ++i) {
+    pm.add_particle(qparticles(i),i);
+  }
+  pm.setup();
+  pm.print_info(elem_info);
   return 0;
 }
 

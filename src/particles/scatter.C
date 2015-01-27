@@ -224,6 +224,8 @@ void ScatterDistributedMPI::setup() {
   STOP_LOG("setup","ScatterDistributedMPI");
 }
 
+#undef  __FUNCT__
+#define __FUNCT__ "ScatterDistributedMPI::scatter"
 void ScatterDistributedMPI::scatter(Scatter::Packer& packer, Scatter::Unpacker& unpacker) const
 {
   libmesh_assert_msg(_setup, "Cannot scatter: ScatterDistributedMPI not set up.");
@@ -261,9 +263,17 @@ void ScatterDistributedMPI::scatter(Scatter::Packer& packer, Scatter::Unpacker& 
   //  the per-rank incoming channel sources, as static -- exchanged up front during the rendezvous -- and
   //  an opportunity for optimizing the communication thanks to this a priori information.
   //
-  int comm_rank = comm().rank();
-  int comm_size = comm().size();
-  std::vector<Request> reqs(_rank_ochannels.size());
+#ifdef DEBUG
+  int rank = comm().rank();
+  int size = comm().size();
+#endif
+  // Make sure the buffer strings aren't deallocated for the duration of the call
+  // How do we avoid string copies in the future?  By improving the OutBuffer API
+  // and allocating an array of buffers here.
+
+  std::vector<Request>     reqs(_rank_ochannels.size());
+  std::vector<std::string> r_obuffer_strs(_rank_ochannels.size());
+
   // iterate over a rank's ochannels and pack all of the ochannels into a single OutBuffer
   int rank_ocount = 0;
   for(std::map<int,std::vector<int> >::const_iterator rank_ochannels_it = _rank_ochannels.begin(); rank_ochannels_it != _rank_ochannels.end(); ++rank_ochannels_it,++rank_ocount) {
@@ -284,6 +294,11 @@ void ScatterDistributedMPI::scatter(Scatter::Packer& packer, Scatter::Unpacker& 
 	}
       }
     }
+#ifdef DEBUG
+    if (debug(__FUNCT__)) {
+      rank_print(std::cout,__FUNCT__) << ": packing buffer " << rank << " --> " << rank_o << std::endl;
+    }
+#endif
     // Iterate over rank's ochannels and pack the sources going into each ochannel
     const std::vector<int>& r_ochannels = rank_ochannels_it->second;
     for (std::vector<int>::const_iterator r_ochannels_it = r_ochannels.begin(); r_ochannels_it != r_ochannels.end(); ++r_ochannels_it) {
@@ -291,24 +306,56 @@ void ScatterDistributedMPI::scatter(Scatter::Packer& packer, Scatter::Unpacker& 
       std::map<int,std::vector<int> >::const_iterator r_ochannel_sources_it = _ochannel_sources.find(r_ochannel);
       const std::vector<int>& r_oc_sources = r_ochannel_sources_it->second;
       int r_oc_sources_size = r_oc_sources.size();
+#ifdef DEBUG
+    if (debug(__FUNCT__)) {
+      rank_print(std::cout,__FUNCT__) << ":\t " << rank << " --> " << rank_o << ": channel " << r_ochannel << " is packed from " << r_oc_sources_size << " sources "<< std::endl;
+    }
+#endif
       r_obuffer.write(r_oc_sources_size);
       // Iterate over the r_ochannel's sources and pack the r_obuffer segment, one subsegment at a time
       for (std::vector<int>::const_iterator r_oc_sources_it = r_oc_sources.begin(); r_oc_sources_it != r_oc_sources.end(); ++r_oc_sources_it) {
 	int r_oc_source = *r_oc_sources_it;
+#ifdef DEBUG
+	if (debug(__FUNCT__)) {
+	  rank_print(std::cout,__FUNCT__) << ":\t " << rank << " --> " << rank_o << ": channel " << r_ochannel << " <-- source " << r_oc_source << std::endl;
+	}
+#endif
 	// write the source id
 	r_obuffer.write(r_oc_source);
 	// pack the packets
 	packer.pack(r_oc_source,r_ochannel,r_obuffer);
       }
     }
+    // copy to a "persistent" buffer
+    r_obuffer_strs[rank_ocount] = r_obuffer.str();
+#ifdef DEBUG
+    if (debug(__FUNCT__)) {
+      std::ostringstream ss;
+      for (unsigned int i = 0; i < r_obuffer_strs[rank_ocount].size(); ++i) {
+	ss << (int) r_obuffer_strs[rank_ocount][i];
+	if (i < r_obuffer_strs[rank_ocount].size()-1) ss << "|";
+      }
+      rank_print(std::cout,__FUNCT__) << ":\t " << rank << " --> " << rank_o << ": sending packed buffer of size " << r_obuffer_strs[rank_ocount].size() << ": " << ss.str() << std::endl;
+    }
+#endif
     // send
-    comm().send(rank_o, r_obuffer.str(), reqs[rank_ocount], _tag);
+    comm().send(rank_o, r_obuffer_strs[rank_ocount], reqs[rank_ocount], _tag);
   }
   // receive buffers from various ranks sending to our ichannels
   for(unsigned int rank_icount = 0; rank_icount < _rank_ichannels.size(); ++rank_icount) {
     std::string r_ibuffer_str;
     int rank_i = comm().receive(Parallel::any_source, r_ibuffer_str, _tag).source(); // source rank
     Scatter::InBuffer r_ibuffer(r_ibuffer_str);
+#ifdef DEBUG
+    if (debug(__FUNCT__)) {
+      std::ostringstream ss;
+      for (unsigned int i = 0; i < r_ibuffer_str.size(); ++i) {
+	ss << (int) r_ibuffer_str[i];
+	if (i < r_ibuffer_str.size()-1) ss << "|";
+      }
+      rank_print(std::cout,__FUNCT__) << ": " << rank << " <-- " << rank_i << " received packed buffer of size " << r_ibuffer_str.size() << ": " << ss.str() << std::endl;
+    }
+#endif
     // Iterate over rank_i's declared ichannels
     std::map<int,std::vector<int> >::const_iterator rank_ichannels_it = _rank_ichannels.find(rank_i);
     const std::vector<int>& r_ichannels = rank_ichannels_it->second;
@@ -317,10 +364,20 @@ void ScatterDistributedMPI::scatter(Scatter::Packer& packer, Scatter::Unpacker& 
       // read the number of r_ichannel's incoming sources
       int r_ic_sources_size;
       r_ibuffer.read(r_ic_sources_size);
+#ifdef DEBUG
+      if (debug(__FUNCT__)) {
+	rank_print(std::cout,__FUNCT__) << ":\t " << rank << " <-- " << rank_i << ": channel " << r_ichannel << " was packed from " << r_ic_sources_size << " sources "<< std::endl;
+      }
+#endif
       // Iterate over r_ichannel's incoming sources and unpack the data from the sent r_ichannel's sources.
       for (int r_ic_sources_count = 0; r_ic_sources_count < r_ic_sources_size; ++r_ic_sources_count) {
 	int r_ic_source;
 	r_ibuffer.read(r_ic_source);
+#ifdef DEBUG
+	if (debug(__FUNCT__)) {
+	  rank_print(std::cout,__FUNCT__) << ":\t " << rank << " <-- " << rank_i << ": channel " << r_ichannel << " <-- source " << r_ic_source << std::endl;
+	}
+#endif
 	unpacker.unpack(r_ic_source,r_ichannel,r_ibuffer);
       }
     }

@@ -17,6 +17,7 @@
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/parallel_object.h"
+#include "libmesh/parallel_printer.h"
 
 namespace libMesh {
 
@@ -30,7 +31,7 @@ namespace libMesh {
     public:
       template <typename T>
       void write(const T& t) {_ss.write((char*)&t,sizeof(t));}
-      std::string& str() {_str = _ss.str(); return _str;}
+      std::string str() {return _ss.str();}
     protected:
       std::ostringstream _ss;
       std::string _str;
@@ -185,11 +186,10 @@ namespace libMesh {
   };// ScatterDistributed
 
 
-  class ScatterDistributedMPI : public ScatterDistributed, ParallelObject
-  {
+  class ScatterDistributedMPI : public ScatterDistributed, ParallelObject, ParallelPrinter {
   public:
     ScatterDistributedMPI(const Parallel::Communicator & comm) :
-    ScatterDistributed(), ParallelObject(comm), _tag(comm.get_unique_tag(15382)) {};
+    ScatterDistributed(), ParallelObject(comm), ParallelPrinter(comm), _tag(comm.get_unique_tag(15382)) {};
 
     virtual void rank_add_ichannel(int rank,int inchannel);
     virtual void rank_add_ochannel(int rank,int ochanel);
