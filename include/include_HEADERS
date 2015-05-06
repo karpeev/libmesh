@@ -340,6 +340,7 @@ include_HEADERS =  \
         solvers/petsc_diff_solver.h \
         solvers/petsc_linear_solver.h \
         solvers/petsc_nonlinear_solver.h \
+        solvers/petsc_ts_solver.h \
         solvers/petscdmlibmesh.h \
         solvers/slepc_eigen_solver.h \
         solvers/slepc_macro.h \
@@ -379,6 +380,7 @@ include_HEADERS =  \
         systems/system_subset.h \
         systems/system_subset_by_subdomain.h \
         systems/transient_system.h \
+        systems/ts_system.h \
         utils/compare_types.h \
         utils/error_vector.h \
         utils/hashword.h \

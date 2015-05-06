@@ -32,7 +32,7 @@
 
 #if !PETSC_VERSION_LESS_THAN(3,5,0)
 #include "libmesh/ignore_warnings.h"
-#include "petsc-private/matimpl.h"
+#include "petsc/private/matimpl.h"
 #include "libmesh/restore_warnings.h"
 #endif
 
