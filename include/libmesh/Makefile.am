@@ -5,2224 +5,1115 @@
 # include the magic script!
 EXTRA_DIST = rebuild_makefile.sh
 
--n BUILT_SOURCES =
- \
--n         LDLT.h
- \
--n         LLT.h
- \
--n         LLT_MKL.h
- \
--n         CholmodSupport.h
- \
--n         Array.h
- \
--n         ArrayBase.h
- \
--n         ArrayWrapper.h
- \
--n         Assign.h
- \
--n         Assign_MKL.h
- \
--n         BandMatrix.h
- \
--n         Block.h
- \
--n         BooleanRedux.h
- \
--n         CommaInitializer.h
- \
--n         CoreIterators.h
- \
--n         CwiseBinaryOp.h
- \
--n         CwiseNullaryOp.h
- \
--n         CwiseUnaryOp.h
- \
--n         CwiseUnaryView.h
- \
--n         DenseBase.h
- \
--n         DenseCoeffsBase.h
- \
--n         DenseStorage.h
- \
--n         Diagonal.h
- \
--n         DiagonalMatrix.h
- \
--n         DiagonalProduct.h
- \
--n         Dot.h
- \
--n         EigenBase.h
- \
--n         Flagged.h
- \
--n         ForceAlignedAccess.h
- \
--n         Functors.h
- \
--n         Fuzzy.h
- \
--n         GeneralProduct.h
- \
--n         GenericPacketMath.h
- \
--n         GlobalFunctions.h
- \
--n         IO.h
- \
--n         Map.h
- \
--n         MapBase.h
- \
--n         MathFunctions.h
- \
--n         Matrix.h
- \
--n         MatrixBase.h
- \
--n         NestByValue.h
- \
--n         NoAlias.h
- \
--n         NumTraits.h
- \
--n         PermutationMatrix.h
- \
--n         PlainObjectBase.h
- \
--n         ProductBase.h
- \
--n         Random.h
- \
--n         Redux.h
- \
--n         Ref.h
- \
--n         Replicate.h
- \
--n         ReturnByValue.h
- \
--n         Reverse.h
- \
--n         Select.h
- \
--n         SelfAdjointView.h
- \
--n         SelfCwiseBinaryOp.h
- \
--n         SolveTriangular.h
- \
--n         StableNorm.h
- \
--n         Stride.h
- \
--n         Swap.h
- \
--n         Transpose.h
- \
--n         Transpositions.h
- \
--n         TriangularMatrix.h
- \
--n         VectorBlock.h
- \
--n         VectorwiseOp.h
- \
--n         Visitor.h
- \
--n         Complex.h
- \
--n         PacketMath.h
- \
--n         Settings.h
- \
--n         Complex.h
- \
--n         PacketMath.h
- \
--n         Complex.h
- \
--n         MathFunctions.h
- \
--n         PacketMath.h
- \
--n         CoeffBasedProduct.h
- \
--n         GeneralBlockPanelKernel.h
- \
--n         GeneralMatrixMatrix.h
- \
--n         GeneralMatrixMatrixTriangular.h
- \
--n         GeneralMatrixMatrixTriangular_MKL.h
- \
--n         GeneralMatrixMatrix_MKL.h
- \
--n         GeneralMatrixVector.h
- \
--n         GeneralMatrixVector_MKL.h
- \
--n         Parallelizer.h
- \
--n         SelfadjointMatrixMatrix.h
- \
--n         SelfadjointMatrixMatrix_MKL.h
- \
--n         SelfadjointMatrixVector.h
- \
--n         SelfadjointMatrixVector_MKL.h
- \
--n         SelfadjointProduct.h
- \
--n         SelfadjointRank2Update.h
- \
--n         TriangularMatrixMatrix.h
- \
--n         TriangularMatrixMatrix_MKL.h
- \
--n         TriangularMatrixVector.h
- \
--n         TriangularMatrixVector_MKL.h
- \
--n         TriangularSolverMatrix.h
- \
--n         TriangularSolverMatrix_MKL.h
- \
--n         TriangularSolverVector.h
- \
--n         BlasUtil.h
- \
--n         Constants.h
- \
--n         DisableStupidWarnings.h
- \
--n         ForwardDeclarations.h
- \
--n         MKL_support.h
- \
--n         Macros.h
- \
--n         Memory.h
- \
--n         Meta.h
- \
--n         NonMPL2.h
- \
--n         ReenableStupidWarnings.h
- \
--n         StaticAssert.h
- \
--n         XprHelper.h
- \
--n         Block.h
- \
--n         Cwise.h
- \
--n         CwiseOperators.h
- \
--n         AlignedBox.h
- \
--n         All.h
- \
--n         AngleAxis.h
- \
--n         Hyperplane.h
- \
--n         ParametrizedLine.h
- \
--n         Quaternion.h
- \
--n         Rotation2D.h
- \
--n         RotationBase.h
- \
--n         Scaling.h
- \
--n         Transform.h
- \
--n         Translation.h
- \
--n         LU.h
- \
--n         Lazy.h
- \
--n         LeastSquares.h
- \
--n         Macros.h
- \
--n         MathFunctions.h
- \
--n         Memory.h
- \
--n         Meta.h
- \
--n         Minor.h
- \
--n         QR.h
- \
--n         SVD.h
- \
--n         TriangularSolver.h
- \
--n         VectorBlock.h
- \
--n         ComplexEigenSolver.h
- \
--n         ComplexSchur.h
- \
--n         ComplexSchur_MKL.h
- \
--n         EigenSolver.h
- \
--n         GeneralizedEigenSolver.h
- \
--n         GeneralizedSelfAdjointEigenSolver.h
- \
--n         HessenbergDecomposition.h
- \
--n         MatrixBaseEigenvalues.h
- \
--n         RealQZ.h
- \
--n         RealSchur.h
- \
--n         RealSchur_MKL.h
- \
--n         SelfAdjointEigenSolver.h
- \
--n         SelfAdjointEigenSolver_MKL.h
- \
--n         Tridiagonalization.h
- \
--n         AlignedBox.h
- \
--n         AngleAxis.h
- \
--n         EulerAngles.h
- \
--n         Homogeneous.h
- \
--n         Hyperplane.h
- \
--n         OrthoMethods.h
- \
--n         ParametrizedLine.h
- \
--n         Quaternion.h
- \
--n         Rotation2D.h
- \
--n         RotationBase.h
- \
--n         Scaling.h
- \
--n         Transform.h
- \
--n         Translation.h
- \
--n         Umeyama.h
- \
--n         Geometry_SSE.h
- \
--n         BlockHouseholder.h
- \
--n         Householder.h
- \
--n         HouseholderSequence.h
- \
--n         BasicPreconditioners.h
- \
--n         BiCGSTAB.h
- \
--n         ConjugateGradient.h
- \
--n         IncompleteLUT.h
- \
--n         IterativeSolverBase.h
- \
--n         Jacobi.h
- \
--n         Determinant.h
- \
--n         FullPivLU.h
- \
--n         Inverse.h
- \
--n         PartialPivLU.h
- \
--n         PartialPivLU_MKL.h
- \
--n         Inverse_SSE.h
- \
--n         MetisSupport.h
- \
--n         Amd.h
- \
--n         Eigen_Colamd.h
- \
--n         Ordering.h
- \
--n         PaStiXSupport.h
- \
--n         PardisoSupport.h
- \
--n         ColPivHouseholderQR.h
- \
--n         ColPivHouseholderQR_MKL.h
- \
--n         FullPivHouseholderQR.h
- \
--n         HouseholderQR.h
- \
--n         HouseholderQR_MKL.h
- \
--n         SuiteSparseQRSupport.h
- \
--n         JacobiSVD.h
- \
--n         JacobiSVD_MKL.h
- \
--n         UpperBidiagonalization.h
- \
--n         SimplicialCholesky.h
- \
--n         SimplicialCholesky_impl.h
- \
--n         AmbiVector.h
- \
--n         CompressedStorage.h
- \
--n         ConservativeSparseSparseProduct.h
- \
--n         MappedSparseMatrix.h
- \
--n         SparseBlock.h
- \
--n         SparseColEtree.h
- \
--n         SparseCwiseBinaryOp.h
- \
--n         SparseCwiseUnaryOp.h
- \
--n         SparseDenseProduct.h
- \
--n         SparseDiagonalProduct.h
- \
--n         SparseDot.h
- \
--n         SparseFuzzy.h
- \
--n         SparseMatrix.h
- \
--n         SparseMatrixBase.h
- \
--n         SparsePermutation.h
- \
--n         SparseProduct.h
- \
--n         SparseRedux.h
- \
--n         SparseSelfAdjointView.h
- \
--n         SparseSparseProductWithPruning.h
- \
--n         SparseTranspose.h
- \
--n         SparseTriangularView.h
- \
--n         SparseUtil.h
- \
--n         SparseVector.h
- \
--n         SparseView.h
- \
--n         TriangularSolver.h
- \
--n         SparseLU.h
- \
--n         SparseLUImpl.h
- \
--n         SparseLU_Memory.h
- \
--n         SparseLU_Structs.h
- \
--n         SparseLU_SupernodalMatrix.h
- \
--n         SparseLU_Utils.h
- \
--n         SparseLU_column_bmod.h
- \
--n         SparseLU_column_dfs.h
- \
--n         SparseLU_copy_to_ucol.h
- \
--n         SparseLU_gemm_kernel.h
- \
--n         SparseLU_heap_relax_snode.h
- \
--n         SparseLU_kernel_bmod.h
- \
--n         SparseLU_panel_bmod.h
- \
--n         SparseLU_panel_dfs.h
- \
--n         SparseLU_pivotL.h
- \
--n         SparseLU_pruneL.h
- \
--n         SparseLU_relax_snode.h
- \
--n         SparseQR.h
- \
--n         StdDeque.h
- \
--n         StdList.h
- \
--n         StdVector.h
- \
--n         details.h
- \
--n         SuperLUSupport.h
- \
--n         UmfPackSupport.h
- \
--n         Image.h
- \
--n         Kernel.h
- \
--n         Solve.h
- \
--n         SparseSolve.h
- \
--n         blas.h
- \
--n         ArrayCwiseBinaryOps.h
- \
--n         ArrayCwiseUnaryOps.h
- \
--n         BlockMethods.h
- \
--n         CommonCwiseBinaryOps.h
- \
--n         CommonCwiseUnaryOps.h
- \
--n         MatrixCwiseBinaryOps.h
- \
--n         MatrixCwiseUnaryOps.h
- \
--n         auto_ptr.h
- \
--n         dirichlet_boundaries.h
- \
--n         dof_map.h
- \
--n         dof_object.h
- \
--n         factory.h
- \
--n         getpot.h
- \
--n         id_types.h
- \
--n         libmesh.h
- \
--n         libmesh_C_isnan.h
- \
--n         libmesh_augment_std_namespace.h
- \
--n         libmesh_base.h
- \
--n         libmesh_common.h
- \
--n         libmesh_documentation.h
- \
--n         libmesh_exceptions.h
- \
--n         libmesh_logging.h
- \
--n         libmesh_singleton.h
- \
--n         libmesh_version.h
- \
--n         multi_predicates.h
- \
--n         periodic_boundaries.h
- \
--n         periodic_boundary.h
- \
--n         periodic_boundary_base.h
- \
--n         print_trace.h
- \
--n         reference_counted_object.h
- \
--n         reference_counter.h
- \
--n         single_predicates.h
- \
--n         sparsity_pattern.h
- \
--n         variable.h
- \
--n         variant_filter_iterator.h
- \
--n         enum_convergence_flags.h
- \
--n         enum_eigen_solver_type.h
- \
--n         enum_elem_quality.h
- \
--n         enum_elem_type.h
- \
--n         enum_error_estimator_type.h
- \
--n         enum_fe_family.h
- \
--n         enum_inf_map_type.h
- \
--n         enum_io_package.h
- \
--n         enum_norm_type.h
- \
--n         enum_order.h
- \
--n         enum_parallel_type.h
- \
--n         enum_point_locator_type.h
- \
--n         enum_preconditioner_type.h
- \
--n         enum_quadrature_type.h
- \
--n         enum_solver_package.h
- \
--n         enum_solver_type.h
- \
--n         enum_subset_solve_mode.h
- \
--n         enum_xdr_mode.h
- \
--n         adjoint_refinement_estimator.h
- \
--n         adjoint_residual_error_estimator.h
- \
--n         discontinuity_measure.h
- \
--n         error_estimator.h
- \
--n         exact_error_estimator.h
- \
--n         exact_solution.h
- \
--n         fourth_error_estimators.h
- \
--n         hp_coarsentest.h
- \
--n         hp_selector.h
- \
--n         hp_singular.h
- \
--n         jump_error_estimator.h
- \
--n         kelly_error_estimator.h
- \
--n         patch_recovery_error_estimator.h
- \
--n         uniform_refinement_estimator.h
- \
--n         weighted_patch_recovery_error_estimator.h
- \
--n         fe.h
- \
--n         fe_abstract.h
- \
--n         fe_base.h
- \
--n         fe_compute_data.h
- \
--n         fe_interface.h
- \
--n         fe_macro.h
- \
--n         fe_map.h
- \
--n         fe_transformation_base.h
- \
--n         fe_type.h
- \
--n         fe_xyz_map.h
- \
--n         h1_fe_transformation.h
- \
--n         hcurl_fe_transformation.h
- \
--n         inf_fe.h
- \
--n         inf_fe_instantiate_1D.h
- \
--n         inf_fe_instantiate_2D.h
- \
--n         inf_fe_instantiate_3D.h
- \
--n         inf_fe_macro.h
- \
--n         cell.h
- \
--n         cell_hex.h
- \
--n         cell_hex20.h
- \
--n         cell_hex27.h
- \
--n         cell_hex8.h
- \
--n         cell_inf.h
- \
--n         cell_inf_hex.h
- \
--n         cell_inf_hex16.h
- \
--n         cell_inf_hex18.h
- \
--n         cell_inf_hex8.h
- \
--n         cell_inf_prism.h
- \
--n         cell_inf_prism12.h
- \
--n         cell_inf_prism6.h
- \
--n         cell_prism.h
- \
--n         cell_prism15.h
- \
--n         cell_prism18.h
- \
--n         cell_prism6.h
- \
--n         cell_pyramid.h
- \
--n         cell_pyramid13.h
- \
--n         cell_pyramid14.h
- \
--n         cell_pyramid5.h
- \
--n         cell_tet.h
- \
--n         cell_tet10.h
- \
--n         cell_tet4.h
- \
--n         edge.h
- \
--n         edge_edge2.h
- \
--n         edge_edge3.h
- \
--n         edge_edge4.h
- \
--n         edge_inf_edge2.h
- \
--n         elem.h
- \
--n         elem_cutter.h
- \
--n         elem_quality.h
- \
--n         elem_range.h
- \
--n         elem_type.h
- \
--n         face.h
- \
--n         face_inf_quad.h
- \
--n         face_inf_quad4.h
- \
--n         face_inf_quad6.h
- \
--n         face_quad.h
- \
--n         face_quad4.h
- \
--n         face_quad8.h
- \
--n         face_quad9.h
- \
--n         face_tri.h
- \
--n         face_tri3.h
- \
--n         face_tri3_subdivision.h
- \
--n         face_tri6.h
- \
--n         node.h
- \
--n         node_elem.h
- \
--n         node_range.h
- \
--n         plane.h
- \
--n         point.h
- \
--n         reference_elem.h
- \
--n         remote_elem.h
- \
--n         side.h
- \
--n         sphere.h
- \
--n         stored_range.h
- \
--n         surface.h
- \
--n         abaqus_io.h
- \
--n         adaptive_time_solver.h
- \
--n         adjoint_refinement_estimator.h
- \
--n         adjoint_residual_error_estimator.h
- \
--n         analytic_function.h
- \
--n         auto_ptr.h
- \
--n         boundary_info.h
- \
--n         boundary_mesh.h
- \
--n         cell.h
- \
--n         cell_hex.h
- \
--n         cell_hex20.h
- \
--n         cell_hex27.h
- \
--n         cell_hex8.h
- \
--n         cell_inf.h
- \
--n         cell_inf_hex.h
- \
--n         cell_inf_hex16.h
- \
--n         cell_inf_hex18.h
- \
--n         cell_inf_hex8.h
- \
--n         cell_inf_prism.h
- \
--n         cell_inf_prism12.h
- \
--n         cell_inf_prism6.h
- \
--n         cell_prism.h
- \
--n         cell_prism15.h
- \
--n         cell_prism18.h
- \
--n         cell_prism6.h
- \
--n         cell_pyramid.h
- \
--n         cell_pyramid13.h
- \
--n         cell_pyramid14.h
- \
--n         cell_pyramid5.h
- \
--n         cell_tet.h
- \
--n         cell_tet10.h
- \
--n         cell_tet4.h
- \
--n         centroid_partitioner.h
- \
--n         checkpoint_io.h
- \
--n         compare_types.h
- \
--n         composite_fem_function.h
- \
--n         composite_function.h
- \
--n         condensed_eigen_system.h
- \
--n         const_fem_function.h
- \
--n         const_function.h
- \
--n         continuation_system.h
- \
--n         coupling_matrix.h
- \
--n         dense_matrix.h
- \
--n         dense_matrix_base.h
- \
--n         dense_submatrix.h
- \
--n         dense_subvector.h
- \
--n         dense_vector.h
- \
--n         dense_vector_base.h
- \
--n         dg_fem_context.h
- \
--n         diff_context.h
- \
--n         diff_physics.h
- \
--n         diff_qoi.h
- \
--n         diff_solver.h
- \
--n         diff_system.h
- \
--n         direct_solution_transfer.h
- \
--n         dirichlet_boundaries.h
- \
--n         discontinuity_measure.h
- \
--n         distributed_vector.h
- \
--n         diva_io.h
- \
--n         dof_map.h
- \
--n         dof_object.h
- \
--n         dtk_adapter.h
- \
--n         dtk_evaluator.h
- \
--n         dtk_solution_transfer.h
- \
--n         edge.h
- \
--n         edge_edge2.h
- \
--n         edge_edge3.h
- \
--n         edge_edge4.h
- \
--n         edge_inf_edge2.h
- \
--n         eigen_core_support.h
- \
--n         eigen_preconditioner.h
- \
--n         eigen_solver.h
- \
--n         eigen_sparse_linear_solver.h
- \
--n         eigen_sparse_matrix.h
- \
--n         eigen_sparse_vector.h
- \
--n         eigen_system.h
- \
--n         eigen_time_solver.h
- \
--n         elem.h
- \
--n         elem_assembly.h
- \
--n         elem_cutter.h
- \
--n         elem_quality.h
- \
--n         elem_range.h
- \
--n         elem_type.h
- \
--n         ensight_io.h
- \
--n         enum_convergence_flags.h
- \
--n         enum_eigen_solver_type.h
- \
--n         enum_elem_quality.h
- \
--n         enum_elem_type.h
- \
--n         enum_error_estimator_type.h
- \
--n         enum_fe_family.h
- \
--n         enum_inf_map_type.h
- \
--n         enum_io_package.h
- \
--n         enum_norm_type.h
- \
--n         enum_order.h
- \
--n         enum_parallel_type.h
- \
--n         enum_point_locator_type.h
- \
--n         enum_preconditioner_type.h
- \
--n         enum_quadrature_type.h
- \
--n         enum_solver_package.h
- \
--n         enum_solver_type.h
- \
--n         enum_subset_solve_mode.h
- \
--n         enum_xdr_mode.h
- \
--n         equation_systems.h
- \
--n         error_estimator.h
- \
--n         error_vector.h
- \
--n         euler2_solver.h
- \
--n         euler_solver.h
- \
--n         exact_error_estimator.h
- \
--n         exact_solution.h
- \
--n         exodusII.h
- \
--n         exodusII_io.h
- \
--n         explicit_system.h
- \
--n         face.h
- \
--n         face_inf_quad.h
- \
--n         face_inf_quad4.h
- \
--n         face_inf_quad6.h
- \
--n         face_quad.h
- \
--n         face_quad4.h
- \
--n         face_quad8.h
- \
--n         face_quad9.h
- \
--n         face_tri.h
- \
--n         face_tri3.h
- \
--n         face_tri3_subdivision.h
- \
--n         face_tri6.h
- \
--n         factory.h
- \
--n         fe.h
- \
--n         fe_abstract.h
- \
--n         fe_base.h
- \
--n         fe_compute_data.h
- \
--n         fe_interface.h
- \
--n         fe_macro.h
- \
--n         fe_map.h
- \
--n         fe_transformation_base.h
- \
--n         fe_type.h
- \
--n         fe_xyz_map.h
- \
--n         fem_context.h
- \
--n         fem_function_base.h
- \
--n         fem_physics.h
- \
--n         fem_system.h
- \
--n         fourth_error_estimators.h
- \
--n         frequency_system.h
- \
--n         fro_io.h
- \
--n         function_base.h
- \
--n         getpot.h
- \
--n         gmsh_io.h
- \
--n         gmv_io.h
- \
--n         gnuplot_io.h
- \
--n         h1_fe_transformation.h
- \
--n         hashword.h
- \
--n         hcurl_fe_transformation.h
- \
--n         hilbert_sfc_partitioner.h
- \
--n         hp_coarsentest.h
- \
--n         hp_selector.h
- \
--n         hp_singular.h
- \
--n         id_types.h
- \
--n         ignore_warnings.h
- \
--n         implicit_system.h
- \
--n         inf_elem_builder.h
- \
--n         inf_fe.h
- \
--n         inf_fe_instantiate_1D.h
- \
--n         inf_fe_instantiate_2D.h
- \
--n         inf_fe_instantiate_3D.h
- \
--n         inf_fe_macro.h
- \
--n         jump_error_estimator.h
- \
--n         kelly_error_estimator.h
- \
--n         legacy_xdr_io.h
- \
--n         libmesh.h
- \
--n         libmesh_C_isnan.h
- \
--n         libmesh_base.h
- \
--n         libmesh_common.h
- \
--n         libmesh_documentation.h
- \
--n         libmesh_exceptions.h
- \
--n         libmesh_logging.h
- \
--n         libmesh_singleton.h
- \
--n         libmesh_version.h
- \
--n         linear.h
- \
--n         linear_implicit_system.h
- \
--n         linear_partitioner.h
- \
--n         linear_solver.h
- \
--n         location_maps.h
- \
--n         mapvector.h
- \
--n         matlab_io.h
- \
--n         medit_io.h
- \
--n         memory_solution_history.h
- \
--n         mesh.h
- \
--n         mesh_base.h
- \
--n         mesh_communication.h
- \
--n         mesh_data.h
- \
--n         mesh_function.h
- \
--n         mesh_generation.h
- \
--n         mesh_input.h
- \
--n         mesh_inserter_iterator.h
- \
--n         mesh_modification.h
- \
--n         mesh_output.h
- \
--n         mesh_refinement.h
- \
--n         mesh_serializer.h
- \
--n         mesh_smoother.h
- \
--n         mesh_smoother_laplace.h
- \
--n         mesh_smoother_vsmoother.h
- \
--n         mesh_subdivision_support.h
- \
--n         mesh_tetgen_interface.h
- \
--n         mesh_tetgen_wrapper.h
- \
--n         mesh_tools.h
- \
--n         mesh_triangle_holes.h
- \
--n         mesh_triangle_interface.h
- \
--n         mesh_triangle_wrapper.h
- \
--n         meshfree_interpolation.h
- \
--n         meshfree_solution_transfer.h
- \
--n         meshfunction_solution_transfer.h
- \
--n         metis_csr_graph.h
- \
--n         metis_partitioner.h
- \
--n         morton_sfc_partitioner.h
- \
--n         multi_predicates.h
- \
--n         namebased_io.h
- \
--n         nemesis_io.h
- \
--n         newmark_system.h
- \
--n         newton_solver.h
- \
--n         no_solution_history.h
- \
--n         node.h
- \
--n         node_elem.h
- \
--n         node_range.h
- \
--n         nonlinear_implicit_system.h
- \
--n         nonlinear_solver.h
- \
--n         null_output_iterator.h
- \
--n         number_lookups.h
- \
--n         numeric_vector.h
- \
--n         off_io.h
- \
--n         ostream_proxy.h
- \
--n         parallel.h
- \
--n         parallel_algebra.h
- \
--n         parallel_bin_sorter.h
- \
--n         parallel_elem.h
- \
--n         parallel_ghost_sync.h
- \
--n         parallel_histogram.h
- \
--n         parallel_implementation.h
- \
--n         parallel_mesh.h
- \
--n         parallel_node.h
- \
--n         parallel_object.h
- \
--n         parallel_sort.h
- \
--n         parameter_accessor.h
- \
--n         parameter_multipointer.h
- \
--n         parameter_pointer.h
- \
--n         parameter_vector.h
- \
--n         parameters.h
- \
--n         parmetis_partitioner.h
- \
--n         parsed_fem_function.h
- \
--n         parsed_function.h
- \
--n         partitioner.h
- \
--n         patch.h
- \
--n         patch_recovery_error_estimator.h
- \
--n         perf_log.h
- \
--n         perfmon.h
- \
--n         periodic_boundaries.h
- \
--n         periodic_boundary.h
- \
--n         periodic_boundary_base.h
- \
--n         petsc_auto_fieldsplit.h
- \
--n         petsc_diff_solver.h
- \
--n         petsc_linear_solver.h
- \
--n         petsc_macro.h
- \
--n         petsc_matrix.h
- \
--n         petsc_nonlinear_solver.h
- \
--n         petsc_preconditioner.h
- \
--n         petsc_vector.h
- \
--n         petscdmlibmesh.h
- \
--n         plane.h
- \
--n         plt_loader.h
- \
--n         point.h
- \
--n         point_locator_base.h
- \
--n         point_locator_list.h
- \
--n         point_locator_tree.h
- \
--n         pool_allocator.h
- \
--n         postscript_io.h
- \
--n         preconditioner.h
- \
--n         print_trace.h
- \
--n         qoi_set.h
- \
--n         quadrature.h
- \
--n         quadrature_clough.h
- \
--n         quadrature_composite.h
- \
--n         quadrature_conical.h
- \
--n         quadrature_gauss.h
- \
--n         quadrature_gauss_lobatto.h
- \
--n         quadrature_gm.h
- \
--n         quadrature_grid.h
- \
--n         quadrature_jacobi.h
- \
--n         quadrature_monomial.h
- \
--n         quadrature_rules.h
- \
--n         quadrature_simpson.h
- \
--n         quadrature_trap.h
- \
--n         radial_basis_functions.h
- \
--n         radial_basis_interpolation.h
- \
--n         raw_accessor.h
- \
--n         rb_assembly_expansion.h
- \
--n         rb_construction.h
- \
--n         rb_construction_base.h
- \
--n         rb_eim_assembly.h
- \
--n         rb_eim_construction.h
- \
--n         rb_eim_evaluation.h
- \
--n         rb_eim_theta.h
- \
--n         rb_evaluation.h
- \
--n         rb_parameters.h
- \
--n         rb_parametrized.h
- \
--n         rb_parametrized_function.h
- \
--n         rb_scm_construction.h
- \
--n         rb_scm_evaluation.h
- \
--n         rb_temporal_discretization.h
- \
--n         rb_theta.h
- \
--n         rb_theta_expansion.h
- \
--n         reference_counted_object.h
- \
--n         reference_counter.h
- \
--n         reference_elem.h
- \
--n         refinement_selector.h
- \
--n         remote_elem.h
- \
--n         restore_warnings.h
- \
--n         sensitivity_data.h
- \
--n         serial_mesh.h
- \
--n         sfc_partitioner.h
- \
--n         shell_matrix.h
- \
--n         side.h
- \
--n         single_predicates.h
- \
--n         slepc_eigen_solver.h
- \
--n         slepc_macro.h
- \
--n         solution_history.h
- \
--n         solution_transfer.h
- \
--n         solver.h
- \
--n         sparse_matrix.h
- \
--n         sparse_shell_matrix.h
- \
--n         sparsity_pattern.h
- \
--n         sphere.h
- \
--n         statistics.h
- \
--n         steady_solver.h
- \
--n         steady_system.h
- \
--n         stored_range.h
- \
--n         string_to_enum.h
- \
--n         sum_shell_matrix.h
- \
--n         surface.h
- \
--n         system.h
- \
--n         system_norm.h
- \
--n         system_subset.h
- \
--n         system_subset_by_subdomain.h
- \
--n         tecplot_io.h
- \
--n         tensor_shell_matrix.h
- \
--n         tensor_tools.h
- \
--n         tensor_value.h
- \
--n         tetgen.h
- \
--n         tetgen_io.h
- \
--n         threads.h
- \
--n         threads_allocators.h
- \
--n         time_solver.h
- \
--n         timestamp.h
- \
--n         topology_map.h
- \
--n         transient_rb_assembly_expansion.h
- \
--n         transient_rb_construction.h
- \
--n         transient_rb_evaluation.h
- \
--n         transient_rb_theta_expansion.h
- \
--n         transient_system.h
- \
--n         tree.h
- \
--n         tree_base.h
- \
--n         tree_node.h
- \
--n         trilinos_aztec_linear_solver.h
- \
--n         trilinos_epetra_matrix.h
- \
--n         trilinos_epetra_vector.h
- \
--n         trilinos_nox_nonlinear_solver.h
- \
--n         trilinos_preconditioner.h
- \
--n         twostep_time_solver.h
- \
--n         type_n_tensor.h
- \
--n         type_tensor.h
- \
--n         type_vector.h
- \
--n         ucd_io.h
- \
--n         uniform_refinement_estimator.h
- \
--n         unsteady_solver.h
- \
--n         unstructured_mesh.h
- \
--n         unv_io.h
- \
--n         utility.h
- \
--n         variable.h
- \
--n         variant_filter_iterator.h
- \
--n         vector_value.h
- \
--n         vectormap.h
- \
--n         vtk_io.h
- \
--n         weighted_patch_recovery_error_estimator.h
- \
--n         wrapped_function.h
- \
--n         wrapped_functor.h
- \
--n         xdr_cxx.h
- \
--n         xdr_head.h
- \
--n         xdr_io.h
- \
--n         xdr_mesh.h
- \
--n         xdr_mgf.h
- \
--n         xdr_mhead.h
- \
--n         xdr_shead.h
- \
--n         xdr_soln.h
- \
--n         zero_function.h
- \
--n         abaqus_io.h
- \
--n         boundary_info.h
- \
--n         boundary_mesh.h
- \
--n         checkpoint_io.h
- \
--n         diva_io.h
- \
--n         ensight_io.h
- \
--n         exodusII_io.h
- \
--n         exodusII_io_helper.h
- \
--n         fro_io.h
- \
--n         gmsh_io.h
- \
--n         gmv_io.h
- \
--n         gnuplot_io.h
- \
--n         inf_elem_builder.h
- \
--n         legacy_xdr_io.h
- \
--n         matlab_io.h
- \
--n         medit_io.h
- \
--n         mesh.h
- \
--n         mesh_base.h
- \
--n         mesh_communication.h
- \
--n         mesh_data.h
- \
--n         mesh_function.h
- \
--n         mesh_generation.h
- \
--n         mesh_input.h
- \
--n         mesh_inserter_iterator.h
- \
--n         mesh_modification.h
- \
--n         mesh_output.h
- \
--n         mesh_refinement.h
- \
--n         mesh_serializer.h
- \
--n         mesh_smoother.h
- \
--n         mesh_smoother_laplace.h
- \
--n         mesh_smoother_vsmoother.h
- \
--n         mesh_subdivision_support.h
- \
--n         mesh_tetgen_interface.h
- \
--n         mesh_tetgen_wrapper.h
- \
--n         mesh_tools.h
- \
--n         mesh_triangle_holes.h
- \
--n         mesh_triangle_interface.h
- \
--n         mesh_triangle_wrapper.h
- \
--n         namebased_io.h
- \
--n         nemesis_io.h
- \
--n         nemesis_io_helper.h
- \
--n         off_io.h
- \
--n         parallel_mesh.h
- \
--n         patch.h
- \
--n         postscript_io.h
- \
--n         serial_mesh.h
- \
--n         tecplot_io.h
- \
--n         tetgen_io.h
- \
--n         ucd_io.h
- \
--n         unstructured_mesh.h
- \
--n         unv_io.h
- \
--n         vtk_io.h
- \
--n         xdr_head.h
- \
--n         xdr_io.h
- \
--n         xdr_mesh.h
- \
--n         xdr_mgf.h
- \
--n         xdr_mhead.h
- \
--n         xdr_shead.h
- \
--n         xdr_soln.h
- \
--n         netcdf.h
- \
--n         analytic_function.h
- \
--n         composite_fem_function.h
- \
--n         composite_function.h
- \
--n         const_fem_function.h
- \
--n         const_function.h
- \
--n         coupling_matrix.h
- \
--n         dense_matrix.h
- \
--n         dense_matrix_base.h
- \
--n         dense_submatrix.h
- \
--n         dense_subvector.h
- \
--n         dense_vector.h
- \
--n         dense_vector_base.h
- \
--n         distributed_vector.h
- \
--n         eigen_core_support.h
- \
--n         eigen_preconditioner.h
- \
--n         eigen_sparse_matrix.h
- \
--n         eigen_sparse_vector.h
- \
--n         fem_function_base.h
- \
--n         function_base.h
- \
--n         laspack_matrix.h
- \
--n         laspack_vector.h
- \
--n         numeric_vector.h
- \
--n         parsed_fem_function.h
- \
--n         parsed_function.h
- \
--n         petsc_macro.h
- \
--n         petsc_matrix.h
- \
--n         petsc_preconditioner.h
- \
--n         petsc_vector.h
- \
--n         preconditioner.h
- \
--n         raw_accessor.h
- \
--n         refinement_selector.h
- \
--n         shell_matrix.h
- \
--n         sparse_matrix.h
- \
--n         sparse_shell_matrix.h
- \
--n         sum_shell_matrix.h
- \
--n         tensor_shell_matrix.h
- \
--n         tensor_tools.h
- \
--n         tensor_value.h
- \
--n         trilinos_epetra_matrix.h
- \
--n         trilinos_epetra_vector.h
- \
--n         trilinos_preconditioner.h
- \
--n         type_n_tensor.h
- \
--n         type_tensor.h
- \
--n         type_vector.h
- \
--n         vector_value.h
- \
--n         wrapped_function.h
- \
--n         wrapped_functor.h
- \
--n         zero_function.h
- \
--n         parallel.h
- \
--n         parallel_algebra.h
- \
--n         parallel_bin_sorter.h
- \
--n         parallel_conversion_utils.h
- \
--n         parallel_elem.h
- \
--n         parallel_ghost_sync.h
- \
--n         parallel_hilbert.h
- \
--n         parallel_histogram.h
- \
--n         parallel_implementation.h
- \
--n         parallel_node.h
- \
--n         parallel_object.h
- \
--n         parallel_sort.h
- \
--n         threads.h
- \
--n         threads_allocators.h
- \
--n         centroid_partitioner.h
- \
--n         hilbert_sfc_partitioner.h
- \
--n         linear_partitioner.h
- \
--n         metis_csr_graph.h
- \
--n         metis_partitioner.h
- \
--n         morton_sfc_partitioner.h
- \
--n         parmetis_helper.h
- \
--n         parmetis_partitioner.h
- \
--n         partitioner.h
- \
--n         sfc_partitioner.h
- \
--n         diff_physics.h
- \
--n         diff_qoi.h
- \
--n         fem_physics.h
- \
--n         quadrature.h
- \
--n         quadrature_clough.h
- \
--n         quadrature_composite.h
- \
--n         quadrature_conical.h
- \
--n         quadrature_gauss.h
- \
--n         quadrature_gauss_lobatto.h
- \
--n         quadrature_gm.h
- \
--n         quadrature_grid.h
- \
--n         quadrature_jacobi.h
- \
--n         quadrature_monomial.h
- \
--n         quadrature_rules.h
- \
--n         quadrature_simpson.h
- \
--n         quadrature_trap.h
- \
--n         rb_assembly_expansion.h
- \
--n         rb_construction.h
- \
--n         rb_construction_base.h
- \
--n         rb_eim_assembly.h
- \
--n         rb_eim_construction.h
- \
--n         rb_eim_evaluation.h
- \
--n         rb_eim_theta.h
- \
--n         rb_evaluation.h
- \
--n         rb_parameters.h
- \
--n         rb_parametrized.h
- \
--n         rb_parametrized_function.h
- \
--n         rb_scm_construction.h
- \
--n         rb_scm_evaluation.h
- \
--n         rb_temporal_discretization.h
- \
--n         rb_theta.h
- \
--n         rb_theta_expansion.h
- \
--n         transient_rb_assembly_expansion.h
- \
--n         transient_rb_construction.h
- \
--n         transient_rb_evaluation.h
- \
--n         transient_rb_theta_expansion.h
- \
--n         direct_solution_transfer.h
- \
--n         dtk_adapter.h
- \
--n         dtk_evaluator.h
- \
--n         dtk_solution_transfer.h
- \
--n         meshfree_interpolation.h
- \
--n         meshfree_solution_transfer.h
- \
--n         meshfunction_solution_transfer.h
- \
--n         radial_basis_functions.h
- \
--n         radial_basis_interpolation.h
- \
--n         solution_transfer.h
- \
--n         adaptive_time_solver.h
- \
--n         diff_solver.h
- \
--n         eigen_solver.h
- \
--n         eigen_sparse_linear_solver.h
- \
--n         eigen_time_solver.h
- \
--n         euler2_solver.h
- \
--n         euler_solver.h
- \
--n         laspack_linear_solver.h
- \
--n         linear.h
- \
--n         linear_solver.h
- \
--n         memory_solution_history.h
- \
--n         newton_solver.h
- \
--n         no_solution_history.h
- \
--n         nonlinear_solver.h
- \
--n         petsc_auto_fieldsplit.h
- \
--n         petsc_diff_solver.h
- \
--n         petsc_linear_solver.h
- \
--n         petsc_nonlinear_solver.h
- \
--n         petsc_ts_solver.h
- \
--n         petscdmlibmesh.h
- \
--n         slepc_eigen_solver.h
- \
--n         slepc_macro.h
- \
--n         solution_history.h
- \
--n         solver.h
- \
--n         steady_solver.h
- \
--n         time_solver.h
- \
--n         trilinos_aztec_linear_solver.h
- \
--n         trilinos_nox_nonlinear_solver.h
- \
--n         twostep_time_solver.h
- \
--n         unsteady_solver.h
- \
--n         condensed_eigen_system.h
- \
--n         continuation_system.h
- \
--n         dg_fem_context.h
- \
--n         diff_context.h
- \
--n         diff_system.h
- \
--n         eigen_system.h
- \
--n         elem_assembly.h
- \
--n         equation_systems.h
- \
--n         explicit_system.h
- \
--n         fem_context.h
- \
--n         fem_system.h
- \
--n         frequency_system.h
- \
--n         implicit_system.h
- \
--n         linear_implicit_system.h
- \
--n         newmark_system.h
- \
--n         nonlinear_implicit_system.h
- \
--n         parameter_accessor.h
- \
--n         parameter_multipointer.h
- \
--n         parameter_pointer.h
- \
--n         parameter_vector.h
- \
--n         qoi_set.h
- \
--n         sensitivity_data.h
- \
--n         steady_system.h
- \
--n         system.h
- \
--n         system_norm.h
- \
--n         system_subset.h
- \
--n         system_subset_by_subdomain.h
- \
--n         transient_system.h
- \
--n         ts_system.h
- \
--n         AutoDiffJacobian.h
- \
--n         AutoDiffScalar.h
- \
--n         AutoDiffVector.h
- \
--n         BVAlgorithms.h
- \
--n         KdBVH.h
- \
--n         ArpackSelfAdjointEigenSolver.h
- \
--n         ei_fftw_impl.h
- \
--n         ei_kissfft_impl.h
- \
--n         ConstrainedConjGrad.h
- \
--n         DGMRES.h
- \
--n         GMRES.h
- \
--n         IncompleteCholesky.h
- \
--n         IncompleteLU.h
- \
--n         IterationController.h
- \
--n         MINRES.h
- \
--n         Scaling.h
- \
--n         KroneckerTensorProduct.h
- \
--n         LMcovar.h
- \
--n         LMonestep.h
- \
--n         LMpar.h
- \
--n         LMqrsolv.h
- \
--n         LevenbergMarquardt.h
- \
--n         MatrixExponential.h
- \
--n         MatrixFunction.h
- \
--n         MatrixFunctionAtomic.h
- \
--n         MatrixLogarithm.h
- \
--n         MatrixPower.h
- \
--n         MatrixSquareRoot.h
- \
--n         StemFunction.h
- \
--n         MathFunctions.h
- \
--n         HybridNonLinearSolver.h
- \
--n         LevenbergMarquardt.h
- \
--n         chkder.h
- \
--n         covar.h
- \
--n         dogleg.h
- \
--n         fdjac1.h
- \
--n         lmpar.h
- \
--n         qrsolv.h
- \
--n         r1mpyq.h
- \
--n         r1updt.h
- \
--n         rwupdt.h
- \
--n         NumericalDiff.h
- \
--n         Companion.h
- \
--n         PolynomialSolver.h
- \
--n         PolynomialUtils.h
- \
--n         BDCSVD.h
- \
--n         JacobiSVD.h
- \
--n         SVDBase.h
- \
--n         SkylineInplaceLU.h
- \
--n         SkylineMatrix.h
- \
--n         SkylineMatrixBase.h
- \
--n         SkylineProduct.h
- \
--n         SkylineStorage.h
- \
--n         SkylineUtil.h
- \
--n         BlockOfDynamicSparseMatrix.h
- \
--n         DynamicSparseMatrix.h
- \
--n         MarketIO.h
- \
--n         MatrixMarketIterator.h
- \
--n         RandomSetter.h
- \
--n         Spline.h
- \
--n         SplineFitting.h
- \
--n         SplineFwd.h
- \
--n         compare_types.h
- \
--n         error_vector.h
- \
--n         hashword.h
- \
--n         ignore_warnings.h
- \
--n         location_maps.h
- \
--n         mapvector.h
- \
--n         null_output_iterator.h
- \
--n         number_lookups.h
- \
--n         ostream_proxy.h
- \
--n         parameters.h
- \
--n         perf_log.h
- \
--n         perfmon.h
- \
--n         plt_loader.h
- \
--n         point_locator_base.h
- \
--n         point_locator_list.h
- \
--n         point_locator_tree.h
- \
--n         pool_allocator.h
- \
--n         restore_warnings.h
- \
--n         statistics.h
- \
--n         string_to_enum.h
- \
--n         timestamp.h
- \
--n         topology_map.h
- \
--n         tree.h
- \
--n         tree_base.h
- \
--n         tree_node.h
- \
--n         utility.h
- \
--n         vectormap.h
- \
--n         xdr_cxx.h
- \
--n         parallel_communicator_specializations
- \
--n         parallel_communicator_specializations
-
+BUILT_SOURCES = \
+        LDLT.h \
+        LLT.h \
+        LLT_MKL.h \
+        CholmodSupport.h \
+        Array.h \
+        ArrayBase.h \
+        ArrayWrapper.h \
+        Assign.h \
+        Assign_MKL.h \
+        BandMatrix.h \
+        Block.h \
+        BooleanRedux.h \
+        CommaInitializer.h \
+        CoreIterators.h \
+        CwiseBinaryOp.h \
+        CwiseNullaryOp.h \
+        CwiseUnaryOp.h \
+        CwiseUnaryView.h \
+        DenseBase.h \
+        DenseCoeffsBase.h \
+        DenseStorage.h \
+        Diagonal.h \
+        DiagonalMatrix.h \
+        DiagonalProduct.h \
+        Dot.h \
+        EigenBase.h \
+        Flagged.h \
+        ForceAlignedAccess.h \
+        Functors.h \
+        Fuzzy.h \
+        GeneralProduct.h \
+        GenericPacketMath.h \
+        GlobalFunctions.h \
+        IO.h \
+        Map.h \
+        MapBase.h \
+        MathFunctions.h \
+        Matrix.h \
+        MatrixBase.h \
+        NestByValue.h \
+        NoAlias.h \
+        NumTraits.h \
+        PermutationMatrix.h \
+        PlainObjectBase.h \
+        ProductBase.h \
+        Random.h \
+        Redux.h \
+        Ref.h \
+        Replicate.h \
+        ReturnByValue.h \
+        Reverse.h \
+        Select.h \
+        SelfAdjointView.h \
+        SelfCwiseBinaryOp.h \
+        SolveTriangular.h \
+        StableNorm.h \
+        Stride.h \
+        Swap.h \
+        Transpose.h \
+        Transpositions.h \
+        TriangularMatrix.h \
+        VectorBlock.h \
+        VectorwiseOp.h \
+        Visitor.h \
+        Complex.h \
+        PacketMath.h \
+        Settings.h \
+        Complex.h \
+        PacketMath.h \
+        Complex.h \
+        MathFunctions.h \
+        PacketMath.h \
+        CoeffBasedProduct.h \
+        GeneralBlockPanelKernel.h \
+        GeneralMatrixMatrix.h \
+        GeneralMatrixMatrixTriangular.h \
+        GeneralMatrixMatrixTriangular_MKL.h \
+        GeneralMatrixMatrix_MKL.h \
+        GeneralMatrixVector.h \
+        GeneralMatrixVector_MKL.h \
+        Parallelizer.h \
+        SelfadjointMatrixMatrix.h \
+        SelfadjointMatrixMatrix_MKL.h \
+        SelfadjointMatrixVector.h \
+        SelfadjointMatrixVector_MKL.h \
+        SelfadjointProduct.h \
+        SelfadjointRank2Update.h \
+        TriangularMatrixMatrix.h \
+        TriangularMatrixMatrix_MKL.h \
+        TriangularMatrixVector.h \
+        TriangularMatrixVector_MKL.h \
+        TriangularSolverMatrix.h \
+        TriangularSolverMatrix_MKL.h \
+        TriangularSolverVector.h \
+        BlasUtil.h \
+        Constants.h \
+        DisableStupidWarnings.h \
+        ForwardDeclarations.h \
+        MKL_support.h \
+        Macros.h \
+        Memory.h \
+        Meta.h \
+        NonMPL2.h \
+        ReenableStupidWarnings.h \
+        StaticAssert.h \
+        XprHelper.h \
+        Block.h \
+        Cwise.h \
+        CwiseOperators.h \
+        AlignedBox.h \
+        All.h \
+        AngleAxis.h \
+        Hyperplane.h \
+        ParametrizedLine.h \
+        Quaternion.h \
+        Rotation2D.h \
+        RotationBase.h \
+        Scaling.h \
+        Transform.h \
+        Translation.h \
+        LU.h \
+        Lazy.h \
+        LeastSquares.h \
+        Macros.h \
+        MathFunctions.h \
+        Memory.h \
+        Meta.h \
+        Minor.h \
+        QR.h \
+        SVD.h \
+        TriangularSolver.h \
+        VectorBlock.h \
+        ComplexEigenSolver.h \
+        ComplexSchur.h \
+        ComplexSchur_MKL.h \
+        EigenSolver.h \
+        GeneralizedEigenSolver.h \
+        GeneralizedSelfAdjointEigenSolver.h \
+        HessenbergDecomposition.h \
+        MatrixBaseEigenvalues.h \
+        RealQZ.h \
+        RealSchur.h \
+        RealSchur_MKL.h \
+        SelfAdjointEigenSolver.h \
+        SelfAdjointEigenSolver_MKL.h \
+        Tridiagonalization.h \
+        AlignedBox.h \
+        AngleAxis.h \
+        EulerAngles.h \
+        Homogeneous.h \
+        Hyperplane.h \
+        OrthoMethods.h \
+        ParametrizedLine.h \
+        Quaternion.h \
+        Rotation2D.h \
+        RotationBase.h \
+        Scaling.h \
+        Transform.h \
+        Translation.h \
+        Umeyama.h \
+        Geometry_SSE.h \
+        BlockHouseholder.h \
+        Householder.h \
+        HouseholderSequence.h \
+        BasicPreconditioners.h \
+        BiCGSTAB.h \
+        ConjugateGradient.h \
+        IncompleteLUT.h \
+        IterativeSolverBase.h \
+        Jacobi.h \
+        Determinant.h \
+        FullPivLU.h \
+        Inverse.h \
+        PartialPivLU.h \
+        PartialPivLU_MKL.h \
+        Inverse_SSE.h \
+        MetisSupport.h \
+        Amd.h \
+        Eigen_Colamd.h \
+        Ordering.h \
+        PaStiXSupport.h \
+        PardisoSupport.h \
+        ColPivHouseholderQR.h \
+        ColPivHouseholderQR_MKL.h \
+        FullPivHouseholderQR.h \
+        HouseholderQR.h \
+        HouseholderQR_MKL.h \
+        SuiteSparseQRSupport.h \
+        JacobiSVD.h \
+        JacobiSVD_MKL.h \
+        UpperBidiagonalization.h \
+        SimplicialCholesky.h \
+        SimplicialCholesky_impl.h \
+        AmbiVector.h \
+        CompressedStorage.h \
+        ConservativeSparseSparseProduct.h \
+        MappedSparseMatrix.h \
+        SparseBlock.h \
+        SparseColEtree.h \
+        SparseCwiseBinaryOp.h \
+        SparseCwiseUnaryOp.h \
+        SparseDenseProduct.h \
+        SparseDiagonalProduct.h \
+        SparseDot.h \
+        SparseFuzzy.h \
+        SparseMatrix.h \
+        SparseMatrixBase.h \
+        SparsePermutation.h \
+        SparseProduct.h \
+        SparseRedux.h \
+        SparseSelfAdjointView.h \
+        SparseSparseProductWithPruning.h \
+        SparseTranspose.h \
+        SparseTriangularView.h \
+        SparseUtil.h \
+        SparseVector.h \
+        SparseView.h \
+        TriangularSolver.h \
+        SparseLU.h \
+        SparseLUImpl.h \
+        SparseLU_Memory.h \
+        SparseLU_Structs.h \
+        SparseLU_SupernodalMatrix.h \
+        SparseLU_Utils.h \
+        SparseLU_column_bmod.h \
+        SparseLU_column_dfs.h \
+        SparseLU_copy_to_ucol.h \
+        SparseLU_gemm_kernel.h \
+        SparseLU_heap_relax_snode.h \
+        SparseLU_kernel_bmod.h \
+        SparseLU_panel_bmod.h \
+        SparseLU_panel_dfs.h \
+        SparseLU_pivotL.h \
+        SparseLU_pruneL.h \
+        SparseLU_relax_snode.h \
+        SparseQR.h \
+        StdDeque.h \
+        StdList.h \
+        StdVector.h \
+        details.h \
+        SuperLUSupport.h \
+        UmfPackSupport.h \
+        Image.h \
+        Kernel.h \
+        Solve.h \
+        SparseSolve.h \
+        blas.h \
+        ArrayCwiseBinaryOps.h \
+        ArrayCwiseUnaryOps.h \
+        BlockMethods.h \
+        CommonCwiseBinaryOps.h \
+        CommonCwiseUnaryOps.h \
+        MatrixCwiseBinaryOps.h \
+        MatrixCwiseUnaryOps.h \
+        auto_ptr.h \
+        dirichlet_boundaries.h \
+        dof_map.h \
+        dof_object.h \
+        factory.h \
+        getpot.h \
+        id_types.h \
+        libmesh.h \
+        libmesh_C_isnan.h \
+        libmesh_augment_std_namespace.h \
+        libmesh_base.h \
+        libmesh_common.h \
+        libmesh_documentation.h \
+        libmesh_exceptions.h \
+        libmesh_logging.h \
+        libmesh_singleton.h \
+        libmesh_version.h \
+        multi_predicates.h \
+        periodic_boundaries.h \
+        periodic_boundary.h \
+        periodic_boundary_base.h \
+        print_trace.h \
+        reference_counted_object.h \
+        reference_counter.h \
+        single_predicates.h \
+        sparsity_pattern.h \
+        variable.h \
+        variant_filter_iterator.h \
+        enum_convergence_flags.h \
+        enum_eigen_solver_type.h \
+        enum_elem_quality.h \
+        enum_elem_type.h \
+        enum_error_estimator_type.h \
+        enum_fe_family.h \
+        enum_inf_map_type.h \
+        enum_io_package.h \
+        enum_norm_type.h \
+        enum_order.h \
+        enum_parallel_type.h \
+        enum_point_locator_type.h \
+        enum_preconditioner_type.h \
+        enum_quadrature_type.h \
+        enum_solver_package.h \
+        enum_solver_type.h \
+        enum_subset_solve_mode.h \
+        enum_xdr_mode.h \
+        adjoint_refinement_estimator.h \
+        adjoint_residual_error_estimator.h \
+        discontinuity_measure.h \
+        error_estimator.h \
+        exact_error_estimator.h \
+        exact_solution.h \
+        fourth_error_estimators.h \
+        hp_coarsentest.h \
+        hp_selector.h \
+        hp_singular.h \
+        jump_error_estimator.h \
+        kelly_error_estimator.h \
+        patch_recovery_error_estimator.h \
+        uniform_refinement_estimator.h \
+        weighted_patch_recovery_error_estimator.h \
+        fe.h \
+        fe_abstract.h \
+        fe_base.h \
+        fe_compute_data.h \
+        fe_interface.h \
+        fe_macro.h \
+        fe_map.h \
+        fe_transformation_base.h \
+        fe_type.h \
+        fe_xyz_map.h \
+        h1_fe_transformation.h \
+        hcurl_fe_transformation.h \
+        inf_fe.h \
+        inf_fe_instantiate_1D.h \
+        inf_fe_instantiate_2D.h \
+        inf_fe_instantiate_3D.h \
+        inf_fe_macro.h \
+        cell.h \
+        cell_hex.h \
+        cell_hex20.h \
+        cell_hex27.h \
+        cell_hex8.h \
+        cell_inf.h \
+        cell_inf_hex.h \
+        cell_inf_hex16.h \
+        cell_inf_hex18.h \
+        cell_inf_hex8.h \
+        cell_inf_prism.h \
+        cell_inf_prism12.h \
+        cell_inf_prism6.h \
+        cell_prism.h \
+        cell_prism15.h \
+        cell_prism18.h \
+        cell_prism6.h \
+        cell_pyramid.h \
+        cell_pyramid13.h \
+        cell_pyramid14.h \
+        cell_pyramid5.h \
+        cell_tet.h \
+        cell_tet10.h \
+        cell_tet4.h \
+        edge.h \
+        edge_edge2.h \
+        edge_edge3.h \
+        edge_edge4.h \
+        edge_inf_edge2.h \
+        elem.h \
+        elem_cutter.h \
+        elem_quality.h \
+        elem_range.h \
+        elem_type.h \
+        face.h \
+        face_inf_quad.h \
+        face_inf_quad4.h \
+        face_inf_quad6.h \
+        face_quad.h \
+        face_quad4.h \
+        face_quad8.h \
+        face_quad9.h \
+        face_tri.h \
+        face_tri3.h \
+        face_tri3_subdivision.h \
+        face_tri6.h \
+        node.h \
+        node_elem.h \
+        node_range.h \
+        plane.h \
+        point.h \
+        reference_elem.h \
+        remote_elem.h \
+        side.h \
+        sphere.h \
+        stored_range.h \
+        surface.h \
+        abaqus_io.h \
+        adaptive_time_solver.h \
+        adjoint_refinement_estimator.h \
+        adjoint_residual_error_estimator.h \
+        analytic_function.h \
+        auto_ptr.h \
+        boundary_info.h \
+        boundary_mesh.h \
+        cell.h \
+        cell_hex.h \
+        cell_hex20.h \
+        cell_hex27.h \
+        cell_hex8.h \
+        cell_inf.h \
+        cell_inf_hex.h \
+        cell_inf_hex16.h \
+        cell_inf_hex18.h \
+        cell_inf_hex8.h \
+        cell_inf_prism.h \
+        cell_inf_prism12.h \
+        cell_inf_prism6.h \
+        cell_prism.h \
+        cell_prism15.h \
+        cell_prism18.h \
+        cell_prism6.h \
+        cell_pyramid.h \
+        cell_pyramid13.h \
+        cell_pyramid14.h \
+        cell_pyramid5.h \
+        cell_tet.h \
+        cell_tet10.h \
+        cell_tet4.h \
+        centroid_partitioner.h \
+        checkpoint_io.h \
+        compare_types.h \
+        composite_fem_function.h \
+        composite_function.h \
+        condensed_eigen_system.h \
+        const_fem_function.h \
+        const_function.h \
+        continuation_system.h \
+        coupling_matrix.h \
+        dense_matrix.h \
+        dense_matrix_base.h \
+        dense_submatrix.h \
+        dense_subvector.h \
+        dense_vector.h \
+        dense_vector_base.h \
+        dg_fem_context.h \
+        diff_context.h \
+        diff_physics.h \
+        diff_qoi.h \
+        diff_solver.h \
+        diff_system.h \
+        direct_solution_transfer.h \
+        dirichlet_boundaries.h \
+        discontinuity_measure.h \
+        distributed_vector.h \
+        diva_io.h \
+        dof_map.h \
+        dof_object.h \
+        dtk_adapter.h \
+        dtk_evaluator.h \
+        dtk_solution_transfer.h \
+        edge.h \
+        edge_edge2.h \
+        edge_edge3.h \
+        edge_edge4.h \
+        edge_inf_edge2.h \
+        eigen_core_support.h \
+        eigen_preconditioner.h \
+        eigen_solver.h \
+        eigen_sparse_linear_solver.h \
+        eigen_sparse_matrix.h \
+        eigen_sparse_vector.h \
+        eigen_system.h \
+        eigen_time_solver.h \
+        elem.h \
+        elem_assembly.h \
+        elem_cutter.h \
+        elem_quality.h \
+        elem_range.h \
+        elem_type.h \
+        ensight_io.h \
+        enum_convergence_flags.h \
+        enum_eigen_solver_type.h \
+        enum_elem_quality.h \
+        enum_elem_type.h \
+        enum_error_estimator_type.h \
+        enum_fe_family.h \
+        enum_inf_map_type.h \
+        enum_io_package.h \
+        enum_norm_type.h \
+        enum_order.h \
+        enum_parallel_type.h \
+        enum_point_locator_type.h \
+        enum_preconditioner_type.h \
+        enum_quadrature_type.h \
+        enum_solver_package.h \
+        enum_solver_type.h \
+        enum_subset_solve_mode.h \
+        enum_xdr_mode.h \
+        equation_systems.h \
+        error_estimator.h \
+        error_vector.h \
+        euler2_solver.h \
+        euler_solver.h \
+        exact_error_estimator.h \
+        exact_solution.h \
+        exodusII.h \
+        exodusII_io.h \
+        explicit_system.h \
+        face.h \
+        face_inf_quad.h \
+        face_inf_quad4.h \
+        face_inf_quad6.h \
+        face_quad.h \
+        face_quad4.h \
+        face_quad8.h \
+        face_quad9.h \
+        face_tri.h \
+        face_tri3.h \
+        face_tri3_subdivision.h \
+        face_tri6.h \
+        factory.h \
+        fe.h \
+        fe_abstract.h \
+        fe_base.h \
+        fe_compute_data.h \
+        fe_interface.h \
+        fe_macro.h \
+        fe_map.h \
+        fe_transformation_base.h \
+        fe_type.h \
+        fe_xyz_map.h \
+        fem_context.h \
+        fem_function_base.h \
+        fem_physics.h \
+        fem_system.h \
+        fourth_error_estimators.h \
+        frequency_system.h \
+        fro_io.h \
+        function_base.h \
+        getpot.h \
+        gmsh_io.h \
+        gmv_io.h \
+        gnuplot_io.h \
+        h1_fe_transformation.h \
+        hashword.h \
+        hcurl_fe_transformation.h \
+        hilbert_sfc_partitioner.h \
+        hp_coarsentest.h \
+        hp_selector.h \
+        hp_singular.h \
+        id_types.h \
+        ignore_warnings.h \
+        implicit_system.h \
+        inf_elem_builder.h \
+        inf_fe.h \
+        inf_fe_instantiate_1D.h \
+        inf_fe_instantiate_2D.h \
+        inf_fe_instantiate_3D.h \
+        inf_fe_macro.h \
+        jump_error_estimator.h \
+        kelly_error_estimator.h \
+        legacy_xdr_io.h \
+        libmesh.h \
+        libmesh_C_isnan.h \
+        libmesh_base.h \
+        libmesh_common.h \
+        libmesh_documentation.h \
+        libmesh_exceptions.h \
+        libmesh_logging.h \
+        libmesh_singleton.h \
+        libmesh_version.h \
+        linear.h \
+        linear_implicit_system.h \
+        linear_partitioner.h \
+        linear_solver.h \
+        location_maps.h \
+        mapvector.h \
+        matlab_io.h \
+        medit_io.h \
+        memory_solution_history.h \
+        mesh.h \
+        mesh_base.h \
+        mesh_communication.h \
+        mesh_data.h \
+        mesh_function.h \
+        mesh_generation.h \
+        mesh_input.h \
+        mesh_inserter_iterator.h \
+        mesh_modification.h \
+        mesh_output.h \
+        mesh_refinement.h \
+        mesh_serializer.h \
+        mesh_smoother.h \
+        mesh_smoother_laplace.h \
+        mesh_smoother_vsmoother.h \
+        mesh_subdivision_support.h \
+        mesh_tetgen_interface.h \
+        mesh_tetgen_wrapper.h \
+        mesh_tools.h \
+        mesh_triangle_holes.h \
+        mesh_triangle_interface.h \
+        mesh_triangle_wrapper.h \
+        meshfree_interpolation.h \
+        meshfree_solution_transfer.h \
+        meshfunction_solution_transfer.h \
+        metis_csr_graph.h \
+        metis_partitioner.h \
+        morton_sfc_partitioner.h \
+        multi_predicates.h \
+        namebased_io.h \
+        nemesis_io.h \
+        newmark_system.h \
+        newton_solver.h \
+        no_solution_history.h \
+        node.h \
+        node_elem.h \
+        node_range.h \
+        nonlinear_implicit_system.h \
+        nonlinear_solver.h \
+        null_output_iterator.h \
+        number_lookups.h \
+        numeric_vector.h \
+        off_io.h \
+        ostream_proxy.h \
+        parallel.h \
+        parallel_algebra.h \
+        parallel_bin_sorter.h \
+        parallel_elem.h \
+        parallel_ghost_sync.h \
+        parallel_histogram.h \
+        parallel_implementation.h \
+        parallel_mesh.h \
+        parallel_node.h \
+        parallel_object.h \
+        parallel_sort.h \
+        parameter_accessor.h \
+        parameter_multipointer.h \
+        parameter_pointer.h \
+        parameter_vector.h \
+        parameters.h \
+        parmetis_partitioner.h \
+        parsed_fem_function.h \
+        parsed_function.h \
+        partitioner.h \
+        patch.h \
+        patch_recovery_error_estimator.h \
+        perf_log.h \
+        perfmon.h \
+        periodic_boundaries.h \
+        periodic_boundary.h \
+        periodic_boundary_base.h \
+        petsc_auto_fieldsplit.h \
+        petsc_diff_solver.h \
+        petsc_linear_solver.h \
+        petsc_macro.h \
+        petsc_matrix.h \
+        petsc_nonlinear_solver.h \
+        petsc_preconditioner.h \
+        petsc_vector.h \
+        petscdmlibmesh.h \
+        plane.h \
+        plt_loader.h \
+        point.h \
+        point_locator_base.h \
+        point_locator_list.h \
+        point_locator_tree.h \
+        pool_allocator.h \
+        postscript_io.h \
+        preconditioner.h \
+        print_trace.h \
+        qoi_set.h \
+        quadrature.h \
+        quadrature_clough.h \
+        quadrature_composite.h \
+        quadrature_conical.h \
+        quadrature_gauss.h \
+        quadrature_gauss_lobatto.h \
+        quadrature_gm.h \
+        quadrature_grid.h \
+        quadrature_jacobi.h \
+        quadrature_monomial.h \
+        quadrature_rules.h \
+        quadrature_simpson.h \
+        quadrature_trap.h \
+        radial_basis_functions.h \
+        radial_basis_interpolation.h \
+        raw_accessor.h \
+        rb_assembly_expansion.h \
+        rb_construction.h \
+        rb_construction_base.h \
+        rb_eim_assembly.h \
+        rb_eim_construction.h \
+        rb_eim_evaluation.h \
+        rb_eim_theta.h \
+        rb_evaluation.h \
+        rb_parameters.h \
+        rb_parametrized.h \
+        rb_parametrized_function.h \
+        rb_scm_construction.h \
+        rb_scm_evaluation.h \
+        rb_temporal_discretization.h \
+        rb_theta.h \
+        rb_theta_expansion.h \
+        reference_counted_object.h \
+        reference_counter.h \
+        reference_elem.h \
+        refinement_selector.h \
+        remote_elem.h \
+        restore_warnings.h \
+        sensitivity_data.h \
+        serial_mesh.h \
+        sfc_partitioner.h \
+        shell_matrix.h \
+        side.h \
+        single_predicates.h \
+        slepc_eigen_solver.h \
+        slepc_macro.h \
+        solution_history.h \
+        solution_transfer.h \
+        solver.h \
+        sparse_matrix.h \
+        sparse_shell_matrix.h \
+        sparsity_pattern.h \
+        sphere.h \
+        statistics.h \
+        steady_solver.h \
+        steady_system.h \
+        stored_range.h \
+        string_to_enum.h \
+        sum_shell_matrix.h \
+        surface.h \
+        system.h \
+        system_norm.h \
+        system_subset.h \
+        system_subset_by_subdomain.h \
+        tecplot_io.h \
+        tensor_shell_matrix.h \
+        tensor_tools.h \
+        tensor_value.h \
+        tetgen.h \
+        tetgen_io.h \
+        threads.h \
+        threads_allocators.h \
+        time_solver.h \
+        timestamp.h \
+        topology_map.h \
+        transient_rb_assembly_expansion.h \
+        transient_rb_construction.h \
+        transient_rb_evaluation.h \
+        transient_rb_theta_expansion.h \
+        transient_system.h \
+        tree.h \
+        tree_base.h \
+        tree_node.h \
+        trilinos_aztec_linear_solver.h \
+        trilinos_epetra_matrix.h \
+        trilinos_epetra_vector.h \
+        trilinos_nox_nonlinear_solver.h \
+        trilinos_preconditioner.h \
+        twostep_time_solver.h \
+        type_n_tensor.h \
+        type_tensor.h \
+        type_vector.h \
+        ucd_io.h \
+        uniform_refinement_estimator.h \
+        unsteady_solver.h \
+        unstructured_mesh.h \
+        unv_io.h \
+        utility.h \
+        variable.h \
+        variant_filter_iterator.h \
+        vector_value.h \
+        vectormap.h \
+        vtk_io.h \
+        weighted_patch_recovery_error_estimator.h \
+        wrapped_function.h \
+        wrapped_functor.h \
+        xdr_cxx.h \
+        xdr_head.h \
+        xdr_io.h \
+        xdr_mesh.h \
+        xdr_mgf.h \
+        xdr_mhead.h \
+        xdr_shead.h \
+        xdr_soln.h \
+        zero_function.h \
+        abaqus_io.h \
+        boundary_info.h \
+        boundary_mesh.h \
+        checkpoint_io.h \
+        diva_io.h \
+        ensight_io.h \
+        exodusII_io.h \
+        exodusII_io_helper.h \
+        fro_io.h \
+        gmsh_io.h \
+        gmv_io.h \
+        gnuplot_io.h \
+        inf_elem_builder.h \
+        legacy_xdr_io.h \
+        matlab_io.h \
+        medit_io.h \
+        mesh.h \
+        mesh_base.h \
+        mesh_communication.h \
+        mesh_data.h \
+        mesh_function.h \
+        mesh_generation.h \
+        mesh_input.h \
+        mesh_inserter_iterator.h \
+        mesh_modification.h \
+        mesh_output.h \
+        mesh_refinement.h \
+        mesh_serializer.h \
+        mesh_smoother.h \
+        mesh_smoother_laplace.h \
+        mesh_smoother_vsmoother.h \
+        mesh_subdivision_support.h \
+        mesh_tetgen_interface.h \
+        mesh_tetgen_wrapper.h \
+        mesh_tools.h \
+        mesh_triangle_holes.h \
+        mesh_triangle_interface.h \
+        mesh_triangle_wrapper.h \
+        namebased_io.h \
+        nemesis_io.h \
+        nemesis_io_helper.h \
+        off_io.h \
+        parallel_mesh.h \
+        patch.h \
+        postscript_io.h \
+        serial_mesh.h \
+        tecplot_io.h \
+        tetgen_io.h \
+        ucd_io.h \
+        unstructured_mesh.h \
+        unv_io.h \
+        vtk_io.h \
+        xdr_head.h \
+        xdr_io.h \
+        xdr_mesh.h \
+        xdr_mgf.h \
+        xdr_mhead.h \
+        xdr_shead.h \
+        xdr_soln.h \
+        netcdf.h \
+        analytic_function.h \
+        composite_fem_function.h \
+        composite_function.h \
+        const_fem_function.h \
+        const_function.h \
+        coupling_matrix.h \
+        dense_matrix.h \
+        dense_matrix_base.h \
+        dense_submatrix.h \
+        dense_subvector.h \
+        dense_vector.h \
+        dense_vector_base.h \
+        distributed_vector.h \
+        eigen_core_support.h \
+        eigen_preconditioner.h \
+        eigen_sparse_matrix.h \
+        eigen_sparse_vector.h \
+        fem_function_base.h \
+        function_base.h \
+        laspack_matrix.h \
+        laspack_vector.h \
+        numeric_vector.h \
+        parsed_fem_function.h \
+        parsed_function.h \
+        petsc_macro.h \
+        petsc_matrix.h \
+        petsc_preconditioner.h \
+        petsc_vector.h \
+        preconditioner.h \
+        raw_accessor.h \
+        refinement_selector.h \
+        shell_matrix.h \
+        sparse_matrix.h \
+        sparse_shell_matrix.h \
+        sum_shell_matrix.h \
+        tensor_shell_matrix.h \
+        tensor_tools.h \
+        tensor_value.h \
+        trilinos_epetra_matrix.h \
+        trilinos_epetra_vector.h \
+        trilinos_preconditioner.h \
+        type_n_tensor.h \
+        type_tensor.h \
+        type_vector.h \
+        vector_value.h \
+        wrapped_function.h \
+        wrapped_functor.h \
+        zero_function.h \
+        parallel.h \
+        parallel_algebra.h \
+        parallel_bin_sorter.h \
+        parallel_conversion_utils.h \
+        parallel_elem.h \
+        parallel_ghost_sync.h \
+        parallel_hilbert.h \
+        parallel_histogram.h \
+        parallel_implementation.h \
+        parallel_node.h \
+        parallel_object.h \
+        parallel_sort.h \
+        threads.h \
+        threads_allocators.h \
+        centroid_partitioner.h \
+        hilbert_sfc_partitioner.h \
+        linear_partitioner.h \
+        metis_csr_graph.h \
+        metis_partitioner.h \
+        morton_sfc_partitioner.h \
+        parmetis_helper.h \
+        parmetis_partitioner.h \
+        partitioner.h \
+        sfc_partitioner.h \
+        diff_physics.h \
+        diff_qoi.h \
+        fem_physics.h \
+        quadrature.h \
+        quadrature_clough.h \
+        quadrature_composite.h \
+        quadrature_conical.h \
+        quadrature_gauss.h \
+        quadrature_gauss_lobatto.h \
+        quadrature_gm.h \
+        quadrature_grid.h \
+        quadrature_jacobi.h \
+        quadrature_monomial.h \
+        quadrature_rules.h \
+        quadrature_simpson.h \
+        quadrature_trap.h \
+        rb_assembly_expansion.h \
+        rb_construction.h \
+        rb_construction_base.h \
+        rb_eim_assembly.h \
+        rb_eim_construction.h \
+        rb_eim_evaluation.h \
+        rb_eim_theta.h \
+        rb_evaluation.h \
+        rb_parameters.h \
+        rb_parametrized.h \
+        rb_parametrized_function.h \
+        rb_scm_construction.h \
+        rb_scm_evaluation.h \
+        rb_temporal_discretization.h \
+        rb_theta.h \
+        rb_theta_expansion.h \
+        transient_rb_assembly_expansion.h \
+        transient_rb_construction.h \
+        transient_rb_evaluation.h \
+        transient_rb_theta_expansion.h \
+        direct_solution_transfer.h \
+        dtk_adapter.h \
+        dtk_evaluator.h \
+        dtk_solution_transfer.h \
+        meshfree_interpolation.h \
+        meshfree_solution_transfer.h \
+        meshfunction_solution_transfer.h \
+        radial_basis_functions.h \
+        radial_basis_interpolation.h \
+        solution_transfer.h \
+        adaptive_time_solver.h \
+        diff_solver.h \
+        eigen_solver.h \
+        eigen_sparse_linear_solver.h \
+        eigen_time_solver.h \
+        euler2_solver.h \
+        euler_solver.h \
+        laspack_linear_solver.h \
+        linear.h \
+        linear_solver.h \
+        memory_solution_history.h \
+        newton_solver.h \
+        no_solution_history.h \
+        nonlinear_solver.h \
+        petsc_auto_fieldsplit.h \
+        petsc_diff_solver.h \
+        petsc_linear_solver.h \
+        petsc_nonlinear_solver.h \
+        petsc_ts_solver.h \
+        petscdmlibmesh.h \
+        slepc_eigen_solver.h \
+        slepc_macro.h \
+        solution_history.h \
+        solver.h \
+        steady_solver.h \
+        time_solver.h \
+        trilinos_aztec_linear_solver.h \
+        trilinos_nox_nonlinear_solver.h \
+        twostep_time_solver.h \
+        unsteady_solver.h \
+        condensed_eigen_system.h \
+        continuation_system.h \
+        dg_fem_context.h \
+        diff_context.h \
+        diff_system.h \
+        eigen_system.h \
+        elem_assembly.h \
+        equation_systems.h \
+        explicit_system.h \
+        fem_context.h \
+        fem_system.h \
+        frequency_system.h \
+        implicit_system.h \
+        linear_implicit_system.h \
+        newmark_system.h \
+        nonlinear_implicit_system.h \
+        parameter_accessor.h \
+        parameter_multipointer.h \
+        parameter_pointer.h \
+        parameter_vector.h \
+        qoi_set.h \
+        sensitivity_data.h \
+        steady_system.h \
+        system.h \
+        system_norm.h \
+        system_subset.h \
+        system_subset_by_subdomain.h \
+        transient_system.h \
+        ts_system.h \
+        AutoDiffJacobian.h \
+        AutoDiffScalar.h \
+        AutoDiffVector.h \
+        BVAlgorithms.h \
+        KdBVH.h \
+        ArpackSelfAdjointEigenSolver.h \
+        ei_fftw_impl.h \
+        ei_kissfft_impl.h \
+        ConstrainedConjGrad.h \
+        DGMRES.h \
+        GMRES.h \
+        IncompleteCholesky.h \
+        IncompleteLU.h \
+        IterationController.h \
+        MINRES.h \
+        Scaling.h \
+        KroneckerTensorProduct.h \
+        LMcovar.h \
+        LMonestep.h \
+        LMpar.h \
+        LMqrsolv.h \
+        LevenbergMarquardt.h \
+        MatrixExponential.h \
+        MatrixFunction.h \
+        MatrixFunctionAtomic.h \
+        MatrixLogarithm.h \
+        MatrixPower.h \
+        MatrixSquareRoot.h \
+        StemFunction.h \
+        MathFunctions.h \
+        HybridNonLinearSolver.h \
+        LevenbergMarquardt.h \
+        chkder.h \
+        covar.h \
+        dogleg.h \
+        fdjac1.h \
+        lmpar.h \
+        qrsolv.h \
+        r1mpyq.h \
+        r1updt.h \
+        rwupdt.h \
+        NumericalDiff.h \
+        Companion.h \
+        PolynomialSolver.h \
+        PolynomialUtils.h \
+        BDCSVD.h \
+        JacobiSVD.h \
+        SVDBase.h \
+        SkylineInplaceLU.h \
+        SkylineMatrix.h \
+        SkylineMatrixBase.h \
+        SkylineProduct.h \
+        SkylineStorage.h \
+        SkylineUtil.h \
+        BlockOfDynamicSparseMatrix.h \
+        DynamicSparseMatrix.h \
+        MarketIO.h \
+        MatrixMarketIterator.h \
+        RandomSetter.h \
+        Spline.h \
+        SplineFitting.h \
+        SplineFwd.h \
+        compare_types.h \
+        error_vector.h \
+        hashword.h \
+        ignore_warnings.h \
+        location_maps.h \
+        mapvector.h \
+        null_output_iterator.h \
+        number_lookups.h \
+        ostream_proxy.h \
+        parameters.h \
+        perf_log.h \
+        perfmon.h \
+        plt_loader.h \
+        point_locator_base.h \
+        point_locator_list.h \
+        point_locator_tree.h \
+        pool_allocator.h \
+        restore_warnings.h \
+        statistics.h \
+        string_to_enum.h \
+        timestamp.h \
+        topology_map.h \
+        tree.h \
+        tree_base.h \
+        tree_node.h \
+        utility.h \
+        vectormap.h \
+        xdr_cxx.h \
+        parallel_communicator_specializations \
+        parallel_communicator_specializations
 
 DISTCLEANFILES = $(BUILT_SOURCES)
 

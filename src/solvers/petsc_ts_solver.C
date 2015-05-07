@@ -16,11 +16,11 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-
+#include "libmesh/libmesh_config.h"
 #include "libmesh/libmesh_common.h"
 
 #ifdef LIBMESH_HAVE_PETSC
-#if !PETSC_RELEASE_LESS_THAN(3,5,0)
+//#if !PETSC_VERSION_LESS_THAN(3,5,0)
 
 // C++ includes
 
@@ -285,5 +285,5 @@ int PetscTSSolver::get_total_linear_iterations()
 } // namespace libMesh
 
 
-#endif // if !PETSC_RELEASE_LESS_THAN(3,5,0)
+#endif // if !PETSC_VERSION_LESS_THAN(3,5,0)
 #endif // #ifdef LIBMESH_HAVE_PETSC
