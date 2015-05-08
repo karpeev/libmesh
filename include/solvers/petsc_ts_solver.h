@@ -31,6 +31,8 @@
 #include "libmesh/parallel_object.h"
 #if !PETSC_RELEASE_LESS_THAN(3,5,0)
 
+#include "libmesh/ts_system.h"
+
 // PETSc includes
 EXTERN_C_FOR_PETSC_BEGIN
 # include <petscts.h>
@@ -40,14 +42,34 @@ EXTERN_C_FOR_PETSC_END
 
 namespace libMesh
 {
+/**
+ * Allow users access to these functions in case they want to reuse them.
+ * Note that users shouldn't need access to these most of the time
+ * as they are used internally by this object.
+ */
+  extern "C" 
+  {
+  PetscErrorCode __libmesh_petsc_ts_monitor(TS ts, PetscInt step, PetscReal time, Vec x, void *ctx);
+  PetscErrorCode __libmesh_petsc_ts_rhsfunction (TS ts, PetscReal t, Vec x, Vec r, void *ctx);
+  PetscErrorCode __libmesh_petsc_ts_rhsjacobian (TS ts, PetscReal t, Vec x, Mat jac, Mat jacpre, void *ctx);
+  PetscErrorCode __libmesh_petsc_ts_ifunction (TS ts, PetscReal t, Vec x, Vec xdot, Vec f, void *ctx);
+  PetscErrorCode __libmesh_petsc_ts_ijacobian (TS ts, PetscReal t, Vec x, Vec xdot, PetscReal shift,Mat ijac, Mat ijacpre, void *ctx);
+  }
+  // Forward Declarations
+  //class TSSystem;
+  //template <typename T> class SparseMatrix;
+  //template <typename T> class NumericVector;
+  //template <typename T> class PetscMatrix;
+  //template <typename T> class PetscVector;
 
-  class PetscTSSolver : public ParallelObject {
-
+class PetscTSSolver : public ParallelObject 
+{
+public:
    /**
     * Constructor.
     * Name will be used as the options prefix.
     */
-   PetscTSSolver(const TSSystem& tsys, const char* name = NULL);
+   PetscTSSolver(TSSystem& tssys, const char* name = NULL);
   /**
    * Destructor.
    */
@@ -94,12 +116,6 @@ namespace libMesh
    */
   TSConvergedReason get_converged_reason();
 
-  /**
-   * Get the total number of linear iterations done in the last solve
-   */
-  // Do we really need this?
-  virtual int get_total_linear_iterations();
-
   // ... and other functions querying the underlying TS state
 
   /**
@@ -118,7 +134,7 @@ protected:
   /**
    * TSSystem
    */
-  TSSystem& _tsys;
+  TSSystem& _tssys;
 
   /**
    * Name of the object; it is also used to build the PETSc options prefix: <name>_
@@ -137,26 +153,12 @@ protected:
    */
   TSConvergedReason _reason;
 
-  /**
-   * Stores the total number of linear iterations from the last solve.
-   */
-  PetscInt _n_linear_iterations;
-
-  /**
-   * Stores the current nonlinear iteration number
-   */
-  unsigned _current_nonlinear_iteration_number;
-
   // Current timestep value should go into _tsys, if anywhere.
 
   PetscVector<Number> *_R;
   PetscMatrix<Number> *_J, *_Jpre;
 
-  friend PetscErrorCode __libmesh_petsc_ts_rhsfunction (TS ts, PetscReal t, Vec x, Vec r, void *ctx);
-  friend PetscErrorCode __libmesh_petsc_ts_rhsjacobian (TS ts, PetscReal t, Vec x, Mat jac, Mat jacpre, void *ctx);
-  friend PetscErrorCode __libmesh_petsc_ts_ifunction (TS ts, PetscReal t, Vec x, Vec xdot, Vec f, void *ctx);
-  friend PetscErrorCode __libmesh_petsc_ts_ijacobian (TS ts, PetscReal t, Vec x, Vec xdot, PetscReal shift,Mat ijac, Mat ijacpre, void *ctx);
-  friend PetscErrorCode __libmesh_petsc_ts_monitor(TS ts, PetscInt step, PetscReal time, Vec x, void *ctx);
+
 };
 
 

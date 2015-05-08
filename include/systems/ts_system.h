@@ -21,7 +21,7 @@
 #define LIBMESH_TS_SYSTEM_H
 
 // Local Includes
-#include "libmesh/nonlinear_implicit_system.h"
+#include "libmesh/implicit_system.h"
 
 // C++ includes
 
@@ -32,7 +32,7 @@ namespace libMesh
 /**
  * This class provides a time-dependent system class.
  * This is an abstract class that codifies the interface
- * used by TSNonlinearSolver.  It should be inherited from
+ * used by TSSolver.  It should be inherited from
  * by a user, who might combine this class with another
  * such as the NonlinearImplicitSystem through multiple
  * inheritance.  NonlinearImplicitSystem would then provide
@@ -43,7 +43,7 @@ namespace libMesh
 // ------------------------------------------------------------
 // TSSystem class definition
 
-class TSSystem : public ParallelObject
+class TSSystem : public ImplicitSystem
 {
 public:
 
@@ -51,14 +51,16 @@ public:
    * Constructor.  Optionally initializes required
    * data structures.
    */
-  TSSystem (const Parallel::Communicator &comm_in) : ParallelObject(obj){};
-  TSSystem (const ParallelObject& obj) : ParallelObject(obj){};
+  TSSystem (EquationSystems& es,
+            const std::string& name,
+            const unsigned int number);
 
   /**
    * Destructor.
    */
   virtual ~TSSystem ();
 
+  typedef ImplicitSystem Parent;
 
   // RSHFunction computes the R in M\dot X = R(X,t).
   // Implementations might need to localize X to a ghosted version.
