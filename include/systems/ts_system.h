@@ -64,19 +64,19 @@ public:
 
   // RSHFunction computes the R in M\dot X = R(X,t).
   // Implementations might need to localize X to a ghosted version.
-  virtual void RHSFunction  (Real time, const NumericVector<Number>& X, NumericVector<Number>& R) = 0;
-  virtual void RHSJacobian  (Real time, const NumericVector<Number>& X, SparseMatrix<Number>& J,SparseMatrix<Number> &Jpre);
-  virtual void IFunction    (Real time, const NumericVector<Number>& X, const NumericVector<Number>& Xdot,NumericVector<Number>& F);
-  virtual void IJacobian    (Real time, const NumericVector<Number>& X, const NumericVector<Number>& Xdot,Real shift,SparseMatrix<Number>& IJ,SparseMatrix<Number>& IJpre) = 0;
-  virtual void monitor      (int  step, Real time, NumericVector<Number>& X){};
+  virtual void RHSFunction  (Real time, const NumericVector<Number>& X, NumericVector<Number>& R){};
+  virtual void RHSJacobian  (Real time, const NumericVector<Number>& X, SparseMatrix<Number>& J,SparseMatrix<Number> &Jpre){};
+  virtual void IFunction    (Real time, const NumericVector<Number>& X, const NumericVector<Number>& Xdot,NumericVector<Number>& F){};
+  virtual void IJacobian    (Real time, const NumericVector<Number>& X, const NumericVector<Number>& Xdot,Real shift,SparseMatrix<Number>& IJ,SparseMatrix<Number>& IJpre){};
+  virtual void monitor      (int  step, Real time, NumericVector<Number>& X){} ;
   // ... and other callbacks required by (Petsc)TSSolver: pre/postsolve(),adjoint-related stuff, etc.
   // The optional callback methods should be noops, rather than purely abstract so that the user doesn't have to implement a bunch of dummy methods (see IFunction and IJacobian above).
 
   // These methods must be provided by the system in order to be able to set up the solver.
   // A specialization of this class might inherit them (or delegate to other inherited methods)
   // from another System class via multiple inheritance.
-  virtual NumericVector<Number>* create_vector() = 0;
-  virtual SparseMatrix<Number>*  create_matrix() = 0;
+  virtual NumericVector<Number>* create_vector()=0;
+  virtual SparseMatrix<Number>*  create_matrix()=0;
 
 protected:
 };
