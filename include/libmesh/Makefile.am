@@ -657,6 +657,7 @@ BUILT_SOURCES = \
         petsc_matrix.h \
         petsc_nonlinear_solver.h \
         petsc_preconditioner.h \
+        petsc_ts_solver.h \
         petsc_vector.h \
         petscdmlibmesh.h \
         plane.h \
@@ -758,6 +759,7 @@ BUILT_SOURCES = \
         trilinos_epetra_vector.h \
         trilinos_nox_nonlinear_solver.h \
         trilinos_preconditioner.h \
+        ts_system.h \
         twostep_time_solver.h \
         type_n_tensor.h \
         type_tensor.h \
@@ -1013,6 +1015,7 @@ BUILT_SOURCES = \
         parameter_multipointer.h \
         parameter_pointer.h \
         parameter_vector.h \
+        petsc_ts_system.h \
         qoi_set.h \
         sensitivity_data.h \
         steady_system.h \
@@ -1021,7 +1024,6 @@ BUILT_SOURCES = \
         system_subset.h \
         system_subset_by_subdomain.h \
         transient_system.h \
-        ts_system.h \
         AutoDiffJacobian.h \
         AutoDiffScalar.h \
         AutoDiffVector.h \
@@ -3161,6 +3163,9 @@ petsc_nonlinear_solver.h: $(top_srcdir)/include/libmesh/petsc_nonlinear_solver.h
 petsc_preconditioner.h: $(top_srcdir)/include/libmesh/petsc_preconditioner.h
 	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
 
+petsc_ts_solver.h: $(top_srcdir)/include/libmesh/petsc_ts_solver.h
+	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
+
 petsc_vector.h: $(top_srcdir)/include/libmesh/petsc_vector.h
 	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
 
@@ -3462,6 +3467,9 @@ trilinos_nox_nonlinear_solver.h: $(top_srcdir)/include/libmesh/trilinos_nox_nonl
 	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
 
 trilinos_preconditioner.h: $(top_srcdir)/include/libmesh/trilinos_preconditioner.h
+	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
+
+ts_system.h: $(top_srcdir)/include/libmesh/ts_system.h
 	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
 
 twostep_time_solver.h: $(top_srcdir)/include/libmesh/twostep_time_solver.h
@@ -4229,6 +4237,9 @@ parameter_pointer.h: $(top_srcdir)/include/systems/parameter_pointer.h
 parameter_vector.h: $(top_srcdir)/include/systems/parameter_vector.h
 	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
 
+petsc_ts_system.h: $(top_srcdir)/include/systems/petsc_ts_system.h
+	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
+
 qoi_set.h: $(top_srcdir)/include/systems/qoi_set.h
 	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
 
@@ -4251,9 +4262,6 @@ system_subset_by_subdomain.h: $(top_srcdir)/include/systems/system_subset_by_sub
 	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
 
 transient_system.h: $(top_srcdir)/include/systems/transient_system.h
-	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
-
-ts_system.h: $(top_srcdir)/include/systems/ts_system.h
 	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
 
 AutoDiffJacobian.h: $(top_srcdir)/include/unsupported/Eigen/src/AutoDiff/AutoDiffJacobian.h

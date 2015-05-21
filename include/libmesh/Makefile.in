@@ -634,11 +634,12 @@ BUILT_SOURCES = LDLT.h LLT.h LLT_MKL.h CholmodSupport.h Array.h \
 	periodic_boundary_base.h petsc_auto_fieldsplit.h \
 	petsc_diff_solver.h petsc_linear_solver.h petsc_macro.h \
 	petsc_matrix.h petsc_nonlinear_solver.h petsc_preconditioner.h \
-	petsc_vector.h petscdmlibmesh.h plane.h plt_loader.h point.h \
-	point_locator_base.h point_locator_list.h point_locator_tree.h \
-	pool_allocator.h postscript_io.h preconditioner.h \
-	print_trace.h qoi_set.h quadrature.h quadrature_clough.h \
-	quadrature_composite.h quadrature_conical.h quadrature_gauss.h \
+	petsc_ts_solver.h petsc_vector.h petscdmlibmesh.h plane.h \
+	plt_loader.h point.h point_locator_base.h point_locator_list.h \
+	point_locator_tree.h pool_allocator.h postscript_io.h \
+	preconditioner.h print_trace.h qoi_set.h quadrature.h \
+	quadrature_clough.h quadrature_composite.h \
+	quadrature_conical.h quadrature_gauss.h \
 	quadrature_gauss_lobatto.h quadrature_gm.h quadrature_grid.h \
 	quadrature_jacobi.h quadrature_monomial.h quadrature_rules.h \
 	quadrature_simpson.h quadrature_trap.h \
@@ -667,7 +668,7 @@ BUILT_SOURCES = LDLT.h LLT.h LLT_MKL.h CholmodSupport.h Array.h \
 	transient_system.h tree.h tree_base.h tree_node.h \
 	trilinos_aztec_linear_solver.h trilinos_epetra_matrix.h \
 	trilinos_epetra_vector.h trilinos_nox_nonlinear_solver.h \
-	trilinos_preconditioner.h twostep_time_solver.h \
+	trilinos_preconditioner.h ts_system.h twostep_time_solver.h \
 	type_n_tensor.h type_tensor.h type_vector.h ucd_io.h \
 	uniform_refinement_estimator.h unsteady_solver.h \
 	unstructured_mesh.h unv_io.h utility.h variable.h \
@@ -755,23 +756,23 @@ BUILT_SOURCES = LDLT.h LLT.h LLT_MKL.h CholmodSupport.h Array.h \
 	linear_implicit_system.h newmark_system.h \
 	nonlinear_implicit_system.h parameter_accessor.h \
 	parameter_multipointer.h parameter_pointer.h \
-	parameter_vector.h qoi_set.h sensitivity_data.h \
-	steady_system.h system.h system_norm.h system_subset.h \
-	system_subset_by_subdomain.h transient_system.h ts_system.h \
-	AutoDiffJacobian.h AutoDiffScalar.h AutoDiffVector.h \
-	BVAlgorithms.h KdBVH.h ArpackSelfAdjointEigenSolver.h \
-	ei_fftw_impl.h ei_kissfft_impl.h ConstrainedConjGrad.h \
-	DGMRES.h GMRES.h IncompleteCholesky.h IncompleteLU.h \
-	IterationController.h MINRES.h Scaling.h \
-	KroneckerTensorProduct.h LMcovar.h LMonestep.h LMpar.h \
-	LMqrsolv.h LevenbergMarquardt.h MatrixExponential.h \
-	MatrixFunction.h MatrixFunctionAtomic.h MatrixLogarithm.h \
-	MatrixPower.h MatrixSquareRoot.h StemFunction.h \
-	MathFunctions.h HybridNonLinearSolver.h LevenbergMarquardt.h \
-	chkder.h covar.h dogleg.h fdjac1.h lmpar.h qrsolv.h r1mpyq.h \
-	r1updt.h rwupdt.h NumericalDiff.h Companion.h \
-	PolynomialSolver.h PolynomialUtils.h BDCSVD.h JacobiSVD.h \
-	SVDBase.h SkylineInplaceLU.h SkylineMatrix.h \
+	parameter_vector.h petsc_ts_system.h qoi_set.h \
+	sensitivity_data.h steady_system.h system.h system_norm.h \
+	system_subset.h system_subset_by_subdomain.h \
+	transient_system.h AutoDiffJacobian.h AutoDiffScalar.h \
+	AutoDiffVector.h BVAlgorithms.h KdBVH.h \
+	ArpackSelfAdjointEigenSolver.h ei_fftw_impl.h \
+	ei_kissfft_impl.h ConstrainedConjGrad.h DGMRES.h GMRES.h \
+	IncompleteCholesky.h IncompleteLU.h IterationController.h \
+	MINRES.h Scaling.h KroneckerTensorProduct.h LMcovar.h \
+	LMonestep.h LMpar.h LMqrsolv.h LevenbergMarquardt.h \
+	MatrixExponential.h MatrixFunction.h MatrixFunctionAtomic.h \
+	MatrixLogarithm.h MatrixPower.h MatrixSquareRoot.h \
+	StemFunction.h MathFunctions.h HybridNonLinearSolver.h \
+	LevenbergMarquardt.h chkder.h covar.h dogleg.h fdjac1.h \
+	lmpar.h qrsolv.h r1mpyq.h r1updt.h rwupdt.h NumericalDiff.h \
+	Companion.h PolynomialSolver.h PolynomialUtils.h BDCSVD.h \
+	JacobiSVD.h SVDBase.h SkylineInplaceLU.h SkylineMatrix.h \
 	SkylineMatrixBase.h SkylineProduct.h SkylineStorage.h \
 	SkylineUtil.h BlockOfDynamicSparseMatrix.h \
 	DynamicSparseMatrix.h MarketIO.h MatrixMarketIterator.h \
@@ -2978,6 +2979,9 @@ petsc_nonlinear_solver.h: $(top_srcdir)/include/libmesh/petsc_nonlinear_solver.h
 petsc_preconditioner.h: $(top_srcdir)/include/libmesh/petsc_preconditioner.h
 	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
 
+petsc_ts_solver.h: $(top_srcdir)/include/libmesh/petsc_ts_solver.h
+	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
+
 petsc_vector.h: $(top_srcdir)/include/libmesh/petsc_vector.h
 	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
 
@@ -3279,6 +3283,9 @@ trilinos_nox_nonlinear_solver.h: $(top_srcdir)/include/libmesh/trilinos_nox_nonl
 	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
 
 trilinos_preconditioner.h: $(top_srcdir)/include/libmesh/trilinos_preconditioner.h
+	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
+
+ts_system.h: $(top_srcdir)/include/libmesh/ts_system.h
 	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
 
 twostep_time_solver.h: $(top_srcdir)/include/libmesh/twostep_time_solver.h
@@ -4046,6 +4053,9 @@ parameter_pointer.h: $(top_srcdir)/include/systems/parameter_pointer.h
 parameter_vector.h: $(top_srcdir)/include/systems/parameter_vector.h
 	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
 
+petsc_ts_system.h: $(top_srcdir)/include/systems/petsc_ts_system.h
+	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
+
 qoi_set.h: $(top_srcdir)/include/systems/qoi_set.h
 	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
 
@@ -4068,9 +4078,6 @@ system_subset_by_subdomain.h: $(top_srcdir)/include/systems/system_subset_by_sub
 	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
 
 transient_system.h: $(top_srcdir)/include/systems/transient_system.h
-	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
-
-ts_system.h: $(top_srcdir)/include/systems/ts_system.h
 	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
 
 AutoDiffJacobian.h: $(top_srcdir)/include/unsupported/Eigen/src/AutoDiff/AutoDiffJacobian.h

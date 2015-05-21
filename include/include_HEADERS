@@ -372,6 +372,7 @@ include_HEADERS =  \
         systems/parameter_multipointer.h \
         systems/parameter_pointer.h \
         systems/parameter_vector.h \
+        systems/petsc_ts_system.h \
         systems/qoi_set.h \
         systems/sensitivity_data.h \
         systems/steady_system.h \
@@ -380,7 +381,6 @@ include_HEADERS =  \
         systems/system_subset.h \
         systems/system_subset_by_subdomain.h \
         systems/transient_system.h \
-        systems/ts_system.h \
         utils/compare_types.h \
         utils/error_vector.h \
         utils/hashword.h \

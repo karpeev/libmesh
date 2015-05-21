@@ -389,6 +389,7 @@ libmesh_SOURCES =  \
         src/systems/newmark_system.C \
         src/systems/nonlinear_implicit_system.C \
         src/systems/parameter_vector.C \
+        src/systems/petsc_ts_system.C \
         src/systems/qoi_set.C \
         src/systems/steady_system.C \
         src/systems/system.C \
@@ -397,7 +398,6 @@ libmesh_SOURCES =  \
         src/systems/system_subset.C \
         src/systems/system_subset_by_subdomain.C \
         src/systems/transient_system.C \
-        src/systems/ts_system.C \
         src/utils/error_vector.C \
         src/utils/hashword.C \
         src/utils/libmesh_version.C \
