@@ -355,6 +355,7 @@ BUILT_SOURCES = \
         dg_fem_context.h \
         diff_context.h \
         diff_system.h \
+        dm.h \
         eigen_system.h \
         elem_assembly.h \
         equation_systems.h \
@@ -1547,6 +1548,9 @@ diff_context.h: $(top_srcdir)/include/systems/diff_context.h
 	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
 
 diff_system.h: $(top_srcdir)/include/systems/diff_system.h
+	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
+
+dm.h: $(top_srcdir)/include/systems/dm.h
 	$(AM_V_GEN)rm -f $@ && $(LN_S) -f $< $@
 
 eigen_system.h: $(top_srcdir)/include/systems/eigen_system.h
