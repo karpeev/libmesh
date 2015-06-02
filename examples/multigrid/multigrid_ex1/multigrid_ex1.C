@@ -16,7 +16,7 @@
 #include "libmesh/gnuplot_io.h"
 #include "libmesh/linear_implicit_system.h"
 #include "libmesh/equation_systems.h"
-#include "libmesh/distributed_vector.h"  
+#include "libmesh/distributed_vector.h"
 #include "libmesh/fe.h"
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/dof_map.h"
@@ -75,7 +75,7 @@ void assemble_helmholtz(EquationSystems& es,
 
 // error checking function
 
-void e(unsigned int i) { 
+void e(unsigned int i) {
 if (multigrid_ex1_print_statements_active)
 PetscPrintf(PETSC_COMM_SELF, "PrintStatement: %D \n", i);
 }
@@ -128,7 +128,7 @@ int main (int argc, char** argv)
  #ifndef LIBMESH_ENABLE_AMR
     libmesh_example_assert(false, "--enable-amr");
   #else
-  
+
     GetPot input_file("multigrid_ex1.in");
     const unsigned int n_levels_coarsen = input_file("n_levels_coarsen", 3);
     			gamma_R       = input_file("gamma_R", 1.0);
@@ -173,9 +173,9 @@ int main (int argc, char** argv)
     dim = input_file("dimension", 3);
     const std::string indicator_type = input_file("indicator_type", "kelly");
     singularity = input_file("singularity", true);
-  
-    libmesh_example_assert(dim <= LIBMESH_DIM, "3D support");
-  
+
+    libmesh_example_requires(dim <= LIBMESH_DIM, "3D support");
+
     std::string approx_name = "";
     if (element_type == "tensor")
       approx_name += "bi";
@@ -187,7 +187,7 @@ int main (int argc, char** argv)
       approx_name += "cubic";
     else if (approx_order == 4)
       approx_name += "quartic";
-  
+
     std::string output_file = approx_name;
     output_file += "_";
     output_file += refine_type;
@@ -195,11 +195,11 @@ int main (int argc, char** argv)
       output_file += "_adaptive.m";
     else
       output_file += "_uniform.m";
-  
+
     std::ofstream out (output_file.c_str());
     out << "% dofs     L2-error  " << std::endl;
     out << "e = [" << std::endl;
-  
+
 
   std::cout << "Running " << argv[0];
 
@@ -214,7 +214,7 @@ if (mesh_build)
 {
 int count_unif =(int) n_uniform_refinements;
 
-  libmesh_example_assert(3 <= LIBMESH_DIM, "3D support");
+  libmesh_example_requires(3 <= LIBMESH_DIM, "3D support");
   MeshTools::Generation::build_cube (mesh,x_range, y_range, z_range,0., x_size,0.,y_size, 0.,z_size,HEX8);
 
   std::cout << x_range << ", " << y_range << ", " << z_range << "\n";
@@ -224,7 +224,7 @@ int count_unif =(int) n_uniform_refinements;
 
   if (approx_order > 1 || refine_type != "h")
       mesh.all_second_order();
-  
+
     MeshRefinement mesh_refinement(mesh);
     mesh_refinement.refine_fraction() = refine_percentage;
     mesh_refinement.coarsen_fraction() = coarsen_percentage;
@@ -246,7 +246,7 @@ LinearImplicitSystem& system = equation_systems.add_system<LinearImplicitSystem>
 
    equation_systems.parameters.set<unsigned int>("linear solver maximum iterations")
       = max_linear_iterations;
-  
+
     equation_systems.parameters.set<Real>("linear solver tolerance") =
       std::pow(TOLERANCE, 2.5);
 
@@ -256,10 +256,10 @@ LinearImplicitSystem& system = equation_systems.add_system<LinearImplicitSystem>
   ExactSolution exact_sol(equation_systems);
     exact_sol_I.attach_exact_value(exact_solution_I);
     exact_sol.attach_exact_value(exact_solution);
-  
+
     exact_sol_I.extra_quadrature_order(extra_error_quadrature);
     exact_sol.extra_quadrature_order(extra_error_quadrature);
-  
+
     for (unsigned int r_step=0; r_step<max_r_steps; r_step++)
       {
 if (count_unif <= 0)
@@ -273,19 +273,19 @@ else
 std::cout << "NON-UNIFORM REFINEMENT\n";
 
         std::cout << "Beginning Solve " << r_step << std::endl;
-  
+
         system.solve();
-  
+
         std::cout << "System has: " << equation_systems.n_active_dofs()
                   << " degrees of freedom."
                   << std::endl;
-  
+
         std::cout << "Linear solver converged at step: "
                   << system.n_linear_iterations()
                   << ", final residual: "
                   << system.final_linear_residual()
                   << std::endl;
-  
+
   #ifdef LIBMESH_HAVE_EXODUS_API
         if (output_intermediate)
           {
@@ -295,9 +295,9 @@ std::cout << "NON-UNIFORM REFINEMENT\n";
                                                  equation_systems);
           }
   #endif // #ifdef LIBMESH_HAVE_EXODUS_API
-  
+
         exact_sol.compute_error("Helmholtz", "u_R");
-        exact_sol_I.compute_error("Helmholtz", "u_C");  
+        exact_sol_I.compute_error("Helmholtz", "u_C");
 
 
      Real l2_error_I = exact_sol_I.l2_error("Helmholtz", "u_C");
@@ -308,46 +308,46 @@ std::cout << "NON-UNIFORM REFINEMENT\n";
      std::cout << "L2-error is " << l2_total_error << std::endl;
 
         out << equation_systems.n_active_dofs() << " "
-            << l2_total_error << " "; 
+            << l2_total_error << " ";
         if (r_step+1 != max_r_steps)
           {
             std::cout << "  Refining the mesh..." << std::endl;
-  
+
             if (uniform_refine == 0)
               {
-  
+
                 ErrorVector error;
-  
+
                 if (indicator_type == "exact")
                   {
                     ExactErrorEstimator error_estimator;
-  
+
                     error_estimator.attach_exact_value(exact_solution);
-  
+
                     error_estimator.estimate_error (system, error);
                   }
                 else if (indicator_type == "patch")
                   {
                     PatchRecoveryErrorEstimator error_estimator;
-  
+
                     error_estimator.estimate_error (system, error);
                   }
                 else if (indicator_type == "uniform")
                   {
                     UniformRefinementEstimator error_estimator;
-  
+
                     error_estimator.estimate_error (system, error);
                   }
                 else
                   {
                     libmesh_assert_equal_to (indicator_type, "kelly");
-  
+
                     KellyErrorEstimator error_estimator;
 		    error_estimator.error_norm = L2;
-  
+
                     error_estimator.estimate_error (system, error);
                   }
-  
+
                 std::ostringstream ss;
   	      ss << r_step;
   #ifdef LIBMESH_HAVE_EXODUS_API
@@ -356,9 +356,9 @@ std::cout << "NON-UNIFORM REFINEMENT\n";
   	      std::string error_output = "error_"+ss.str()+".gmv";
   #endif
                 error.plot_error( error_output, mesh );
-  
+
                 mesh_refinement.flag_elements_by_error_fraction (error);
-  
+
                 if (refine_type == "p")
                   mesh_refinement.switch_h_to_p_refinement();
                 if (refine_type == "matchedhp")
@@ -375,10 +375,10 @@ std::cout << "NON-UNIFORM REFINEMENT\n";
                     hpselector.singular_points.push_back(Point());
                     hpselector.select_refinement(system);
                   }
-  
+
                 mesh_refinement.refine_and_coarsen_elements();
               }
-  
+
             else if (uniform_refine == 1)
               {
                 if (refine_type == "h" || refine_type == "hp" ||
@@ -388,7 +388,7 @@ std::cout << "NON-UNIFORM REFINEMENT\n";
                     refine_type == "matchedhp")
                   mesh_refinement.uniformly_p_refine(1);
               }
-  
+
             equation_systems.reinit ();
           }
       }
@@ -463,7 +463,7 @@ for (unsigned int k = 0; k < n_levels_coarsen-1; k++)
   dm_levels[k]->coarsen(*dm_levels[k+1]);
 
   dm_levels[k]->createInterpolation(*dm_levels[k+1], *level_interp[k]);
-  
+
   if (!use_galerkin)
     dm_levels[k+1]->assemble();
 }
@@ -797,4 +797,3 @@ Number exact_solution_I(const Point& p, const Parameters&, const std::string&, c
 {
 return exact_solution_I(p(0),p(1),p(2));
 }
-

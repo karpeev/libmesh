@@ -26,6 +26,8 @@
 #include "libmesh/threads.h"
 #include "libmesh/wrapped_function.h"
 
+using namespace libMesh;
+
 #include <fstream>
 #define MG_TOOL_PRINT_STATEMENTS_ACTIVE 0
 
@@ -37,10 +39,10 @@ unsigned int current_interp_count = 0;
 
 // this function is just for debugging
 
-void w(unsigned int i) { 
+void w(unsigned int i) {
 
 if (MG_TOOL_PRINT_STATEMENTS_ACTIVE)
-std::cout << "PrintMGTool: " << i << std::endl << std::flush; 
+std::cout << "PrintMGTool: " << i << std::endl << std::flush;
 }
 
 unsigned int MGCountLevelsFAC(MeshBase & mesh)
@@ -194,7 +196,7 @@ w(5);
             unsigned int new_dofs_nz = elem_coarse->n_nodes();
             for (unsigned int k = 0; k < coarse_n_dofs; k++)
               if (dof_map_coarse.first_dof() <= coarse_dof_indices[k] && coarse_dof_indices[k] <= dof_map_coarse.last_dof())
-                { new_dofs_nnz++; new_dofs_nz--; } 
+                { new_dofs_nnz++; new_dofs_nz--; }
 
 w(6);
                   nnz[ fine_position ] = new_dofs_nnz;
@@ -218,7 +220,7 @@ w(6);
 // could use FEInterface::shape to check how many 0s here
           }  // if fine_dof is on processor
           else
-          skip_count++; 
+          skip_count++;
       }
       else // else (elem_coarse->active())
       {
@@ -226,7 +228,7 @@ w(6);
 
           for (unsigned int j = 0; j < fine_n_dofs; j++)
           {
-              if (fine_dof_indices[j] <= dof_map_fine.last_dof() && fine_dof_indices[j] >= dof_map_fine.first_dof()) 
+              if (fine_dof_indices[j] <= dof_map_fine.last_dof() && fine_dof_indices[j] >= dof_map_fine.first_dof())
 	      {
 	      total_count++;
 
@@ -313,7 +315,7 @@ w(13);
 
           elem_coarse = es_coarse.get_mesh().elem(elem_parent->id());
 
-          if (!elem_coarse->active()) // if element not active on coarse mesh, then elem is 
+          if (!elem_coarse->active()) // if element not active on coarse mesh, then elem is
 					// not a new refinement. So element_is_coarse = 1
           {
           element_is_coarse = 1;
@@ -359,9 +361,9 @@ w(15);
  // fine_dof_indices[j], coarse_dof_indices[k], enter them right into the matrix
 
             for (unsigned int k = 0; k < coarse_n_dofs; k++)
-            {    
+            {
 w(17);
-              const dof_id_type coarse_global_dof = coarse_dof_indices[k];  
+              const dof_id_type coarse_global_dof = coarse_dof_indices[k];
              Real value = FEInterface::shape(dim, base_fe_type, elem_coarse, k, point);
              if (value > zero_threshold_mg_tool && fine_global_dof <= dof_map_fine.last_dof() && fine_global_dof >= dof_map_fine.first_dof())
              Interpolation.set(fine_global_dof, coarse_global_dof, value);
@@ -396,8 +398,8 @@ Interpolation.close();
 
 }
 
-      
- 
+
+
 // end of function
 
 
@@ -444,7 +446,7 @@ void flag_elements_FAC(MeshBase & _mesh)
   Elem* tp = elem;
 
  while (tp->parent() != NULL)
-    { 
+    {
     tp = tp->parent();
     level_count++;
     }
@@ -476,5 +478,3 @@ void flag_elements_uniformly(MeshBase & _mesh)
   }
 
 }
-
-
