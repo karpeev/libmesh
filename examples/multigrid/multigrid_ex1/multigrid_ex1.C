@@ -63,7 +63,7 @@
 #include "libmesh/string_to_enum.h"
 #include "mg_tool.h"
 
-PetscBool multigrid_ex1_print_statements_active = PETSC_TRUE;
+PetscBool debug = PETSC_TRUE;
 
 using namespace libMesh;
 using std::vector;
@@ -73,23 +73,14 @@ void assemble_helmholtz(EquationSystems& es,
 
 #include "dm_sample.h"
 
-// error checking function
 
-void e(unsigned int i) {
-if (multigrid_ex1_print_statements_active)
-PetscPrintf(PETSC_COMM_SELF, "PrintStatement: %D \n", i);
-}
+Real gamma_R = 0.0;
+Real gamma_I = 0.0;
+bool use_bc  = false;
 
-void e(unsigned int i, unsigned int j) {
-if (multigrid_ex1_print_statements_active)
-PetscPrintf(PETSC_COMM_SELF, "PrintStatement: %D (%D)\n", i, j);
-}
-
-
-void PrintStatus(std::string s)
-{
-std::cout << s << std::endl;
-}
+unsigned int dim = 3;
+bool singularity = true;
+bool print_matrix = false;
 
 Real exact_solution (const Real x,
                      const Real y,
@@ -101,14 +92,6 @@ Real exact_solution_I (const Real x,
 Number exact_solution(const Point& p, const Parameters&,const std::string&,const std::string&);
 Number exact_solution_I(const Point& p, const Parameters&,const std::string&,const std::string&);
 
-bool singularity = true;
-PetscBool print_matrix = PETSC_FALSE;
-
-Real gamma_R = 0.0;
-Real gamma_I =  0.0;
-PetscBool use_bc = PETSC_FALSE;
-
-unsigned int dim = 3;
 
 // this program is divided into three sections.
 
@@ -123,441 +106,321 @@ unsigned int dim = 3;
 
 int main (int argc, char** argv)
 {
-    LibMeshInit init (argc, argv);
+  PetscErrorCode ierr;
 
- #ifndef LIBMESH_ENABLE_AMR
-    libmesh_example_assert(false, "--enable-amr");
-  #else
+  LibMeshInit init (argc, argv);
 
-    GetPot input_file("multigrid_ex1.in");
-    const unsigned int n_levels_coarsen = input_file("n_levels_coarsen", 3);
-    			gamma_R       = input_file("gamma_R", 1.0);
-			gamma_I	      = input_file("gamma_I", 0.0);
-    const unsigned int max_r_steps    = input_file("max_r_steps", 3);
-    const unsigned int max_r_level    = input_file("max_r_level", 3);
-    const Real refine_percentage      = input_file("refine_percentage", 0.5);
-    const Real coarsen_percentage     = input_file("coarsen_percentage", 0.5);
-    unsigned int uniform_refine       = input_file("uniform_refine",0);
-    const std::string refine_type     = input_file("refinement_type", "h");
-    const std::string approx_type     = input_file("approx_type", "LAGRANGE");
-    const unsigned int approx_order   = input_file("approx_order", 1);
-    const std::string element_type    = input_file("element_type", "tensor");
-    const int extra_error_quadrature  = input_file("extra_error_quadrature", 0);
-    const int max_linear_iterations   = input_file("max_linear_iterations", 5000);
-    const bool output_intermediate    = input_file("output_intermediate", false);
-    const unsigned int x_range        = input_file("x_range", 2);
-    const unsigned int y_range        = input_file("y_range", 2);
-    const unsigned int z_range        = input_file("z_range", 2);
-    const Real x_size                 = input_file("x_size", 1);
-    const Real y_size                 = input_file("y_size", 1);
-    const Real z_size                 = input_file("z_size", 1);
-    const unsigned int n_uniform_refinements = input_file("n_uniform_refinements", 3);
+#ifndef LIBMESH_ENABLE_AMR
+  libmesh_example_requires(false, "--enable-amr");
+#else
 
-    PetscBool use_gmg = PETSC_FALSE;
-    PetscBool mesh_build = PETSC_FALSE;
-    PetscBool use_galerkin = PETSC_FALSE;
-    PetscOptionsGetBool(NULL, "-pc_mg_galerkin", &use_galerkin, NULL);
-    PetscOptionsGetBool(NULL, "-use_debug", &multigrid_ex1_print_statements_active, NULL);
-    PetscOptionsGetBool(NULL, "-print_matrix", &print_matrix, NULL);
-    PetscOptionsGetBool(NULL, "-mesh_build", &mesh_build, NULL);
-    PetscOptionsGetBool(NULL, "-use_bc", &use_bc, NULL);
-    PetscOptionsGetBool(NULL, "-use_gmg", &use_gmg, NULL);
-    PetscBool print_interp = PETSC_FALSE;
-    PetscOptionsGetBool(NULL, "-write_interp", &print_interp,NULL);
-    PetscBool use_null_space = PETSC_FALSE;
-    PetscOptionsGetBool(NULL, "-use_null_space", &use_null_space, NULL);
+  //bool  verbose                       = on_command_line("--verbose");
 
-//                               ADAPTIVELY REFINE AND SOLVE
-// ===================================================================================
+  // Problem
+  gamma_R                             = command_line_value("gamma_R", 1.0);
+  gamma_I	                      = command_line_value("gamma_I", 0.0);
+  use_bc                              = on_command_line("--dirichlet_bc");
+  dim                                 = command_line_value("dim", 3);
+  singularity                         = on_command_line("--rhs_singularity");
 
-    dim = input_file("dimension", 3);
-    const std::string indicator_type = input_file("indicator_type", "kelly");
-    singularity = input_file("singularity", true);
+  // Mesh
+  const unsigned int x_range          = command_line_value("nx", 2);
+  const unsigned int y_range          = command_line_value("ny", 2);
+  const unsigned int z_range          = command_line_value("nz", 2);
+  const Real x_size                   = command_line_value("xlen", 1.0);
+  const Real y_size                   = command_line_value("ylen", 1.0);
+  const Real z_size                   = command_line_value("ylen", 1.0);
 
-    libmesh_example_requires(dim <= LIBMESH_DIM, "3D support");
+  // Approximation
+  const std::string approx_type       = command_line_value("approx_type", std::string("LAGRANGE"));
+  const unsigned int approx_order     = command_line_value("approx_order", 1);
+  const std::string element_type      = command_line_value("element_type", std::string("tensor"));     // simplex|tensor
 
-    std::string approx_name = "";
-    if (element_type == "tensor")
-      approx_name += "bi";
-    if (approx_order == 1)
-      approx_name += "linear";
-    else if (approx_order == 2)
-      approx_name += "quadratic";
-    else if (approx_order == 3)
-      approx_name += "cubic";
-    else if (approx_order == 4)
-      approx_name += "quartic";
+  // Hierarchy generation
+  bool build_mesh                    = on_command_line("--build_mesh");
+  bool save_mesh                     = on_command_line("--save_mesh");
+  std::string mesh_filename           = command_line_value("mesh_filename",std::string("cube"));
 
-    std::string output_file = approx_name;
-    output_file += "_";
-    output_file += refine_type;
-    if (uniform_refine == 0)
-      output_file += "_adaptive.m";
-    else
-      output_file += "_uniform.m";
+  // Refinement
+  const unsigned int max_r_steps           = command_line_value("n_refinements", 3);         // total number of refinements
+  const unsigned int n_uniform_refinements = command_line_value("n_uniform_refinements", 3); // of which n_uniform_refinements are uniform (possibly all)
+  const std::string refine_type            = command_line_value("refinement_type", std::string("h"));     // the remaining refinements are of type 'refinement_type': h|p|hp|matchedhp|singularhp
+  const Real refine_percentage             = command_line_value("refine_percentage", 0.5);   // refinement/coarsening percentages
+  const Real coarsen_percentage            = command_line_value("coarsen_percentage", 0.5);  //    for the non-uniform refinements
+  const std::string indicator_type         = command_line_value("refinement_indicator_type", std::string("kelly")); // exact|patch|uniform|kelly
+  const unsigned int max_r_level           = command_line_value("max_element_refinement_level", 3);    // FIXME: how is this different from n_refinements?
 
-    std::ofstream out (output_file.c_str());
-    out << "% dofs     L2-error  " << std::endl;
-    out << "e = [" << std::endl;
+  // Solver
+  bool  solve                         = on_command_line("--solve");
+  //bool  use_null_space                = on_command_line("--use_null_space");
+  PetscInt mg_levels = 3;
+  ierr  = PetscOptionsGetInt(NULL,"-pc_mg_levels",&mg_levels,NULL);
+  CHKERRABORT(init.comm().get(),ierr);
+  const unsigned int n_levels_coarsen = (unsigned int) mg_levels;
+  PetscBool use_galerkin = PETSC_FALSE;
+  PetscOptionsGetBool(NULL, "-pc_mg_galerkin", &use_galerkin, NULL);
 
 
-  std::cout << "Running " << argv[0];
 
-  for (int i=1; i<argc; i++)
-    std::cout << " " << argv[i];
 
-  std::cout << std::endl << std::endl;
+  //                              REFINE AND GENERATE THE HIERARCHY
+  // ===================================================================================
+  libmesh_example_requires(dim <= LIBMESH_DIM, "3D support");
 
   Mesh mesh(init.comm());
 
-if (mesh_build)
-{
-int count_unif =(int) n_uniform_refinements;
+  if (build_mesh) {
+    int count_unif = (int) n_uniform_refinements;
 
-  libmesh_example_requires(3 <= LIBMESH_DIM, "3D support");
-  MeshTools::Generation::build_cube (mesh,x_range, y_range, z_range,0., x_size,0.,y_size, 0.,z_size,HEX8);
+    libmesh_example_requires(3 <= LIBMESH_DIM, "3D support");
+    libMesh::out << "Building a cubic mesh: [0.0," << x_size <<"]x[0.0," << y_size << "]x[0.0," << z_size << "]\n";
+    libMesh::out << "Numbers of elements: " << x_range << "x" << y_range << "x" << z_range << "\n";
+    libMesh::out << "Using element type " << element_type << std::endl;
 
-  std::cout << x_range << ", " << y_range << ", " << z_range << "\n";
+    MeshTools::Generation::build_cube (mesh,x_range, y_range, z_range,0., x_size,0.,y_size, 0.,z_size,HEX8);
+    if (element_type == "simplex") MeshTools::Modification::all_tri(mesh);
 
-    if (element_type == "simplex")
-      MeshTools::Modification::all_tri(mesh);
 
-  if (approx_order > 1 || refine_type != "h")
+
+    libMesh::out << "Approximation type " << approx_type << ", approximation order " << approx_order << std::endl;
+    if (approx_order > 1 || refine_type != "h") {
       mesh.all_second_order();
+    }
 
+    mesh.print_info();
+
+    EquationSystems equation_systems (mesh);
+
+    LinearImplicitSystem& system = equation_systems.add_system<LinearImplicitSystem> ("Helmholtz");
+
+    system.add_variable("u_R", static_cast<Order>(approx_order),
+    Utility::string_to_enum<FEFamily>(approx_type));
+    system.add_variable("u_C", static_cast<Order>(approx_order),Utility::string_to_enum<FEFamily>(approx_type));
+
+    ExactSolution exact_sol_I(equation_systems);
+    ExactSolution exact_sol(equation_systems);
+
+    equation_systems.init();
+    equation_systems.print_info();
+
+    libMesh::out << "Mesh refinement parameters:\n";
+    libMesh::out << "\t refinement percentage " << refine_percentage << std::endl;
+    libMesh::out << "\t coarsen percentage " << coarsen_percentage << std::endl;
     MeshRefinement mesh_refinement(mesh);
     mesh_refinement.refine_fraction() = refine_percentage;
     mesh_refinement.coarsen_fraction() = coarsen_percentage;
     mesh_refinement.max_h_level() = max_r_level;
 
-  mesh.print_info();
-
-  EquationSystems equation_systems (mesh);
-
-LinearImplicitSystem& system = equation_systems.add_system<LinearImplicitSystem> ("Helmholtz");
-
-  system.add_variable("u_R", static_cast<Order>(approx_order),
-                        Utility::string_to_enum<FEFamily>(approx_type));
-  system.add_variable("u_C", static_cast<Order>(approx_order),Utility::string_to_enum<FEFamily>(approx_type));
-
-  equation_systems.get_system("Helmholtz").attach_assemble_function (assemble_helmholtz);
-
-  equation_systems.init();
-
-   equation_systems.parameters.set<unsigned int>("linear solver maximum iterations")
-      = max_linear_iterations;
-
-    equation_systems.parameters.set<Real>("linear solver tolerance") =
-      std::pow(TOLERANCE, 2.5);
-
-  equation_systems.print_info();
-
-  ExactSolution exact_sol_I(equation_systems);
-  ExactSolution exact_sol(equation_systems);
-    exact_sol_I.attach_exact_value(exact_solution_I);
-    exact_sol.attach_exact_value(exact_solution);
-
-    exact_sol_I.extra_quadrature_order(extra_error_quadrature);
-    exact_sol.extra_quadrature_order(extra_error_quadrature);
-
-    for (unsigned int r_step=0; r_step<max_r_steps; r_step++)
-      {
-if (count_unif <= 0)
-uniform_refine = 0;
-else
-uniform_refine = 1;
-count_unif--;
-if (uniform_refine)
-std::cout << "UNIFORM REFINEMENT\n";
-else
-std::cout << "NON-UNIFORM REFINEMENT\n";
-
-        std::cout << "Beginning Solve " << r_step << std::endl;
-
-        system.solve();
-
-        std::cout << "System has: " << equation_systems.n_active_dofs()
-                  << " degrees of freedom."
-                  << std::endl;
-
-        std::cout << "Linear solver converged at step: "
-                  << system.n_linear_iterations()
-                  << ", final residual: "
-                  << system.final_linear_residual()
-                  << std::endl;
-
-  #ifdef LIBMESH_HAVE_EXODUS_API
-        if (output_intermediate)
-          {
-            std::ostringstream outfile;
-            outfile << "lshaped_" << r_step << ".e";
-            ExodusII_IO (mesh).write_equation_systems (outfile.str(),
-                                                 equation_systems);
-          }
-  #endif // #ifdef LIBMESH_HAVE_EXODUS_API
-
-        exact_sol.compute_error("Helmholtz", "u_R");
-        exact_sol_I.compute_error("Helmholtz", "u_C");
-
-
-     Real l2_error_I = exact_sol_I.l2_error("Helmholtz", "u_C");
-     Real l2_error_R = exact_sol.l2_error("Helmholtz", "u_R");
-
-     Real l2_total_error = sqrt(l2_error_I*l2_error_I + l2_error_R*l2_error_R);
-
-     std::cout << "L2-error is " << l2_total_error << std::endl;
-
-        out << equation_systems.n_active_dofs() << " "
-            << l2_total_error << " ";
-        if (r_step+1 != max_r_steps)
-          {
-            std::cout << "  Refining the mesh..." << std::endl;
-
-            if (uniform_refine == 0)
-              {
-
-                ErrorVector error;
-
-                if (indicator_type == "exact")
-                  {
-                    ExactErrorEstimator error_estimator;
-
-                    error_estimator.attach_exact_value(exact_solution);
-
-                    error_estimator.estimate_error (system, error);
-                  }
-                else if (indicator_type == "patch")
-                  {
-                    PatchRecoveryErrorEstimator error_estimator;
-
-                    error_estimator.estimate_error (system, error);
-                  }
-                else if (indicator_type == "uniform")
-                  {
-                    UniformRefinementEstimator error_estimator;
-
-                    error_estimator.estimate_error (system, error);
-                  }
-                else
-                  {
-                    libmesh_assert_equal_to (indicator_type, "kelly");
-
-                    KellyErrorEstimator error_estimator;
-		    error_estimator.error_norm = L2;
-
-                    error_estimator.estimate_error (system, error);
-                  }
-
-                std::ostringstream ss;
-  	      ss << r_step;
-  #ifdef LIBMESH_HAVE_EXODUS_API
-  	      std::string error_output = "error_"+ss.str()+".e";
-  #else
-  	      std::string error_output = "error_"+ss.str()+".gmv";
-  #endif
-                error.plot_error( error_output, mesh );
-
-                mesh_refinement.flag_elements_by_error_fraction (error);
-
-                if (refine_type == "p")
-                  mesh_refinement.switch_h_to_p_refinement();
-                if (refine_type == "matchedhp")
-                  mesh_refinement.add_p_to_h_refinement();
-                if (refine_type == "hp")
-                  {
-                    HPCoarsenTest hpselector;
-                    hpselector.select_refinement(system);
-                  }
-                if (refine_type == "singularhp")
-                  {
-                    libmesh_assert (singularity);
-                    HPSingularity hpselector;
-                    hpselector.singular_points.push_back(Point());
-                    hpselector.select_refinement(system);
-                  }
-
-                mesh_refinement.refine_and_coarsen_elements();
-              }
-
-            else if (uniform_refine == 1)
-              {
-                if (refine_type == "h" || refine_type == "hp" ||
-                    refine_type == "matchedhp")
-                  mesh_refinement.uniformly_refine(1);
-                if (refine_type == "p" || refine_type == "hp" ||
-                    refine_type == "matchedhp")
-                  mesh_refinement.uniformly_p_refine(1);
-              }
-
-            equation_systems.reinit ();
-          }
+    for (unsigned int r_step=0; r_step<max_r_steps; r_step++) {
+      bool uniform_refine;
+      if (count_unif <= 0)
+        uniform_refine = false;
+      else
+        uniform_refine = true;
+      count_unif--;
+      if (uniform_refine) {
+        libMesh::out << "UNIFORM REFINEMENT\n";
+      } else {
+	libMesh::out << "NON-UNIFORM REFINEMENT\n";
       }
+      libMesh::out << "System has: " << equation_systems.n_active_dofs()
+                << " degrees of freedom."
+                << std::endl;
 
-  #ifdef LIBMESH_HAVE_EXODUS_API
-    ExodusII_IO (mesh).write_equation_systems ("lshaped.e",
-                                         equation_systems);
-  #endif // #ifdef LIBMESH_HAVE_EXODUS_API
-mesh.write("refined_cube.xda");
+      if (r_step < max_r_steps) {
+        libMesh::out << "  Refining the mesh..." << std::endl;
+        if (!uniform_refine) {
 
-    out << "];" << std::endl;
-    out << "hold on" << std::endl;
-    out << "plot(e(:,1), e(:,2), 'bo-');" << std::endl;
-    out << "plot(e(:,1), e(:,3), 'ro-');" << std::endl;
-    out << "xlabel('dofs');" << std::endl;
-    out << "title('" << approx_name << " elements');" << std::endl;
-    out << "legend('L2-error');" << std::endl;
-  #endif // #ifndef LIBMESH_ENABLE_AMR
+          ErrorVector error;
+          if (indicator_type == "exact")
+          {
+            ExactErrorEstimator error_estimator;
+            error_estimator.attach_exact_value(exact_solution);
+            error_estimator.estimate_error (system, error);
+          }
+          else if (indicator_type == "patch")
+          {
+            PatchRecoveryErrorEstimator error_estimator;
+            error_estimator.estimate_error (system, error);
+          }
+          else if (indicator_type == "uniform")
+          {
+            UniformRefinementEstimator error_estimator;
+            error_estimator.estimate_error (system, error);
+          }
+          else
+          {
+            libmesh_assert_equal_to (indicator_type, "kelly");
+            KellyErrorEstimator error_estimator;
+            error_estimator.error_norm = L2;
+            error_estimator.estimate_error (system, error);
+          }
+          mesh_refinement.flag_elements_by_error_fraction (error);
+          if (refine_type == "p"){
+            mesh_refinement.switch_h_to_p_refinement();
+          }
+          if (refine_type == "matchedhp") {
+            mesh_refinement.add_p_to_h_refinement();
+          }
+          if (refine_type == "hp") {
+            HPCoarsenTest hpselector;
+            hpselector.select_refinement(system);
+          }
+          if (refine_type == "singularhp") {
+            libmesh_assert (singularity);
+            HPSingularity hpselector;
+            hpselector.singular_points.push_back(Point());
+            hpselector.select_refinement(system);
+          }
+          mesh_refinement.refine_and_coarsen_elements();
+        } else if (uniform_refine) {
+                if (refine_type == "h" || refine_type == "hp" || refine_type == "matchedhp")
+                  mesh_refinement.uniformly_refine(1);
+                if (refine_type == "p" || refine_type == "hp" || refine_type == "matchedhp")
+                  mesh_refinement.uniformly_p_refine(1);
+        }
+        equation_systems.reinit ();
+      }
+    }
+    if (save_mesh) {
+      std::string filename = "refined_"+mesh_filename+".xda";
+      libMesh::out << "Saving mesh to file '" << filename << "'\n";
+      mesh.write("refined_"+mesh_filename+".xda");
+    }
+#endif // #ifndef LIBMESH_ENABLE_AMR
+  }
+  // 				END HIERARCHY GENERATION
+  // ===================================================================================
+  //      			BEGIN MULTIGRID LEVEL BUILDING
+  if (solve) {
+    libMesh::out << "Solving Helmholtz with gamma = " << gamma_R << " + i*" << gamma_I << std::endl;
+    if (!build_mesh) {
+      std::string filename = "refined_"+mesh_filename+".xda";
+      libMesh::out << "\tUsing mesh from file '" << filename << "'\n";
+      mesh.read(filename);
+    }
 
-}
-// 				END ADAPTIVELY REFINE AND SOLVE
-// ===================================================================================
-//      			BEGIN MULTIGRID LEVEL BUILDING
-else // here we are solving instead of mesh_building. Note we don't do both in one go
-     // because we don't want the mesh builder to use Multigrid
-if (use_gmg)
-{
+    EquationSystems equation_systems(mesh);
 
-PrintStatus("loading mesh . . .");
+    LinearImplicitSystem & system = equation_systems.add_system<LinearImplicitSystem> ("Helmholtz");
+    system.add_variable("u_R", static_cast<Order>(approx_order), Utility::string_to_enum<FEFamily>(approx_type));
+    system.add_variable("u_C", static_cast<Order>(approx_order),Utility::string_to_enum<FEFamily>(approx_type));
+    equation_systems.get_system("Helmholtz").attach_assemble_function (assemble_helmholtz);
 
+    libMesh::out << "Initializing levels storage ...\n";
 
-  Mesh mesh_mg(init.comm());
-e(0);
-  mesh_mg.read("refined_cube.xda");
+    dm** dm_levels;
+    dm_levels = new dm*[n_levels_coarsen];
 
-  EquationSystems equation_systems(mesh_mg);
+    libMesh::out << "Building level-0\n";
+    dm_levels[0] = new dm("Helmholtz");
+    dm_levels[0]->set_eq(&equation_systems, approx_order,approx_type);
 
-  LinearImplicitSystem & system = equation_systems.add_system<LinearImplicitSystem> ("Helmholtz");
-  system.add_variable("u_R", static_cast<Order>(approx_order), Utility::string_to_enum<FEFamily>(approx_type));
-  system.add_variable("u_C", static_cast<Order>(approx_order),Utility::string_to_enum<FEFamily>(approx_type));
-  equation_systems.get_system("Helmholtz").attach_assemble_function (assemble_helmholtz);
+    libMesh::out << "Level-0 rhs\n";
+    PetscVector<Number> level_vector(init.comm());
+    dm_levels[0]->copy_rhs(level_vector);
 
-PrintStatus("initializing storage . . .");
+    libMesh::out << "\nNumber of Levels: " << MGCountLevelsFAC(mesh) << std::endl << std::endl;
 
-  dm** dm_levels;
-  dm_levels = new dm*[n_levels_coarsen];
-e(3);
-  dm_levels[0] = new dm("Helmholtz");
-e(4);
-  dm_levels[0]->set_eq(&equation_systems, approx_order,approx_type);
-  e(5);
+    PetscMatrix<Number> **level_interp = new PetscMatrix<Number>* [n_levels_coarsen];
 
-  PetscVector<Number> level_vector(init.comm());
-  dm_levels[0]->copy_rhs(level_vector);
-
- std::cout << "\nNumber of Levels: " << MGCountLevelsFAC(mesh_mg) << std::endl << std::endl;
-
-  PetscMatrix<Number> **level_interp = new PetscMatrix<Number>* [n_levels_coarsen];
-
-  for (unsigned int i = 0; i < n_levels_coarsen; i++)
-  level_interp[i] = new PetscMatrix<Number>(system.comm());
-
-
-for (unsigned int k = 0; k < n_levels_coarsen-1; k++)
-{
-
-  dm_levels[k+1] = new dm("Helmholtz");
-
-  PetscPrintf(PETSC_COMM_WORLD, "Building and Coarsening Mesh %D . . .", k+2);
-
-
-  dm_levels[k]->coarsen(*dm_levels[k+1]);
-
-  dm_levels[k]->createInterpolation(*dm_levels[k+1], *level_interp[k]);
-
-  if (!use_galerkin)
-    dm_levels[k+1]->assemble();
-}
-
-PetscErrorCode ierr;
-
-PrintStatus("adding components to PCMG . . .");
-
-PetscInt nlevels = n_levels_coarsen;
-PC pc;
-KSP ksp;
-KSPCreate(PETSC_COMM_WORLD,&ksp);
-e(1);
-
-
-KSPSetOperators(ksp, dm_levels[0]->get_mat(),dm_levels[0]->get_mat());
-KSPGetPC(ksp,&pc);
-if (use_gmg) {
-PCSetType(pc,PCMG);
-PCMGSetLevels(pc,nlevels,NULL);
-PCMGSetType(pc,PC_MG_MULTIPLICATIVE);
-e(1006);
-
-for (unsigned int i = 1; i < nlevels; i++)
-PCMGSetInterpolation(pc,i,level_interp[nlevels-1-i]->mat());
-
-}
-
-if (!use_galerkin)
-for (unsigned int i = 0; i < nlevels; i++)
-{
-    KSP smoother;
-    PCMGGetSmoother(pc, nlevels - 1 - i, &smoother);
-    KSPSetOperators(smoother, dm_levels[i]->get_mat(), dm_levels[i]->get_mat());
-}
-e(3);
-KSPSetFromOptions(ksp);
+    for (unsigned int i = 0; i < n_levels_coarsen; i++) {
+      level_interp[i] = new PetscMatrix<Number>(system.comm());
+    }
 
 
-e(1010);
+    for (unsigned int k = 0; k < n_levels_coarsen-1; k++) {
 
-Vec sol;
-VecDuplicate(level_vector.vec(), &sol);
-e(1013);
-VecSet(level_vector.vec(), 1.0);
+      dm_levels[k+1] = new dm("Helmholtz");
 
-PetscPrintf(PETSC_COMM_WORLD, "KSP Setup . . .\n");
-ierr = KSPSetUp(ksp);CHKERRQ(ierr);
+      libMesh::out << "Building level " << k+2 <<" . . .\n";
 
-// PetscPrintf(PETSC_COMM_WORLD, "System Size: %D\n", level_A[0]->m());
 
-PetscPrintf(PETSC_COMM_WORLD, "KSP Solving . . .\n");
+      dm_levels[k]->coarsen(*dm_levels[k+1]);
 
-ierr = KSPSolve(ksp,level_vector.vec(),sol);CHKERRQ(ierr);
+      dm_levels[k]->createInterpolation(*dm_levels[k+1], *level_interp[k]);
 
-/*
-e(1014);
-VecSet(sol, 1.);
-PetscVector<Number> sol_check(sol,system.comm());
-system.solution->init(sol_check);
-system.matrix->vector_mult(*system.solution, sol_check);
-e(1015);
-            ExodusII_IO (mesh).write_equation_systems ("ksp_solution.e",
-                                                 equation_systems);
-*/
+      if (!use_galerkin) dm_levels[k+1]->assemble();
+    }
 
-PetscInt its = 0;
-KSPGetIterationNumber(ksp,&its);
 
-PetscPrintf(PETSC_COMM_WORLD, "Iterations %D\n", its);
+    libMesh::out << "Configuring KSP . . .\n";
+    KSP ksp;
+    ierr = KSPCreate(PETSC_COMM_WORLD,&ksp);
+    CHKERRABORT(init.comm().get(),ierr);
 
-// PetscVector<Number> solution(sol,init.comm());
-// *system.solution = solution;
+    KSPSetOperators(ksp, dm_levels[0]->get_mat(),dm_levels[0]->get_mat());
+    libMesh::out << "Configuring default PC: PCMG . . .\n";
 
-/*
-  #ifdef LIBMESH_HAVE_EXODUS_API
-    ExodusII_IO (mesh).write_equation_systems ("lshape_solved_solution.e",
-                                         equation_systems);
-  #endif // #ifdef LIBMESH_HAVE_EXODUS_API
-*/
+    PetscInt nlevels = n_levels_coarsen;
+    PC pc;
+    ierr = KSPGetPC(ksp,&pc);
+    CHKERRABORT(init.comm().get(),ierr);
 
-PrintStatus("cleaning up . . .");
+    ierr = PCSetType(pc,PCMG);
+    CHKERRABORT(init.comm().get(),ierr);
+    ierr = PCMGSetLevels(pc,nlevels,NULL);
+    CHKERRABORT(init.comm().get(),ierr);
 
-for (unsigned int i = 0; i < n_levels_coarsen; i++)
-{
- delete dm_levels[i];
-}
+    PCMGSetType(pc,PC_MG_MULTIPLICATIVE);
+    CHKERRABORT(init.comm().get(),ierr);
 
-delete [] dm_levels;
-delete [] level_interp;
-}
+    libMesh::out << "Setting up interpolations\n";
 
-PrintStatus("Complete.");
+    for (unsigned int i = 1; i < n_levels_coarsen; i++) {
+      ierr = PCMGSetInterpolation(pc,i,level_interp[nlevels-1-i]->mat());
+      CHKERRABORT(init.comm().get(),ierr);
+    }
 
+
+    if (!use_galerkin) {
+      libMesh::out << "NOT using Galerking MG; configuring smoothers manually.\n";
+      for (unsigned int i = 0; i < n_levels_coarsen; i++) {
+	KSP smoother;
+	ierr = PCMGGetSmoother(pc, nlevels - 1 - i, &smoother);
+	CHKERRABORT(init.comm().get(),ierr);
+	KSPSetOperators(smoother, dm_levels[i]->get_mat(), dm_levels[i]->get_mat());
+	CHKERRABORT(init.comm().get(),ierr);
+      }
+    }
+
+    libMesh::out << "Setting KSP from options\n";
+    ierr = KSPSetFromOptions(ksp);
+    CHKERRABORT(init.comm().get(),ierr);
+
+    Vec sol;
+    ierr = VecDuplicate(level_vector.vec(), &sol);
+    CHKERRABORT(init.comm().get(),ierr);
+    libMesh::out << "Setting rhs\n";
+    ierr = VecSet(level_vector.vec(), 1.0);
+    CHKERRABORT(init.comm().get(),ierr);
+
+    libMesh::out << "KSPSetUp() . . .\n";
+    ierr = KSPSetUp(ksp);CHKERRQ(ierr);
+    CHKERRABORT(init.comm().get(),ierr);
+
+
+    libMesh::out << "KSPSolve() . . .\n";
+
+    ierr = KSPSolve(ksp,level_vector.vec(),sol);
+    CHKERRABORT(init.comm().get(),ierr);
+
+    PetscInt its = 0;
+    ierr = KSPGetIterationNumber(ksp,&its);
+    CHKERRABORT(init.comm().get(),ierr);
+
+    libMesh::out << "Solver returned after " << its << " iterations\n";
+
+    libMesh::out << "cleaning up . . .\n";
+
+    for (unsigned int i = 0; i < n_levels_coarsen; i++) {
+      delete dm_levels[i];
+    }
+
+    delete [] dm_levels;
+    delete [] level_interp;
+  }
+  libMesh::out << "Done\n";
   return 0;
 }
 
@@ -616,6 +479,7 @@ void assemble_helmholtz(EquationSystems& es,
   std::vector<dof_id_type> dof_indices_C;
 
 
+  libMesh::out << "Assembling bulk Helmholtz.\n";
   MeshBase::const_element_iterator       el     = mesh.active_local_elements_begin();
   const MeshBase::const_element_iterator end_el = mesh.active_local_elements_end();
 
@@ -704,87 +568,82 @@ void assemble_helmholtz(EquationSystems& es,
       system.rhs->add_vector    (Fe, dof_indices);
       }
 
-system.matrix->close();
-system.rhs->close();
-PetscPrintf(PETSC_COMM_WORLD, "First Part Done\n");
+  system.matrix->close();
+  system.rhs->close();
+  libMesh::out << "Assembled bulk Helmholtz.\n";
 
+  if (use_bc) {// add in boundary conditions
+    libMesh::out << "Assembling BCs.\n";
+    unsigned int processor_id = system.processor_id();
 
-if (use_bc) // add in boundary conditions
-{
-  unsigned int processor_id = system.processor_id();
+    unsigned int n_variables = system.n_vars();
+    vector<PetscBool> bddy_dof_done;
+    bddy_dof_done.resize(system.rhs->local_size()); // this tells if this dof has been inserted.
+    // note that we use this per variable.
 
-  unsigned int n_variables = system.n_vars();
-  vector<PetscBool> bddy_dof_done;
-  bddy_dof_done.resize(system.rhs->local_size()); // this tells if this dof has been inserted.
-					   // note that we use this per variable.
+    // currently, I simply set the RHS on the boundary to zero
+    // later it should be altered to take general boundary conditions
 
-PetscPrintf(PETSC_COMM_SELF, "system.rhs->local_size()=%D\n", system.rhs->local_size());
+    for (unsigned int var=0; var<n_variables; var++)
+      {
+	el     = mesh.active_local_elements_begin();
+	for (unsigned int i = 0; i < bddy_dof_done.size(); i++)
+	  bddy_dof_done[i] = PETSC_FALSE;
+	unsigned int node_count = 0;
+	for ( ; el != end_el ; ++el)
+	  {
+	    const Elem* elem = *el;
 
-// currently, I simply set the RHS on the boundary to zero
-// later it should be altered to take general boundary conditions
+	    // This tells what nodes of the element are on the boundary
 
-  for (unsigned int var=0; var<n_variables; var++)
-  {
-   el     = mesh.active_local_elements_begin();
-   for (unsigned int i = 0; i < bddy_dof_done.size(); i++)
-    bddy_dof_done[i] = PETSC_FALSE;
- unsigned int node_count = 0;
-   for ( ; el != end_el ; ++el)
-    {
-      const Elem* elem = *el;
+	    vector<PetscBool> node_on_side;
 
-      // This tells what nodes of the element are on the boundary
+	    for (unsigned int side=0; side<elem->n_sides(); side++)
+	      if (elem->neighbor(side)==NULL)
+		{
+		  for (unsigned int node = 0; node < elem->n_nodes(); node++)
+		    {
+		      PetscBool check_on_processor = PETSC_FALSE;
+		      PetscBool check_if_row_done = PETSC_FALSE;
 
-      vector<PetscBool> node_on_side;
+		      unsigned int dof = elem->get_node(node)->dof_number(0,var,0);
 
-        for (unsigned int side=0; side<elem->n_sides(); side++)
-            if (elem->neighbor(side)==NULL)
-            {
-              for (unsigned int node = 0; node < elem->n_nodes(); node++)
-              {
-		PetscBool check_on_processor = PETSC_FALSE;
-		PetscBool check_if_row_done = PETSC_FALSE;
+		      if (dof <= dof_map.last_dof() && dof >= dof_map.first_dof())
+			check_on_processor = PETSC_TRUE;
 
-		unsigned int dof = elem->get_node(node)->dof_number(0,var,0);
-
-		if (dof <= dof_map.last_dof() && dof >= dof_map.first_dof())
-		  check_on_processor = PETSC_TRUE;
-
-               if (elem->is_node_on_side(node, side) && check_on_processor)
+		      if (elem->is_node_on_side(node, side) && check_on_processor)
 			if (bddy_dof_done[dof - dof_map.first_dof()] == PETSC_FALSE) // avoid double-counting
-                        { bddy_dof_done[dof-dof_map.first_dof()] = PETSC_TRUE; node_count++;}
-              }
-            }
+			  { bddy_dof_done[dof-dof_map.first_dof()] = PETSC_TRUE; node_count++;}
+		    }
+		}
 
-       // now node_on_side knows what nodes are of interest, so we start our looping
+	    // now node_on_side knows what nodes are of interest, so we start our looping
 
-      //        system.matrix->zero_rows(rows, 1.);
-    //          system.rhs->insert(rhs, rows);
-    }
+	    //        system.matrix->zero_rows(rows, 1.);
+	    //          system.rhs->insert(rhs, rows);
+	  }
 
-vector<unsigned int> row;
-vector<double> rhs;
-rhs.resize(node_count);
-row.resize(node_count);
+	vector<unsigned int> row;
+	vector<double> rhs;
+	rhs.resize(node_count);
+	row.resize(node_count);
 
-unsigned int index = 0;
-for (unsigned int i = 0; i < bddy_dof_done.size(); i++)
-if (bddy_dof_done[i])
-{
-rhs[index] = 0;
-row[index++] = dof_map.first_dof() + i;
-}
-system.matrix->zero_rows(row, 1.);
-system.rhs->insert(rhs, row);
+	unsigned int index = 0;
+	for (unsigned int i = 0; i < bddy_dof_done.size(); i++)
+	  if (bddy_dof_done[i])
+	    {
+	      rhs[index] = 0;
+	      row[index++] = dof_map.first_dof() + i;
+	    }
+	system.matrix->zero_rows(row, 1.);
+	system.rhs->insert(rhs, row);
+      }
+    system.matrix->close();
+    system.rhs->close();
+    libMesh::out << "Assembed BCs.\n";
+  }
 
-}
-e(102, processor_id);
-system.matrix->close();
-system.rhs->close();
-e(103, processor_id);
-}
-
-PetscPrintf(PETSC_COMM_SELF, "matrix assembled.\n");
+  libMesh::out << "Helmholtz assembled.\n";
 }
 
 
