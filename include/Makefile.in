@@ -857,6 +857,7 @@ include_HEADERS = \
         systems/dg_fem_context.h \
         systems/diff_context.h \
         systems/diff_system.h \
+        systems/dm.h \
         systems/eigen_system.h \
         systems/elem_assembly.h \
         systems/equation_systems.h \
