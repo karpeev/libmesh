@@ -97,14 +97,7 @@ public:
   /**
    * Creates an interpolation to another, generally finer DMSystem
    */
-  void assembleInterpolation(const DM& fine, SparseMatrix<Number> &interp); // or should it be 'coarse'?
-
-  /**
-   * Function that assembles the system residual.  Should be implemented by the user in a derived class.
-   */
-  // virtual void assembleResidual(const NumericVector<Number>& X, NumericVector<Number>& R) = 0;
-
-  // virtual void assembleJacobians(const NumericVector<Number>& X, SparseMatrix<Number>& J, SparseMatrix<Number>& J_pre) = 0;
+  void assembleInterpolation(const DM& coarse, SparseMatrix<Number> &interp); // or should it be 'coarse'?
 
  protected:
 
@@ -113,6 +106,11 @@ public:
   std::string       _sys_name;
 
   System&           _sys;
+
+  static void build_interpolation(EquationSystems&,EquationSystems&,std::string,SparseMatrix<Number>&,NumericVector<Number>&,NumericVector<Number>&);
+  static unsigned int MGCountLevelsFAC(MeshBase&);
+  static void flag_elements_uniformly(MeshBase&);
+  static void flag_elements_FAC(MeshBase&);
 };
 
 
