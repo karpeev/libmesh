@@ -151,6 +151,7 @@ public:
              const std::vector<numeric_index_type>& n_oz,
              const numeric_index_type blocksize=1);
 
+  using SparseMatrix<Number>::init;
   /**
    * Initialize using sparsity structure computed by \p dof_map.
    */

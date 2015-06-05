@@ -28,6 +28,7 @@
 #include "libmesh/id_types.h"
 #include "libmesh/reference_counted_object.h"
 #include "libmesh/parallel_object.h"
+#include "libmesh/sparsity_pattern.h"
 
 // C++ includes
 #include <cstddef>
@@ -146,6 +147,22 @@ public:
                      const numeric_index_type nnz=30,
                      const numeric_index_type noz=10,
                      const numeric_index_type blocksize=1) = 0;
+ /**
+   * Initialize a Sparse matrix that is of global
+   * dimension \f$ m \times  n \f$ with local dimensions
+   * \f$ m_l \times n_l \f$.  \p sparsity is the sparsity pattern graph.
+   * Optionally supports a block size, which indicates dense coupled blocks
+   * for systems with multiple variables all of the same type.
+   * SparseMatrix specializations are supposed to implement this.
+   * In the default implementation \p sparsity is ignored and nnz-/noz-based
+   * preallocation is used.
+   */
+  virtual void init (const numeric_index_type m,
+                     const numeric_index_type n,
+                     const numeric_index_type m_l,
+                     const numeric_index_type n_l,
+		     const SparsityPattern::Graph& /*sparsity*/,
+                     const numeric_index_type blocksize=1) {init(m,n,m_l,n_l,30,10,blocksize);};
 
   /**
    * Initialize using sparsity structure computed by \p dof_map.
